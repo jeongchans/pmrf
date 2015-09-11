@@ -3,7 +3,9 @@
 
 #include <memory>
 
-#include "msaanalysis/hmmio.h"
+#include "msaanalysis/seqweight.h"
+#include "msaanalysis/effseqnum.h"
+#include "msaanalysis/msafilter.h"
 
 typedef int SeqWeightMethod;
 const int NO_WEIGHT = 0;
@@ -28,9 +30,9 @@ class MSAAnalyzer {
 
     MSAAnalyzer(Option& opt, const Alphabet& abc);
 
-    shared_ptr<SeqWeightEstimator> seq_weight_estimator;
-    shared_ptr<EffSeqNumEstimator> eff_seq_num_estimator;
-    shared_ptr<TerminalGapRemover> termi_gap_remover;
+    std::shared_ptr<SeqWeightEstimator> seq_weight_estimator;
+    std::shared_ptr<EffSeqNumEstimator> eff_seq_num_estimator;
+    std::shared_ptr<TerminalGapRemover> termi_gap_remover;
 
   private:
     const Alphabet& abc;
