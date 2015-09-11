@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "protbinfo/msaanalysis.h"
+#include "msaanalysis/hmmio.h"
 
 typedef int SeqWeightMethod;
 const int NO_WEIGHT = 0;

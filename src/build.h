@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 
-#include "protbinfo/align.h"
+#include "align/trace.h"
 #include "msaanalyze.h"
 #include "mrf.h"
 #include "parameterize.h"

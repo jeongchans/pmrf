@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cmath>
 
-#include "protbinfo/common.h"
+#include "common/common.h"
 
 #include "core.h"
 

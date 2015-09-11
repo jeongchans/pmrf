@@ -3,7 +3,7 @@
 
 #include "lbfgs.h"
 
-#include "protbinfo/msaanalysis.h"
+//#include "msaanalysis/msaanalysis.h"
 
 #include "mrf.h"
 #include "msaanalyze.h"

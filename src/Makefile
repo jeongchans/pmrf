@@ -1,5 +1,5 @@
 OBJECTS     = $(patsubst %.cpp, %.o, $(wildcard *.cpp))
-INCPATH     = -I ../ -I ../protbinfo/src/
+INCPATH     = -I ../
 
 .SUFFIXES : .o .cpp
 %.o : %.cpp

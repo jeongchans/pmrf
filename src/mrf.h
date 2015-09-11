@@ -7,8 +7,8 @@
 
 #include <gtest/gtest_prod.h>
 
-#include "protbinfo/common.h"
-#include "protbinfo/seq.h"
+#include "common/common.h"
+#include "seq/alphabet.h"
 
 using std::vector;
 using std::string;

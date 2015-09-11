@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 
-#include "protbinfo/seq.h"
+#include "seq/alphabet.h"
 
 #include "command.h"
 
