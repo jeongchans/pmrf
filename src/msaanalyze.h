@@ -3,9 +3,9 @@
 
 #include <memory>
 
-#include "msaanalysis/seqweight.h"
-#include "msaanalysis/effseqnum.h"
-#include "msaanalysis/msafilter.h"
+#include "msaproc/seqweight.h"
+#include "msaproc/effseqnum.h"
+#include "msaproc/msafilter.h"
 
 typedef int SeqWeightMethod;
 const int NO_WEIGHT = 0;
