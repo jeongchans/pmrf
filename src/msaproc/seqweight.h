@@ -1,8 +1,8 @@
 #ifndef _SEQWEIGHT_H_
 #define _SEQWEIGHT_H_
 
-#include "common/common.h"
-#include "common/numeric.h"
+#include "util/common.h"
+#include "util/numeric.h"
 #include "seq/alphabet.h"
 
 class SeqWeightEstimator {

@@ -6,8 +6,8 @@
 
 #include <blitz/array.h>
 
-#include "common/common.h"
-#include "common/numeric.h"
+#include "util/common.h"
+#include "util/numeric.h"
 #include "seq/alphabet.h"
 
 enum StateType { MATCH = 0, DELETE = 1, INSERT = 2, UNDEFINED = 99 };

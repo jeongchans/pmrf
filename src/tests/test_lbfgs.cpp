@@ -2,7 +2,7 @@
 
 #include "lbfgs.h"
 
-#include "common/numeric.h"
+#include "util/numeric.h"
 
 class LBFGS_Parameter_Test : public testing::Test {
   protected:

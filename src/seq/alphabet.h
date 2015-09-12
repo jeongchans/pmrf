@@ -6,7 +6,7 @@
 #include <string>
 #include <map>
 
-#include "common/numeric.h"
+#include "util/numeric.h"
 
 class Alphabet {
 

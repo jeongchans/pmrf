@@ -1,7 +1,7 @@
 #ifndef _MSAFILTER_H_
 #define _MSAFILTER_H_
 
-#include "common/common.h"
+#include "util/common.h"
 #include "seq/alphabet.h"
 
 class MSAFilter {

@@ -7,7 +7,7 @@
 
 #include <gtest/gtest_prod.h>
 
-#include "common/common.h"
+#include "util/common.h"
 #include "seq/alphabet.h"
 
 using std::vector;
