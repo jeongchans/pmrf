@@ -107,16 +107,6 @@ TEST_F(MRFParameterizer_RegularizationFunction_Test, test_edge_l2_regularization
     EXPECT_NE(0., abs_sum(g));
 }
 
-TEST_F(MRFParameterizer_RegularizationFunction_Test, test_edge_blockl1_regularization) {
-    MRFParameterizer::EdgeBlockL1Regularization::Option opt;
-    MRFParameterizer::EdgeBlockL1Regularization regul_func(param, opt);
-    lbfgsfloatval_t fx = 0.0;
-
-    regul_func.regularize(param.x, g, fx);
-    EXPECT_TRUE(fx > 0);
-    EXPECT_NE(0., abs_sum(g));
-}
-
 class MRFParameterizer_ObjectiveFunction_Test : public testing::Test {
   protected:
     MRFParameterizer_ObjectiveFunction_Test() : length(16), g(NULL), mrf(length, abc), param(mrf, optim_opt) {};

@@ -27,11 +27,6 @@ static const string option_message =
     "                           0: no\n"
     "                           1: yes (default)\n"
     "\n"
-    " --regedge-blockl1 <int>   Block-L1 regularization for edge weights\n"
-    "                           0: no\n"
-    "                           1: yes\n"
-    " --blockl1-lambda <float>  Weighting factor for edge block-L1 (default: XX)\n"
-    "\n"
     "Alignment analysis options:\n"
     " --seqwt <int>             Sequence weight method\n"
     "                           0: no sequence weight\n"
@@ -68,8 +63,6 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         {"regedge-l2", required_argument, 0, 0},
         {"l2-lambda2", required_argument, 0, 0},
         {"l2-scale", required_argument, 0, 0},
-        {"regedge-blockl1", required_argument, 0, 0},
-        {"blockl1-lambda", required_argument, 0, 0},
         {"msa", required_argument, 0, 0},
         {"edge", required_argument, 0, 0},
         {"delta", required_argument, 0, 0},
@@ -103,21 +96,15 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
                 if (parse_bool(optarg, opt.build_opt.parameterizer_opt.edge_l2_opt.sc)) break;
                 else return false;
             case 6:
-                if (parse_bool(optarg, opt.build_opt.parameterizer_opt.edge_blockl1_regul)) break;
-                else return false;
-            case 7:
-                if (parse_float(optarg, opt.build_opt.parameterizer_opt.edge_blockl1_opt.lambda)) break;
-                else return false;
-            case 8:
                 if (parse_msa_fmt(optarg, opt.build_opt.msa_fmt)) break;
                 else return false;
-            case 9:
+            case 7:
                 if (parse_str(optarg, opt.build_opt.eidx_filename)) break;
                 else return false;
-            case 10:
+            case 8:
                 if (parse_float(optarg, opt.build_opt.optim_opt.delta)) break;
                 else return false;
-            case 11:
+            case 9:
                 if (parse_int(optarg, opt.build_opt.msa_analyzer_opt.seq_wt)) break;
                 else return false;
             }

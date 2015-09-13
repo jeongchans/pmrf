@@ -19,16 +19,14 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_param) {
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_regul_param) {
-    int argc = 19;
-    char* argv[19] = {"pmrf", "build",
+    int argc = 15;
+    char* argv[15] = {"pmrf", "build",
                       "aaa.afa", "-o", "aaa.mrf",
                       "--regnode-l2", "0",
                       "--l2-lambda1", "2.0",
                       "--regedge-l2", "1",
                       "--l2-lambda2", "3.0",
-                      "--l2-scale", "0",
-                      "--regedge-blockl1", "1",
-                      "--blockl1-lambda", "1.0"};
+                      "--l2-scale", "0"};
     MRFBuildCommandLine cmd_line(argc, argv);
 
     ASSERT_TRUE(cmd_line.is_valid());
@@ -41,9 +39,6 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_regul_param) {
     EXPECT_EQ(true, cmd_line.opt.build_opt.parameterizer_opt.edge_l2_regul);
     EXPECT_EQ(3.0, cmd_line.opt.build_opt.parameterizer_opt.edge_l2_opt.lambda);
     EXPECT_EQ(false, cmd_line.opt.build_opt.parameterizer_opt.edge_l2_opt.sc);
-
-    EXPECT_EQ(true, cmd_line.opt.build_opt.parameterizer_opt.edge_blockl1_regul);
-    EXPECT_EQ(1.0, cmd_line.opt.build_opt.parameterizer_opt.edge_blockl1_opt.lambda);
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_input_param) {

@@ -89,27 +89,6 @@ class MRFParameterizer {
         double lambda; 
     };
 
-    // Edge block-L1 regularization
-
-    class EdgeBlockL1Regularization : public RegularizationFunction {
-      public:
-
-        class Option {
-          public:
-            Option(const double& lambda=1.0) : lambda(lambda) {};
-
-            double lambda;
-        };
-
-        EdgeBlockL1Regularization(Parameter& param, Option& opt) : param(param), opt(opt) {};
-
-        virtual void regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
-
-      private:
-        const Parameter& param;
-        const Option& opt;
-    };
-
     // Objective function
 
     class ObjectiveFunction : public LBFGS::ObjectiveFunction {
@@ -117,15 +96,13 @@ class MRFParameterizer {
 
         class Option {
           public:
-            Option(const bool& node_l2_regul=true, const bool& edge_l2_regul=true, const bool& edge_blockl1_regul=false)
-            : node_l2_regul(node_l2_regul), edge_l2_regul(edge_l2_regul), edge_blockl1_regul(edge_blockl1_regul) {};
+            Option(const bool& node_l2_regul=true, const bool& edge_l2_regul=true)
+            : node_l2_regul(node_l2_regul), edge_l2_regul(edge_l2_regul) {};
 
             bool node_l2_regul;
             NodeL2Regularization::Option node_l2_opt;
             bool edge_l2_regul;
             EdgeL2Regularization::Option edge_l2_opt;
-            bool edge_blockl1_regul;
-            EdgeBlockL1Regularization::Option edge_blockl1_opt;
         };
 
         ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const MSAAnalyzer& msa_analyzer);
@@ -143,7 +120,6 @@ class MRFParameterizer {
 
         NodeL2Regularization node_l2_func;
         EdgeL2Regularization edge_l2_func;
-        EdgeBlockL1Regularization edge_blockl1_func;
 
         Float2dArray calc_logpot(const lbfgsfloatval_t *x, const string& seq, const double& sw);
         Float1dArray logsumexp(const Float2dArray& b);

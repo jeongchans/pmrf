@@ -81,34 +81,6 @@ void MRFParameterizer::EdgeL2Regularization::regularize(const lbfgsfloatval_t *x
     }
 }
 
-// MRFParameterizer::EdgeBlockL1Regularization
-
-void MRFParameterizer::EdgeBlockL1Regularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
-    const double& lambda = opt.lambda;
-    string letters = param.abc.get_canonical();
-    for (map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
-        int i = pos->first.idx1;
-        int j = pos->first.idx2;
-        lbfgsfloatval_t s = 0.;
-        for (int p = 0; p < param.num_var; ++p) {
-            for (int q = 0; q < param.num_var; ++q) {
-                int k = param.get_eidx(i, j, letters[p], letters[q]);
-                s += pow2(x[k]);
-            }
-        }
-        s = sqrt(s);
-        fx += lambda * s;
-        if (s > 0) {
-            for (int p = 0; p < param.num_var; ++p) {
-                for (int q = 0; q < param.num_var; ++q) {
-                    int k = param.get_eidx(i, j, letters[p], letters[q]);
-                    g[k] += lambda * x[k] / s;
-                }
-            }
-        }
-    }
-}
-
 // MRFParameterizer::ObjectiveFunction
 
 MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const MSAAnalyzer& msa_analyzer) 
@@ -117,7 +89,6 @@ MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces
   opt(opt), 
   node_l2_func(param, opt.node_l2_opt),
   edge_l2_func(param, opt.edge_l2_opt),
-  edge_blockl1_func(param, opt.edge_blockl1_opt),
   msa_analyzer(msa_analyzer) {
     vector<string> msa = traces.get_MD_seq_vec();
     seq_weight.resize(traces.size());
@@ -139,7 +110,6 @@ lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatva
     }
     if (opt.node_l2_regul) node_l2_func.regularize(x, g, fx);
     if (opt.edge_l2_regul) edge_l2_func.regularize(x, g, fx);
-    if (opt.edge_blockl1_regul) edge_blockl1_func.regularize(x, g, fx);
     return fx;
 }
 
