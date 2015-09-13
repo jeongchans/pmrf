@@ -7,6 +7,8 @@
 #include "msaproc/effseqnum.h"
 #include "msaproc/msafilter.h"
 
+using std::shared_ptr;
+
 typedef int SeqWeightMethod;
 const int NO_WEIGHT = 0;
 const int POSITION_BASED = 1;
@@ -30,9 +32,9 @@ class MSAAnalyzer {
 
     MSAAnalyzer(Option& opt, const Alphabet& abc);
 
-    std::shared_ptr<SeqWeightEstimator> seq_weight_estimator;
-    std::shared_ptr<EffSeqNumEstimator> eff_seq_num_estimator;
-    std::shared_ptr<TerminalGapRemover> termi_gap_remover;
+    shared_ptr<SeqWeightEstimator> seq_weight_estimator;
+    shared_ptr<EffSeqNumEstimator> eff_seq_num_estimator;
+    shared_ptr<TerminalGapRemover> termi_gap_remover;
 
   private:
     const Alphabet& abc;
