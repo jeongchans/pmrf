@@ -113,8 +113,8 @@ class MRFParameterizer_ObjectiveFunction_Test : public testing::Test {
 
     virtual void SetUp() {
         size_t n = abc.get_canonical_size();
-        traces.push_back(Trace("MMMMMMMMMMMMMMMM", "PPDQEFLRARVQLGDA"));
-        traces.push_back(Trace("DDDDDMMMIIIIMMMMDDDD", "SSHGNRIVHLQ"));
+        traces.push_back(Trace("MMMMMMMMMMMMMMMMM", "PPDQEFLRGARVQLGDA"));
+        traces.push_back(Trace("UUMMOEEMIIIIMMMMUUUU", "DQHGNRIVHLQ"));
         seq_weight.resize(2);
         seq_weight = 0.5, 0.5;
 
@@ -143,7 +143,7 @@ class MRFParameterizer_ObjectiveFunction_Test : public testing::Test {
 TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_calc_logpot) {
     MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
 
-    string seq = traces[0].get_MD_seq();
+    string seq = traces[0].get_matched_aseq();
     FloatType sw = seq_weight(0);
 
     Float2dArray logpot = obj_func.calc_logpot(param.x, seq, sw);
@@ -177,7 +177,7 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_calc_logz) {
 TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_update_obj_score) {
     MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
 
-    string seq = traces[0].get_MD_seq();
+    string seq = traces[0].get_matched_aseq();
     FloatType sw = seq_weight(0);
     Float2dArray logpot = exp(randn(param.num_var, param.length));
     Float1dArray logz = obj_func.calc_logz(logpot);
@@ -190,7 +190,7 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_update_obj_score) {
 TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_update_gradient) {
     MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
 
-    string seq = traces[0].get_MD_seq();
+    string seq = traces[0].get_matched_aseq();
     FloatType sw = seq_weight(0);
     Float2dArray logpot = exp(randn(param.num_var, param.length));
     Float1dArray logz = obj_func.calc_logz(logpot);

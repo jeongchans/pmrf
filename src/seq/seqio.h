@@ -22,17 +22,19 @@ class SeqParser {
 
 class FastaParser : public SeqParser {
   public:
-    FastaParser(std::istream& is) : is(is) { init(); }
+    FastaParser(std::istream& is);
 
     virtual SeqRecord next();
     virtual bool has_next() { return _has_next; }
+
+    void init();
 
   private:
     std::istream& is;   // input stream
     bool _has_next;
     std::string buffer;
+    std::ios::pos_type init_pos;
 
-    void init();
     inline void set_buffer(const std::string& s) { buffer = s; _has_next = true; }
 };
 

@@ -7,6 +7,7 @@
 #include <string>
 #include <deque>
 #include <exception>
+#include <iostream>
 
 using std::pair;
 using std::vector;
@@ -14,5 +15,6 @@ using std::deque;
 using std::map;
 using std::string;
 using std::make_pair;
+using std::endl;
 
 #endif

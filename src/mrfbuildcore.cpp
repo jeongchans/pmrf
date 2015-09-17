@@ -11,8 +11,7 @@ MRFBuildProcessor::~MRFBuildProcessor() {
 }
 
 int MRFBuildProcessor::build(const string& msa_filename, const string& out_filename) {
-//    MRFModelBuilder builder(AMINO_ACID);
-    MRFModelBuilder builder(AA_GAP);   // TODO: AA_GAP needs to be replaced with AMINO_ACID
+    MRFModelBuilder builder(AA_GAP3);
     builder.opt = ((MRFBuildCommandLine*)cmd_line)->opt.build_opt;
     int ret = builder.build(msa_filename, out_filename);
     return ret;

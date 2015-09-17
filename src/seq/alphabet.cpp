@@ -5,6 +5,8 @@
 #include <vector>
 #include <iostream>
 
+#include "util/common.h"
+
 bool Alphabet::SymbolGroup::has_symbol(const char& x) const {
     std::string::size_type idx = this->member.find(x);
     if (idx != std::string::npos) return true;
@@ -99,10 +101,6 @@ std::string Alphabet::get_valid_symbol() const {
     return s;
 }
 
-size_t Alphabet::get_canonical_size() const {
-    return sym_grp[CANONICAL].get_uniq_size();
-}
-
 std::string Alphabet::get_degeneracy(const char& x, FloatType* w) const {
     std::string s;
     if (is_canonical(x)) s += x;
@@ -131,12 +129,12 @@ Float1dArray Alphabet::get_count(const char& x) const {
     return v;
 }
 
-AminoAcid::AminoAcid() : Alphabet("ACDEFGHIKLMNPQRSTVWY",
-                                  "-",
-                                  "BJZOU",
-                                  "X",
-                                  "*",
-                                  "~") {
+AminoAcid::AminoAcid(const char* gap) : Alphabet("ACDEFGHIKLMNPQRSTVWY",
+                                                 gap,
+                                                 "BJZOU",
+                                                 "X",
+                                                 "*",
+                                                 "~") {
     set_degeneracy('B', 'N');
     set_degeneracy('B', 'D');
     set_degeneracy('J', 'I');
@@ -146,3 +144,11 @@ AminoAcid::AminoAcid() : Alphabet("ACDEFGHIKLMNPQRSTVWY",
     set_degeneracy('O', 'K');
     set_degeneracy('U', 'C');
 }
+
+//string AminoAcidGap3::get_canonical_and_gap() const {
+//    return get_canonical() + get_gap();
+//}
+
+//size_t AminoAcidGap3::get_canonical_and_gap_size() const {
+//    return get_canonical_size() + get_gap_size();
+//}

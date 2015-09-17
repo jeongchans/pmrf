@@ -15,6 +15,11 @@ inline std::string trim(std::string& s, const std::string& drop = TRIM_SPACE) {
     return ltrim(r, drop);
 }  
 
+FastaParser::FastaParser(std::istream& is) : is(is) { 
+    init_pos = is.tellg();
+    init();
+}
+
 SeqRecord FastaParser::next() {
     SeqRecord r;
     r.id = buffer.substr(1, buffer.find(' ') - 1);
@@ -35,6 +40,7 @@ SeqRecord FastaParser::next() {
 
 void FastaParser::init() {
     std::string s;
+    is.seekg(init_pos);
     while (getline(is, s)) {
         s = trim(s);
         if (s.empty()) continue;
