@@ -18,12 +18,9 @@ void Alphabet::SymbolGroup::set_member(const char* symbols) {
     this->uniq_size = this->member.size();
 }
 
-Alphabet::Alphabet() {
-}
-
 Alphabet::Alphabet(const char* canonical, const char* gap, const char* degenerate,
                    const char* unknown, const char* none, const char* missing,
-                   const bool& nocase) {
+                   const bool& nocase, const bool& gapres) {
     sym_grp[CANONICAL].set_member(canonical);
     sym_grp[GAP].set_member(gap);
     sym_grp[DEGENERATE].set_member(degenerate);
@@ -47,6 +44,17 @@ Alphabet::Alphabet(const char* canonical, const char* gap, const char* degenerat
             }
         }
     }
+    this->gapres = gapres;
+}
+
+std::string Alphabet::get_canonical() const {
+    if (gapres) return sym_grp[CANONICAL].get_member() + get_gap();
+    else return sym_grp[CANONICAL].get_member();
+}
+
+size_t Alphabet::get_canonical_size() const {
+    if (gapres) return sym_grp[CANONICAL].get_uniq_size() + get_gap_size();
+    else return sym_grp[CANONICAL].get_uniq_size();
 }
 
 void Alphabet::set_degeneracy(const char& degen_ch, const char& canoni_ch) {
@@ -129,12 +137,12 @@ Float1dArray Alphabet::get_count(const char& x) const {
     return v;
 }
 
-AminoAcid::AminoAcid(const char* gap) : Alphabet("ACDEFGHIKLMNPQRSTVWY",
+AminoAcid::AminoAcid(const char* gap, const bool& nocase, const bool& gapres) : Alphabet("ACDEFGHIKLMNPQRSTVWY",
                                                  gap,
                                                  "BJZOU",
                                                  "X",
                                                  "*",
-                                                 "~") {
+                                                 "~", nocase, gapres) {
     set_degeneracy('B', 'N');
     set_degeneracy('B', 'D');
     set_degeneracy('J', 'I');
@@ -144,11 +152,3 @@ AminoAcid::AminoAcid(const char* gap) : Alphabet("ACDEFGHIKLMNPQRSTVWY",
     set_degeneracy('O', 'K');
     set_degeneracy('U', 'C');
 }
-
-//string AminoAcidGap3::get_canonical_and_gap() const {
-//    return get_canonical() + get_gap();
-//}
-
-//size_t AminoAcidGap3::get_canonical_and_gap_size() const {
-//    return get_canonical_size() + get_gap_size();
-//}

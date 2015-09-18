@@ -27,12 +27,12 @@ class Alphabet {
     typedef std::multimap<char, char> DegeneracyMap;
 
   public:
-    Alphabet();
+    Alphabet() {};
     Alphabet(const char* canonical, const char* gap, const char* degenerate,
              const char* unknown, const char* none, const char* missing,
-             const bool& nocase = false);
+             const bool& nocase = false, const bool& gapres = false);
 
-    std::string get_canonical() const { return sym_grp[CANONICAL].get_member(); }
+    std::string get_canonical() const;
     std::string get_gap() const { return sym_grp[GAP].get_member(); }
     std::string get_unknown() const { return sym_grp[UNKNOWN].get_member(); }
     bool is_canonical(const char& x) const;
@@ -43,7 +43,7 @@ class Alphabet {
     bool is_missing(const char& x) const;
     bool is_valid(const char& x) const;
     int get_idx(const char& x) const;
-    size_t get_canonical_size() const { return sym_grp[CANONICAL].get_uniq_size(); }
+    size_t get_canonical_size() const;
     size_t get_gap_size() const { return sym_grp[GAP].get_uniq_size(); }
     size_t get_valid_size() const { return get_valid_symbol().size(); }
     Float1dArray get_count(const char& x) const;
@@ -62,7 +62,8 @@ class Alphabet {
     SymbolGroup sym_grp[NUM_GROUP];
     SymbolIdxMap sym_idx;
     DegeneracyMap degeneracy;
-    bool nocase;
+    bool nocase;    // distinguish capital and small letter
+    bool gapres;    // treat gap as an additional canonical letter
 
     void update_sym_idx();
     std::string get_valid_symbol() const;
@@ -70,19 +71,8 @@ class Alphabet {
 
 class AminoAcid : public Alphabet {
   public:
-    AminoAcid() : AminoAcid("-") {};
-    AminoAcid(const char* gap);
-};
-
-class AminoAcidGap3 : public AminoAcid {
-  public:
-    AminoAcidGap3() : AminoAcid("=-^") {};
-
-//    std::string get_canonical_and_gap() const;
-//    size_t get_canonical_and_gap_size() const;
-//    bool is_gap_open(const char& x) const { return x == '='; }
-//    bool is_gap_ext(const char& x) const { return x == '-'; }
-//    bool is_gap_unaligned(const char& x) const { return x == '^'; }
+    AminoAcid(const bool& nocase = false, const bool& gapres = false) : AminoAcid("-", nocase, gapres) {};
+    AminoAcid(const char* gap, const bool& nocase, const bool& gapres);
 };
 
 typedef std::pair<char, char> SymbolPair;

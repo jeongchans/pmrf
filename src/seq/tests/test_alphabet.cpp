@@ -35,7 +35,6 @@ class AlphabetTest : public testing::Test {
     std::string none_sym;
     std::string missing_sym;
     std::string undefined_sym;
-
 };
 
 TEST_F(AlphabetTest, test_get_canonical) {
@@ -254,61 +253,3 @@ TEST_F(AminoAcidTest, test_get_count) {
     EXPECT_EQ(0.5, amino.get_count('B')(2));
     EXPECT_EQ(0.5, amino.get_count('B')(11));
 }
-
-class AminoAcidGap3Test : public testing::Test {
-  protected:
-    virtual void SetUp() {
-        valid_sym = "ACDEFGHIKLMNPQRSTVWY=-^BJZOUX*~";
-        undefined_sym = "0123456789!@#$%&()<>?";
-        abc = AminoAcidGap3();
-    }
-
-    AminoAcidGap3 abc;
-    std::string valid_sym;
-    std::string undefined_sym;
-};
-
-TEST_F(AminoAcidGap3Test, test_is_xxx) {
-    std::string::iterator pos;
-    std::string s;
-    s = valid_sym.substr(0, 20);
-    for (pos = s.begin(); pos != s.end(); ++pos) {
-        EXPECT_TRUE(abc.is_canonical(*pos));
-    }
-    s = valid_sym.substr(20, 3);
-    for (pos = s.begin(); pos != s.end(); ++pos) {
-        EXPECT_TRUE(abc.is_gap(*pos));
-    }
-    s = valid_sym.substr(23, 5);
-    for (pos = s.begin(); pos != s.end(); ++pos) {
-        EXPECT_TRUE(abc.is_degenerate(*pos));
-    }
-    s = valid_sym.substr(28, 1);
-    for (pos = s.begin(); pos != s.end(); ++pos) {
-        EXPECT_TRUE(abc.is_unknown(*pos));
-    }
-    s = valid_sym.substr(29, 1);
-    for (pos = s.begin(); pos != s.end(); ++pos) {
-        EXPECT_TRUE(abc.is_none(*pos));
-    }
-    s = valid_sym.substr(30, 1);
-    for (pos = s.begin(); pos != s.end(); ++pos) {
-        EXPECT_TRUE(abc.is_missing(*pos));
-    }
-    s = valid_sym;
-    for (pos = s.begin(); pos != s.end(); ++pos) {
-        EXPECT_TRUE(abc.is_valid(*pos));
-    }
-    s = undefined_sym;
-    for (pos = s.begin(); pos != s.end(); ++pos) {
-        EXPECT_FALSE(abc.is_valid(*pos));
-    }
-}
-
-//TEST_F(AminoAcidGap3Test, test_get_canonical_and_gap) {
-//    EXPECT_EQ(valid_sym.substr(0, 23), abc.get_canonical_and_gap());
-//}
-
-//TEST_F(AminoAcidGap3Test, test_get_canonical_and_gap_size) {
-//    EXPECT_EQ(23, abc.get_canonical_and_gap_size());
-//}

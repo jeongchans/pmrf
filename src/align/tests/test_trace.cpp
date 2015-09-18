@@ -11,20 +11,6 @@ string st2   = "UUMMOEEMMIIIMMMMUUUU";
 string seq1  = "PPDQEFLRGARVQLGDA";
 string seq2  = "DQHGNRIVHLQ";
 
-string a3m(">seq1 Sample #1\n"
-           "PPDQEFLRGARVQLGDA\n"
-           ">seq2 Sample #2\n"
-           "--DQ---HGnriVHLQ----\n"
-           ">seq3 Ignored\n"
-           "-----------------agv\n");
-
-string afa(">seq1 Sample #1\n"
-           "PPDQEFLRG---ARVQLGDA---\n"
-           ">seq2 Sample #2\n"
-           "--DQ---HGNRIVHLQ-------\n"
-           ">seq3 Ignored\n"
-           "--------------------AGV\n");
-
 class TraceTest : public testing::Test {
   protected:
     virtual void SetUp() {
@@ -148,6 +134,20 @@ TEST_F(TraceVectorTest, test_get_matched_aseq_vec) {
 //    EXPECT_EQ(traces[0].get_MD_seq(), vec[0]);
 //    EXPECT_EQ(traces[1].get_MD_seq(), vec[1]);
 //}
+
+string a3m(">seq1 Sample #1\n"
+           "PPDQEFLRGARVQLGDA\n"
+           ">seq2 Sample #2\n"
+           "--DQ---HGnriVHLQ----\n"
+           ">seq3 Ignored\n"
+           "-----------------agv\n");
+
+string afa(">seq1 Sample #1\n"
+           "PPDQEFLRG---ARVQLGDA---\n"
+           ">seq2 Sample #2\n"
+           "--DQ---HGNRIVHLQ-------\n"
+           ">seq3 Ignored\n"
+           "--------------------AGV\n");
 
 class TraceImporterTest : public testing::Test {
   public:

@@ -11,7 +11,7 @@ MRFBuildProcessor::~MRFBuildProcessor() {
 }
 
 int MRFBuildProcessor::build(const string& msa_filename, const string& out_filename) {
-    MRFModelBuilder builder(AA_GAP3);
+    MRFModelBuilder builder(AA);
     builder.opt = ((MRFBuildCommandLine*)cmd_line)->opt.build_opt;
     int ret = builder.build(msa_filename, out_filename);
     return ret;

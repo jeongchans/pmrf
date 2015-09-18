@@ -8,7 +8,8 @@
 
 #include "command.h"
 
-const AminoAcidGap3 AA_GAP3;
+const AminoAcid AA("-", false, true);
+//const AminoAcid AA("=-^", false, true);
 
 void assert_file_handle(std::ifstream& ifs, const std::string& filename);
 void assert_file_handle(std::ofstream& ofs, const std::string& filename);
