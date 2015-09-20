@@ -3,9 +3,9 @@
 
 #include <memory>
 
-#include "msaproc/seqweight.h"
-#include "msaproc/effseqnum.h"
-#include "msaproc/msafilter.h"
+#include "seq/seqweight.h"
+#include "seq/effseqnum.h"
+#include "seq/msafilter.h"
 
 using std::shared_ptr;
 

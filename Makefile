@@ -7,7 +7,7 @@ export CXXFLAGS     = -Wno-write-strings -W -Wall -std=c++0x -O3 -lgsl -lgslcbla
 LBFGS_MODULE 	    = lbfgs
 LBFGS_SRC_DIR 	    = $(LBFGS_MODULE)
 
-SRC_DIR 			= src $(addprefix src/, seq align msaproc util)
+SRC_DIR 			= src $(addprefix src/, seq util)
 #DIRS 				= $(SRC_DIR) $(PROTBINFO_SRC_DIR) $(LBFGS_SRC_DIR)
 DIRS 				= $(SRC_DIR) $(LBFGS_SRC_DIR)
 

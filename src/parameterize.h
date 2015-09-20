@@ -3,7 +3,7 @@
 
 #include "lbfgs.h"
 
-#include "align/trace.h"
+#include "seq/trace.h"
 
 #include "mrf.h"
 #include "msaanalyze.h"
