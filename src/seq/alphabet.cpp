@@ -7,6 +7,10 @@
 
 #include "util/common.h"
 
+/**
+   @class Alphabet
+ */
+
 bool Alphabet::SymbolGroup::has_symbol(const char& x) const {
     std::string::size_type idx = this->member.find(x);
     if (idx != std::string::npos) return true;
@@ -61,31 +65,32 @@ void Alphabet::set_degeneracy(const char& degen_ch, const char& canoni_ch) {
     degeneracy.insert(std::make_pair(degen_ch, canoni_ch));
 }
 
-bool Alphabet::is_canonical(const char& x ) const {
-    return sym_grp[CANONICAL].has_symbol(x);
+bool Alphabet::is_canonical(const char& x) const {
+    if (gapres) return sym_grp[CANONICAL].has_symbol(x) || is_gap(x);
+    else return sym_grp[CANONICAL].has_symbol(x);
 }
 
-bool Alphabet::is_gap(const char& x ) const {
+bool Alphabet::is_gap(const char& x) const {
     return sym_grp[GAP].has_symbol(x);
 }
 
-bool Alphabet::is_degenerate(const char& x ) const {
+bool Alphabet::is_degenerate(const char& x) const {
     return sym_grp[DEGENERATE].has_symbol(x);
 }
 
-bool Alphabet::is_unknown(const char& x ) const {
+bool Alphabet::is_unknown(const char& x) const {
     return sym_grp[UNKNOWN].has_symbol(x);
 }
 
-bool Alphabet::is_none(const char& x ) const {
+bool Alphabet::is_none(const char& x) const {
     return sym_grp[NONE].has_symbol(x);
 }
 
-bool Alphabet::is_missing(const char& x ) const {
+bool Alphabet::is_missing(const char& x) const {
     return sym_grp[MISSING].has_symbol(x);
 }
 
-bool Alphabet::is_valid(const char& x ) const {
+bool Alphabet::is_valid(const char& x) const {
     for (size_t g_idx = 0; g_idx < NUM_GROUP; ++g_idx) {
         if (sym_grp[g_idx].has_symbol(x)) return true;
     }
@@ -136,6 +141,10 @@ Float1dArray Alphabet::get_count(const char& x) const {
     }
     return v;
 }
+
+/**
+   @class AminoAcid
+ */
 
 AminoAcid::AminoAcid(const char* gap, const bool& nocase, const bool& gapres) : Alphabet("ACDEFGHIKLMNPQRSTVWY",
                                                  gap,

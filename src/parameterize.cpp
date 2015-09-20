@@ -15,7 +15,9 @@ using blitz::pow;
 
 static const NullSeqWeightEstimator NULL_SEQ_WEIGHT_ESTIMATOR;
 
-// MRFParameterizer::Parameter
+/**
+   @class MRFParameterizer::Parameter
+ */
 
 MRFParameterizer::Parameter::Parameter(const MRF& model, const Option& opt) : abc(model.get_alphabet()), length(model.get_length()) {
     EdgeIndexVector edge_idxs = model.get_edge_idxs();
@@ -46,7 +48,9 @@ int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char
     return k;
 }
 
-// MRFParameterizer::NodeL2Regularization
+/**
+   @class MRFParameterizer::NodeL2Regularization
+ */
 
 void MRFParameterizer::NodeL2Regularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
     const double& lambda = opt.lambda;
@@ -60,7 +64,10 @@ void MRFParameterizer::NodeL2Regularization::regularize(const lbfgsfloatval_t *x
     }
 }
 
-// MRFParameterizer::EdgeL2Regularization
+
+/**
+   @class MRFParameterizer::EdgeL2Regularization
+ */
 
 MRFParameterizer::EdgeL2Regularization::EdgeL2Regularization(Parameter& param, Option& opt) : param(param), opt(opt), lambda(opt.lambda) {
     if (opt.sc) lambda = 2. * ((double)(param.eidx.size())) / ((double)(param.length)) * opt.lambda;
@@ -81,7 +88,9 @@ void MRFParameterizer::EdgeL2Regularization::regularize(const lbfgsfloatval_t *x
     }
 }
 
-// MRFParameterizer::ObjectiveFunction
+/**
+   @class MRFParameterizer::ObjectiveFunction
+ */
 
 MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const MSAAnalyzer& msa_analyzer) 
 : traces(traces), 
@@ -189,7 +198,9 @@ void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t 
     }
 }
 
-// MRFParameterizer
+/**
+   @class MRFParameterizer
+ */
 
 int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     Parameter param(model, optim_opt);

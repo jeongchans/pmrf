@@ -8,13 +8,32 @@
    @class Trace
  */
 
-const char Trace::STATE_SYMBOL[5] = {'M', 'I', 'O', 'E', 'U'};
+//const char Trace::STATE_SYMBOL[5] = {'M', 'I', 'O', 'E', 'U'};
+
+const char Trace::STATE_SYMBOL[3] = {'M', 'I', 'D'};
 
 inline Trace::StateType Trace::char_to_state(const char& x) {
     for (size_t i = 0; i < NUM_STATE_TYPE; ++i)
         if (x == STATE_SYMBOL[i]) return (StateType)i;
     return UNDEFINED;
 }
+
+//Trace::Trace(const string& ststr, const string& seq, const string& id, const string& desc) : id(id), desc(desc) {
+//    size_t i = 0;
+//    size_t j = 0;
+//    for (string::const_iterator pos = ststr.begin(); pos != ststr.end(); ++pos) {
+//        char aa;
+//        StateType st = char_to_state(*pos);
+//        if (st == MATCH || st == INSERT) aa = seq[i++];
+////        else if (st == GAPOPEN) aa = '=';
+////        else if (st == GAPEXT) aa = '-';
+////        else if (st == UNALIGNED) aa = '^';
+//        else throw std::range_error(ststr);
+//        this->st.push_back(State(st, aa));
+//        if (st != INSERT) this->aidx.push_back(j);
+//        ++j;
+//    }
+//}
 
 Trace::Trace(const string& ststr, const string& seq, const string& id, const string& desc) : id(id), desc(desc) {
     size_t i = 0;
@@ -23,9 +42,7 @@ Trace::Trace(const string& ststr, const string& seq, const string& id, const str
         char aa;
         StateType st = char_to_state(*pos);
         if (st == MATCH || st == INSERT) aa = seq[i++];
-        else if (st == GAPOPEN) aa = '=';
-        else if (st == GAPEXT) aa = '-';
-        else if (st == UNALIGNED) aa = '^';
+        else if (st == DELETE) aa = '-';
         else throw std::range_error(ststr);
         this->st.push_back(State(st, aa));
         if (st != INSERT) this->aidx.push_back(j);
@@ -85,24 +102,28 @@ std::pair<size_t, TraceVector> TraceImporter::import(std::istream& is, const MSA
     return make_pair(length, traces);
 }
 
+//inline string reformat_a3m_seq(string aseq) {
+//    for (string::iterator pos = aseq.begin(); pos != aseq.end(); ++pos) {
+//        if (*pos == '-') *pos = '^';
+//        else break;
+//    }
+//    for (string::reverse_iterator pos = aseq.rbegin(); pos != aseq.rend(); ++pos) {
+//        if (*pos == '-') *pos = '^';
+//        else break;
+//    }
+//    bool gap_ahead = false;
+//    for (string::iterator pos = aseq.begin(); pos != aseq.end(); ++pos) {
+//        if (*pos == '-') {
+//            if (!gap_ahead) *pos = '=';
+//            gap_ahead = true;
+//        } else {
+//            gap_ahead = false;
+//        }
+//    }
+//    return aseq;
+//}
+
 inline string reformat_a3m_seq(string aseq) {
-    for (string::iterator pos = aseq.begin(); pos != aseq.end(); ++pos) {
-        if (*pos == '-') *pos = '^';
-        else break;
-    }
-    for (string::reverse_iterator pos = aseq.rbegin(); pos != aseq.rend(); ++pos) {
-        if (*pos == '-') *pos = '^';
-        else break;
-    }
-    bool gap_ahead = false;
-    for (string::iterator pos = aseq.begin(); pos != aseq.end(); ++pos) {
-        if (*pos == '-') {
-            if (!gap_ahead) *pos = '=';
-            gap_ahead = true;
-        } else {
-            gap_ahead = false;
-        }
-    }
     return aseq;
 }
 
@@ -116,13 +137,29 @@ string reformat_afa_seq(string aseq, const string& ref_aseq) {
     return reformat_a3m_seq(a3m_seq);
 }
 
+//void TraceImporter::parse_state(const std::string& aseq, std::string& st, std::string& seq) {
+//    st.empty();
+//    seq.empty();
+//    for (string::const_iterator pos = aseq.begin(); pos != aseq.end(); ++pos) {
+//        if (*pos == '=') st += 'O';
+//        else if (*pos == '-') st += 'E';
+//        else if (*pos == '^') st += 'U';
+//        else if (abc.is_valid(toupper(*pos))) {
+//            if (islower(*pos)) st += 'I';
+//            else st += 'M';
+//            seq += toupper(*pos);
+//        } else {
+//            std::cerr << "Undefined symbol: " << *pos << std::endl;
+//            throw std::range_error(aseq);
+//        }
+//    }
+//}
+
 void TraceImporter::parse_state(const std::string& aseq, std::string& st, std::string& seq) {
     st.empty();
     seq.empty();
     for (string::const_iterator pos = aseq.begin(); pos != aseq.end(); ++pos) {
-        if (*pos == '=') st += 'O';
-        else if (*pos == '-') st += 'E';
-        else if (*pos == '^') st += 'U';
+        if (*pos == '-') st += 'D';
         else if (abc.is_valid(toupper(*pos))) {
             if (islower(*pos)) st += 'I';
             else st += 'M';
