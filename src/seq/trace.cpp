@@ -4,8 +4,6 @@
 
 #include "seq/seqio.h"
 
-//#include <algorithm>
-
 const char state_symbol[5] = {'M', 'I', 'O', 'E', 'U'};
 
 inline Trace::StateType char_to_state(const char& x) {
@@ -13,10 +11,6 @@ inline Trace::StateType char_to_state(const char& x) {
         if (x == state_symbol[i]) return (Trace::StateType)i;
     return Trace::StateType::UNDEFINED;
 }
-
-//Trace::Trace(const char* st, const char* seq) {
-//    init_trace(string(st), string(seq));
-//}
 
 Trace::Trace(const string& ststr, const string& seq, const string& id, const string& desc) : id(id), desc(desc) {
     size_t i = 0;
@@ -57,106 +51,12 @@ bool Trace::operator==(const Trace& rhs) const {
     return true;
 }
 
-//void Trace::init_trace(const string& st, const string& seq) {
-//    length = count(st.begin(), st.end(), 'M') + count(st.begin(), st.end(), 'D');
-//    for (size_t i = 0; i < NUM_STATE_TYPE; ++i) {
-//        emit[i] = std::vector<std::string>(length, "");
-//    }
-//    int idx = -1;
-//    StateType cur_type;
-//    int seq_idx = -1;
-//    std::string::const_iterator pos = st.begin();
-//    while (true) {
-//        cur_type = char_to_state_type(*pos);
-//        if (cur_type == INSERT && idx < 0) {
-//            ++seq_idx;
-//            if (++pos == st.end()) break;
-//            continue;
-//        }
-//        if (cur_type == MATCH || cur_type == DELETE) ++idx;
-//        if (cur_type == MATCH || cur_type == INSERT) emit[cur_type][idx] += seq[++seq_idx];
-//        else emit[DELETE][idx] += "-";
-//        if (++pos == st.end()) break;
-//    }
-//    // identify terminal gap
-//    first_not_delete = st.find_first_not_of('D');
-//    last_not_delete = length - (st.size() - st.find_last_not_of('D'));
-//}
-//
-//bool Trace::is_passing(const StateType& type, const size_t& pos) const {
-//    if (emit[type][pos].empty()) return false;
-//    return true;
-//}
-//
-//std::string Trace::get_emit(const StateType& type, const size_t& pos) const {
-//    return emit[type][pos];
-//}
-//
-//std::string Trace::get_MD_seq() const {
-//    std::string s;
-//    for (size_t i = 0; i < length; ++i) {
-//        s += emit[MATCH][i] + emit[DELETE][i];
-//    }
-//    return s;
-//}
-//
-//bool Trace::has_terminal_gap(const size_t& pos) const {
-//    if (pos < first_not_delete || pos > last_not_delete) return true;
-//    return false;
-//}
-//
-//int Trace::get_visit(const StateType& type, const size_t& pos) const {
-//    return (int) emit[type][pos].size();
-//}
-//
-//FreqVec Trace::get_transit_count(const StateType& type, const size_t& pos) const {
-//    FreqVec fv(NUM_STATE_TYPE);
-//    fv = 0;
-//    if (is_passing(type, pos)) {
-//        if (pos == length - 1) {
-//            if (type == MATCH && get_visit(INSERT, pos) > 0) fv(INSERT) = 1;
-//        }
-//        else if (type == MATCH) {
-//            if (get_visit(INSERT, pos) > 0) fv(INSERT) = 1;
-//            else if (get_visit(MATCH, pos + 1) > 0) fv(MATCH) = 1;
-//            else fv(DELETE) = 1;
-//        }
-//        else if (type == DELETE) {
-//            if (get_visit(MATCH, pos + 1) > 0) fv(MATCH) = 1;
-//            else fv(DELETE) = 1;
-//        }
-//        else if (type == INSERT) {
-//            fv(INSERT) = get_visit(INSERT, pos) - 1;
-//            fv(MATCH) = 1;
-//        }
-//    }
-//    return fv;
-//}
-
 vector<string> TraceVector::get_matched_aseq_vec() const {
     vector<string> r;
     for (const_iterator pos = begin(); pos != end(); ++pos)
         r.push_back(pos->get_matched_aseq());
     return r;
 }
-
-//TraceVector TraceVector::subset_passing(const StateType& type, const size_t& idx, const bool& omit_termi_gap) const {
-//    TraceVector trs;
-//    for (const_iterator pos = begin(); pos != end(); ++pos) {
-//        if (pos->is_passing(type, idx)) {
-//            if (omit_termi_gap && pos->has_terminal_gap(idx)) continue;
-//            trs.push_back(*pos);
-//        }
-//    }
-//    return trs;
-//}
-//
-//vector<string> TraceVector::get_MD_seq_vec() const {
-//    vector<string> r;
-//    for (const_iterator pos = begin(); pos != end(); ++pos)
-//        r.push_back(pos->get_MD_seq());
-//    return r;
-//}
 
 std::pair<size_t, TraceVector> TraceImporter::import(std::istream& is, const MSAFormat& fmt) {
     TraceVector traces;
@@ -195,7 +95,6 @@ inline string reformat_a3m_seq(string aseq) {
 }
 
 string reformat_afa_seq(string aseq, const string& ref_aseq) {
-    //TODO: afa -> a3m
     string a3m_seq;
     size_t n = ref_aseq.size();
     for (size_t i = 0; i < n; ++i) {
@@ -231,16 +130,6 @@ void TraceImporter::a3m_to_trace(std::istream& is, TraceVector& traces) {
     FastaParser parser(is);
     while (parser.has_next()) {
         SeqRecord r = parser.next();
-//        if (r.id == "ss_dssp") {
-//            traces.ss_dssp = r.seq;
-//            continue;
-//        } else if (r.id == "ss_pred") {
-//            traces.ss_pred = r.seq;
-//            continue;
-//        } else if (r.id == "ss_conf") {
-//            traces.ss_conf = r.seq;
-//            continue;
-//        }
         r.seq = reformat_a3m_seq(r.seq);
         string st, seq;
         parse_state(r.seq, st, seq);
