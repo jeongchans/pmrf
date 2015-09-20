@@ -4,12 +4,16 @@
 
 #include "seq/seqio.h"
 
-const char state_symbol[5] = {'M', 'I', 'O', 'E', 'U'};
+/**
+   @class Trace
+ */
 
-inline Trace::StateType char_to_state(const char& x) {
-    for (size_t i = 0; i < Trace::NUM_STATE_TYPE; ++i)
-        if (x == state_symbol[i]) return (Trace::StateType)i;
-    return Trace::StateType::UNDEFINED;
+const char Trace::STATE_SYMBOL[5] = {'M', 'I', 'O', 'E', 'U'};
+
+inline Trace::StateType Trace::char_to_state(const char& x) {
+    for (size_t i = 0; i < NUM_STATE_TYPE; ++i)
+        if (x == STATE_SYMBOL[i]) return (StateType)i;
+    return UNDEFINED;
 }
 
 Trace::Trace(const string& ststr, const string& seq, const string& id, const string& desc) : id(id), desc(desc) {
@@ -51,12 +55,20 @@ bool Trace::operator==(const Trace& rhs) const {
     return true;
 }
 
+/**
+   @class TraceVector
+ */
+
 vector<string> TraceVector::get_matched_aseq_vec() const {
     vector<string> r;
     for (const_iterator pos = begin(); pos != end(); ++pos)
         r.push_back(pos->get_matched_aseq());
     return r;
 }
+
+/**
+   @class TraceImporter
+ */
 
 std::pair<size_t, TraceVector> TraceImporter::import(std::istream& is, const MSAFormat& fmt) {
     TraceVector traces;

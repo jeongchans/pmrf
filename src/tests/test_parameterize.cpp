@@ -4,14 +4,6 @@
 
 using std::string;
 
-// consider gap as an additional symbol
-//Alphabet abc("ACDEFGHIKLMNPQRSTVWY-",
-//             "",
-//             "BJZOU",
-//             "X",
-//             "*",
-//             "~");
-
 AminoAcid abc("-", false, true);
 
 MSAAnalyzer::Option msa_analyzer_opt;

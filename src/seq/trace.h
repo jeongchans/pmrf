@@ -7,6 +7,8 @@
 class Trace {
   public:
 
+    static const char STATE_SYMBOL[5];
+
     enum StateType {
         MATCH = 0,
         INSERT = 1,
@@ -43,6 +45,8 @@ class Trace {
     std::string id, desc;
     std::vector<State> st;
     std::vector<size_t> aidx;       // converting reference index to trace index
+
+    StateType char_to_state(const char& x);
 };
 
 class TraceVector {
