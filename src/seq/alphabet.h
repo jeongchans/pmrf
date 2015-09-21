@@ -71,8 +71,11 @@ class Alphabet {
 
 class AminoAcid : public Alphabet {
   public:
-    AminoAcid(const bool& nocase = false, const bool& gapres = false) : AminoAcid("-", nocase, gapres) {};
+    AminoAcid(const bool& nocase = false, const bool& gapres = false);
     AminoAcid(const char* gap, const bool& nocase, const bool& gapres);
+
+  private:
+    void init();
 };
 
 typedef std::pair<char, char> SymbolPair;

@@ -39,7 +39,7 @@ class Trace {
     };
 
     Trace() {};
-    Trace(const string& ststr, const string& seq) : Trace(ststr, seq, "", "") {}
+    Trace(const string& ststr, const string& seq);
     Trace(const string& ststr, const string& seq, const string& id, const string& desc);
 
     std::string get_seq() const;
@@ -53,6 +53,7 @@ class Trace {
     std::vector<State> st;
     std::vector<size_t> aidx;       // converting reference index to trace index
 
+    void init(const string& ststr, const string& seq, const string& id, const string& desc);
     StateType char_to_state(const char& x);
 };
 

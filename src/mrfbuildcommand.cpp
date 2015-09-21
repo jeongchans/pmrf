@@ -55,7 +55,7 @@ void MRFBuildCommandLine::show_help() {
 }
 
 bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
-    optind = 1;
+    optind = 0;     // initialize getopt_long()
     static struct option opts[] = {
         {"help", 0, 0, 0},
         {"regnode-l2", required_argument, 0, 0},

@@ -8,7 +8,7 @@
 #include "util/common.h"
 
 /**
-   @class Alphabet
+   @class Alphabet::SymbolGroup
  */
 
 bool Alphabet::SymbolGroup::has_symbol(const char& x) const {
@@ -21,6 +21,10 @@ void Alphabet::SymbolGroup::set_member(const char* symbols) {
     this->member = symbols;
     this->uniq_size = this->member.size();
 }
+
+/**
+   @class Alphabet
+ */
 
 Alphabet::Alphabet(const char* canonical, const char* gap, const char* degenerate,
                    const char* unknown, const char* none, const char* missing,
@@ -146,12 +150,17 @@ Float1dArray Alphabet::get_count(const char& x) const {
    @class AminoAcid
  */
 
-AminoAcid::AminoAcid(const char* gap, const bool& nocase, const bool& gapres) : Alphabet("ACDEFGHIKLMNPQRSTVWY",
-                                                 gap,
-                                                 "BJZOU",
-                                                 "X",
-                                                 "*",
-                                                 "~", nocase, gapres) {
+AminoAcid::AminoAcid(const bool& nocase, const bool& gapres) 
+: Alphabet("ACDEFGHIKLMNPQRSTVWY", "-", "BJZOU", "X", "*", "~", nocase, gapres) {
+    init();
+}
+
+AminoAcid::AminoAcid(const char* gap, const bool& nocase, const bool& gapres) 
+: Alphabet("ACDEFGHIKLMNPQRSTVWY", gap, "BJZOU", "X", "*", "~", nocase, gapres) {
+    init();
+}
+
+void AminoAcid::init() {
     set_degeneracy('B', 'N');
     set_degeneracy('B', 'D');
     set_degeneracy('J', 'I');

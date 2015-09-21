@@ -18,6 +18,10 @@ inline Trace::StateType Trace::char_to_state(const char& x) {
     return UNDEFINED;
 }
 
+Trace::Trace(const string& ststr, const string& seq) {
+    init(ststr, seq, "", "");
+}
+
 //Trace::Trace(const string& ststr, const string& seq, const string& id, const string& desc) : id(id), desc(desc) {
 //    size_t i = 0;
 //    size_t j = 0;
@@ -35,7 +39,13 @@ inline Trace::StateType Trace::char_to_state(const char& x) {
 //    }
 //}
 
-Trace::Trace(const string& ststr, const string& seq, const string& id, const string& desc) : id(id), desc(desc) {
+Trace::Trace(const string& ststr, const string& seq, const string& id, const string& desc) {
+    init(ststr, seq, id, desc);
+}
+
+void Trace::init(const string& ststr, const string& seq, const string& id, const string& desc) {
+    this->id = id;
+    this->desc = desc;
     size_t i = 0;
     size_t j = 0;
     for (string::const_iterator pos = ststr.begin(); pos != ststr.end(); ++pos) {
