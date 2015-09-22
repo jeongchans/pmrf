@@ -108,8 +108,8 @@ class MRFParameterizer_ObjectiveFunction_Test : public testing::Test {
     virtual void SetUp() {
         size_t n = abc.get_canonical_size();
         traces.push_back(Trace("MMMMMMMMMMMMMMMMM", "PPDQEFLRGARVQLGDA"));
-        //traces.push_back(Trace("UUMMOEEMIIIIMMMMUUUU", "DQHGNRIVHLQ"));
-        traces.push_back(Trace("DDMMDDDMIIIIMMMMDDDD", "DQHGNRIVHLQ"));
+        traces.push_back(Trace("UUMMOEEMIIIIMMMMUUUU", "DQHGNRIVHLQ"));
+        //traces.push_back(Trace("DDMMDDDMIIIIMMMMDDDD", "DQHGNRIVHLQ"));
         seq_weight.resize(2);
         seq_weight = 0.5, 0.5;
 

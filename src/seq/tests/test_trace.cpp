@@ -8,10 +8,10 @@ string seq1  = "PPDQEFLRGARVQLGDA";
 string seq2  = "DQHGNRIVHLQ";
 string aseq1 = "PPDQEFLRGARVQLGDA";
 string aseq2 = "--DQ---HGNRIVHLQ----";
-//string st1   = "MMMMMMMMMMMMMMMMM";
-//string st2   = "UUMMOEEMMIIIMMMMUUUU";
 string st1   = "MMMMMMMMMMMMMMMMM";
-string st2   = "DDMMDDDMMIIIMMMMDDDD";
+string st2   = "UUMMOEEMMIIIMMMMUUUU";
+//string st1   = "MMMMMMMMMMMMMMMMM";
+//string st2   = "DDMMDDDMMIIIMMMMDDDD";
 
 class TraceTest : public testing::Test {
   protected:
@@ -28,15 +28,15 @@ TEST_F(TraceTest, test_get_seq) {
     EXPECT_EQ(seq2, trace2.get_seq());
 }
 
-//TEST_F(TraceTest, test_get_matched_seq) {
-//    EXPECT_EQ(string("PPDQEFLRGARVQLGDA"), trace1.get_matched_aseq());
-//    EXPECT_EQ(string("^^DQ=--HGVHLQ^^^^"), trace2.get_matched_aseq());
-//}
-
 TEST_F(TraceTest, test_get_matched_seq) {
     EXPECT_EQ(string("PPDQEFLRGARVQLGDA"), trace1.get_matched_aseq());
-    EXPECT_EQ(string("--DQ---HGVHLQ----"), trace2.get_matched_aseq());
+    EXPECT_EQ(string("^^DQ=--HGVHLQ^^^^"), trace2.get_matched_aseq());
 }
+
+//TEST_F(TraceTest, test_get_matched_seq) {
+//    EXPECT_EQ(string("PPDQEFLRGARVQLGDA"), trace1.get_matched_aseq());
+//    EXPECT_EQ(string("--DQ---HGVHLQ----"), trace2.get_matched_aseq());
+//}
 
 TEST_F(TraceTest, test_operator_eq) {
     Trace trace(st1, seq1);
