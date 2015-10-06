@@ -49,6 +49,32 @@ int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char
 }
 
 /**
+   @class MRFParameterizer::NodeGaussRegularization::Option
+ */
+
+MRFParameterizer::NodeGaussRegularization::Option::Option(const Float2dArray& mn, const double& lambda) : lambda(lambda) {
+    this->mn.resize(mn.rows(), mn.cols());
+    this->mn = mn;
+}
+
+/**
+   @class MRFParameterizer::NodeGaussRegularization
+ */
+
+void MRFParameterizer::NodeGaussRegularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
+    const double& lambda = opt.lambda;
+    string letters = param.abc.get_canonical();
+    for (int i = 0; i < param.length; ++i) {
+        for (int t = 0; t < param.num_var; ++t) {
+            int k = param.get_nidx(i, letters[t]);
+            double d = x[k] - opt.mn(i, t);
+            fx += lambda * pow2(d);
+            g[k] += 2. * lambda * (d);
+        }
+    }
+}
+
+/**
    @class MRFParameterizer::NodeL2Regularization
  */
 
@@ -63,7 +89,6 @@ void MRFParameterizer::NodeL2Regularization::regularize(const lbfgsfloatval_t *x
         }
     }
 }
-
 
 /**
    @class MRFParameterizer::EdgeL2Regularization

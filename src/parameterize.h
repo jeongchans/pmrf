@@ -45,7 +45,29 @@ class MRFParameterizer {
         virtual void regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) = 0;
     };
 
-    // Node L2 regularization
+    // Node regularization using Gaussian prior
+
+    class NodeGaussRegularization : public RegularizationFunction {
+      public:
+
+        class Option {
+          public:
+            Option(const Float2dArray& mn, const double& lambda=0.01);
+
+            double lambda;
+            Float2dArray mn;
+        };
+
+        NodeGaussRegularization(Parameter& param, Option& opt) : param(param), opt(opt) {};
+
+        virtual void regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
+
+      private:
+        const Parameter& param;
+        const Option& opt;
+    };
+
+    // Node L2 regularization (using zero-mean Gaussian prior)
 
     class NodeL2Regularization : public RegularizationFunction {
       public:
