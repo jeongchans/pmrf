@@ -81,10 +81,11 @@ class MRFParameterizer_RegularizationFunction_Test : public testing::Test {
     lbfgsfloatval_t *g;
 };
 
-TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_gauss_regularization) {
+TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_pssm_regularization) {
+    MRFParameterizer::NodePSSMRegularization::Option opt;
+    MRFParameterizer::NodePSSMRegularization regul_func(param, opt);
     Float2dArray mn = randn(length, abc.get_canonical().size());
-    MRFParameterizer::NodeGaussRegularization::Option opt(mn);
-    MRFParameterizer::NodeGaussRegularization regul_func(param, opt);
+    regul_func.set_pssm(mn);
     lbfgsfloatval_t fx = 0.0;
 
     regul_func.regularize(param.x, g, fx);

@@ -49,29 +49,25 @@ int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char
 }
 
 /**
-   @class MRFParameterizer::NodeGaussRegularization::Option
+   @class MRFParameterizer::NodePSSMRegularization
  */
 
-MRFParameterizer::NodeGaussRegularization::Option::Option(const Float2dArray& mn, const double& lambda) : lambda(lambda) {
-    this->mn.resize(mn.rows(), mn.cols());
-    this->mn = mn;
-}
-
-/**
-   @class MRFParameterizer::NodeGaussRegularization
- */
-
-void MRFParameterizer::NodeGaussRegularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
+void MRFParameterizer::NodePSSMRegularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
     const double& lambda = opt.lambda;
     string letters = param.abc.get_canonical();
     for (int i = 0; i < param.length; ++i) {
         for (int t = 0; t < param.num_var; ++t) {
             int k = param.get_nidx(i, letters[t]);
-            double d = x[k] - opt.mn(i, t);
+            double d = x[k] - mn(i, t);
             fx += lambda * pow2(d);
             g[k] += 2. * lambda * (d);
         }
     }
+}
+
+void MRFParameterizer::NodePSSMRegularization::set_pssm(const Float2dArray& pssm) {
+    mn.resize(pssm.rows(), pssm.cols());
+    mn = pssm;
 }
 
 /**
@@ -122,6 +118,7 @@ MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces
   param(param), 
   opt(opt), 
   node_l2_func(param, opt.node_l2_opt),
+  node_pssm_func(param, opt.node_pssm_opt),
   edge_l2_func(param, opt.edge_l2_opt),
   msa_analyzer(msa_analyzer) {
     vector<string> msa = traces.get_trimmed_aseq_vec();
@@ -142,8 +139,9 @@ lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatva
         update_obj_score(fx, logpot, logz, seq, sw);
         update_gradient(x, g, logpot, logz, seq, sw);
     }
-    if (opt.node_l2_regul) node_l2_func.regularize(x, g, fx);
-    if (opt.edge_l2_regul) edge_l2_func.regularize(x, g, fx);
+    if (opt.node_regul == NodeRegulMethod::L2) node_l2_func.regularize(x, g, fx);
+    else if (opt.node_regul == NodeRegulMethod::PSSM) node_pssm_func.regularize(x, g, fx);
+    if (opt.edge_regul == EdgeRegulMethod::L2) edge_l2_func.regularize(x, g, fx);
     return fx;
 }
 

@@ -10,6 +10,9 @@
 
 using std::string;
 
+enum class NodeRegulMethod { NONE, L2, PSSM };
+enum class EdgeRegulMethod { NONE, L2 };
+
 class MRFParameterizer {
   public:
 
@@ -45,26 +48,28 @@ class MRFParameterizer {
         virtual void regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) = 0;
     };
 
-    // Node regularization using Gaussian prior
+    // Node regularization using PSSM-based Gaussian prior
 
-    class NodeGaussRegularization : public RegularizationFunction {
+    class NodePSSMRegularization : public RegularizationFunction {
       public:
 
         class Option {
           public:
-            Option(const Float2dArray& mn, const double& lambda=0.01);
+            Option(const double& lambda=0.01) : lambda(lambda) {};
 
             double lambda;
-            Float2dArray mn;
         };
 
-        NodeGaussRegularization(Parameter& param, Option& opt) : param(param), opt(opt) {};
+        NodePSSMRegularization(Parameter& param, Option& opt) : param(param), opt(opt) {};
 
         virtual void regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
+
+        void set_pssm(const Float2dArray& pssm);
 
       private:
         const Parameter& param;
         const Option& opt;
+        Float2dArray mn;
     };
 
     // Node L2 regularization (using zero-mean Gaussian prior)
@@ -118,12 +123,14 @@ class MRFParameterizer {
 
         class Option {
           public:
-            Option(const bool& node_l2_regul=true, const bool& edge_l2_regul=true)
-            : node_l2_regul(node_l2_regul), edge_l2_regul(edge_l2_regul) {};
+            Option(const NodeRegulMethod& node_regul=NodeRegulMethod::L2, const EdgeRegulMethod& edge_regul=EdgeRegulMethod::L2)
+            : node_regul(node_regul), edge_regul(edge_regul) {};
 
-            bool node_l2_regul;
+            NodeRegulMethod node_regul;
             NodeL2Regularization::Option node_l2_opt;
-            bool edge_l2_regul;
+            NodePSSMRegularization::Option node_pssm_opt;
+
+            EdgeRegulMethod edge_regul;
             EdgeL2Regularization::Option edge_l2_opt;
         };
 
@@ -141,6 +148,7 @@ class MRFParameterizer {
         const MSAAnalyzer msa_analyzer;
 
         NodeL2Regularization node_l2_func;
+        NodePSSMRegularization node_pssm_func;
         EdgeL2Regularization edge_l2_func;
 
         Float2dArray calc_logpot(const lbfgsfloatval_t *x, const string& seq, const double& sw);
