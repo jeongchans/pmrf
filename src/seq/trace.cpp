@@ -10,8 +10,6 @@
 
 const char Trace::STATE_SYMBOL[5] = {'M', 'I', 'O', 'E', 'U'};
 
-//const char Trace::STATE_SYMBOL[3] = {'M', 'I', 'D'};
-
 inline Trace::StateType Trace::char_to_state(const char& x) {
     for (size_t i = 0; i < NUM_STATE_TYPE; ++i)
         if (x == STATE_SYMBOL[i]) return (StateType)i;
@@ -45,23 +43,6 @@ void Trace::init(const string& ststr, const string& seq, const string& id, const
     }
 }
 
-//void Trace::init(const string& ststr, const string& seq, const string& id, const string& desc) {
-//    this->id = id;
-//    this->desc = desc;
-//    size_t i = 0;
-//    size_t j = 0;
-//    for (string::const_iterator pos = ststr.begin(); pos != ststr.end(); ++pos) {
-//        char aa;
-//        StateType st = char_to_state(*pos);
-//        if (st == MATCH || st == INSERT) aa = seq[i++];
-//        else if (st == DELETE) aa = '-';
-//        else throw std::range_error(ststr);
-//        this->st.push_back(State(st, aa));
-//        if (st != INSERT) this->aidx.push_back(j);
-//        ++j;
-//    }
-//}
-
 string Trace::get_seq() const {
     string seq;
     for (vector<State>::const_iterator pos = st.begin(); pos != st.end(); ++pos)
@@ -69,11 +50,19 @@ string Trace::get_seq() const {
     return seq;
 }
 
-string Trace::get_matched_aseq() const {
+bool Trace::is_matched(const size_t& ref_idx) const {
+    return st[aidx[ref_idx]].st == MATCH;
+}
+
+string Trace::get_trimmed_aseq() const {
     string seq;
     for (vector<size_t>::const_iterator pos = aidx.begin(); pos != aidx.end(); ++pos)
         seq += st[*pos].aa;
     return seq;
+}
+
+char Trace::get_symbol_at(const size_t& ref_idx) const {
+    return st[aidx[ref_idx]].aa;
 }
 
 bool Trace::operator==(const Trace& rhs) const {
@@ -88,10 +77,17 @@ bool Trace::operator==(const Trace& rhs) const {
    @class TraceVector
  */
 
-vector<string> TraceVector::get_matched_aseq_vec() const {
+TraceVector TraceVector::subset_matched(const size_t& ref_idx) const {
+    TraceVector trs;
+    for (const_iterator pos = begin(); pos != end(); ++pos)
+        if (pos->is_matched(ref_idx)) trs.push_back(*pos);
+    return trs;
+}
+
+vector<string> TraceVector::get_trimmed_aseq_vec() const {
     vector<string> r;
     for (const_iterator pos = begin(); pos != end(); ++pos)
-        r.push_back(pos->get_matched_aseq());
+        r.push_back(pos->get_trimmed_aseq());
     return r;
 }
 
@@ -135,10 +131,6 @@ inline string reformat_a3m_seq(string aseq) {
     return aseq;
 }
 
-//inline string reformat_a3m_seq(string aseq) {
-//    return aseq;
-//}
-
 string reformat_afa_seq(string aseq, const string& ref_aseq) {
     string a3m_seq;
     size_t n = ref_aseq.size();
@@ -166,22 +158,6 @@ void TraceImporter::parse_state(const std::string& aseq, std::string& st, std::s
         }
     }
 }
-
-//void TraceImporter::parse_state(const std::string& aseq, std::string& st, std::string& seq) {
-//    st.empty();
-//    seq.empty();
-//    for (string::const_iterator pos = aseq.begin(); pos != aseq.end(); ++pos) {
-//        if (*pos == '-') st += 'D';
-//        else if (abc.is_valid(toupper(*pos))) {
-//            if (islower(*pos)) st += 'I';
-//            else st += 'M';
-//            seq += toupper(*pos);
-//        } else {
-//            std::cerr << "Undefined symbol: " << *pos << std::endl;
-//            throw std::range_error(aseq);
-//        }
-//    }
-//}
 
 bool TraceImporter::is_valid_state(const std::string& st) const {
     return st.find_first_of('M') != string::npos;

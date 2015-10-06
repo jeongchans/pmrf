@@ -18,15 +18,6 @@ class Trace {
     static const size_t NUM_STATE_TYPE = 5;
     static const char STATE_SYMBOL[5];
 
-//    enum StateType {
-//        MATCH = 0,
-//        INSERT = 1,
-//        DELETE = 2,
-//        UNDEFINED = 99
-//    };
-//    static const char STATE_SYMBOL[3];
-//    static const size_t NUM_STATE_TYPE = 3;
-
     class State {
       public:
         State(const StateType& st, const char& aa) : st(st), aa(aa) {};
@@ -46,7 +37,9 @@ class Trace {
     size_t get_length() const { return get_seq().size(); }
 
     bool operator==(const Trace& rhs) const;
-    std::string get_matched_aseq() const;
+    bool is_matched(const size_t& ref_idx) const;
+    std::string get_trimmed_aseq() const;
+    char get_symbol_at(const size_t& ref_idx) const;
 
   private:
     std::string id, desc;
@@ -69,7 +62,8 @@ class TraceVector {
     void push_back(const Trace& x) { data.push_back(x); }
     bool empty() const { return data.empty(); }
 
-    vector<string> get_matched_aseq_vec() const;
+    TraceVector subset_matched(const size_t& ref_idx) const;
+    vector<string> get_trimmed_aseq_vec() const;
 
   private:
     std::vector<Trace> data;

@@ -99,7 +99,7 @@ MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces
   node_l2_func(param, opt.node_l2_opt),
   edge_l2_func(param, opt.edge_l2_opt),
   msa_analyzer(msa_analyzer) {
-    vector<string> msa = traces.get_matched_aseq_vec();
+    vector<string> msa = traces.get_trimmed_aseq_vec();
     seq_weight.resize(traces.size());
     seq_weight = msa_analyzer.seq_weight_estimator->estimate(msa);
     scale(seq_weight);
@@ -110,7 +110,7 @@ lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatva
     lbfgsfloatval_t fx = 0.;
     for (int i = 0; i < param.n; ++i) g[i] = 0.;
     for (int i = 0; i < traces.size(); ++i) {
-        string seq = traces[i].get_matched_aseq();
+        string seq = traces[i].get_trimmed_aseq();
         double sw = seq_weight(i);
         Float2dArray logpot = calc_logpot(x, seq, sw);
         Float1dArray logz = calc_logz(logpot);
