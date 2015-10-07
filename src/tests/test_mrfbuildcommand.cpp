@@ -6,7 +6,7 @@ class MRFBuildCommandLine_Test : public testing::Test {
   protected:
 };
 
-TEST_F(MRFBuildCommandLine_Test, test_parse_param) {
+TEST_F(MRFBuildCommandLine_Test, test_parse_param_default) {
     int argc = 5;
     char* argv[5] = {"pmrf", "build",
                      "aaa.afa", "-o", "aaa.mrf"};
@@ -16,6 +16,13 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_param) {
     EXPECT_EQ("aaa.mrf", cmd_line.opt.out_filename);
 
     EXPECT_EQ(AFASTA, cmd_line.opt.build_opt.msa_fmt);
+
+    EXPECT_EQ(NodeRegulMethod::L2, cmd_line.opt.build_opt.parameterizer_opt.node_regul);
+    EXPECT_EQ(0.01, cmd_line.opt.build_opt.parameterizer_opt.node_l2_opt.lambda);
+
+    EXPECT_EQ(EdgeRegulMethod::L2, cmd_line.opt.build_opt.parameterizer_opt.edge_regul);
+    EXPECT_EQ(0.2, cmd_line.opt.build_opt.parameterizer_opt.edge_l2_opt.lambda);
+    EXPECT_EQ(true, cmd_line.opt.build_opt.parameterizer_opt.edge_l2_opt.sc);
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_node_regul_param) {

@@ -56,6 +56,8 @@ void MRFBuildCommandLine::show_help() {
 }
 
 bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
+    double node_regul_lambda = 0.01;
+    double edge_regul_lambda = 0.2;
     optind = 0;     // initialize getopt_long()
     static struct option opts[] = {
         {"help", 0, 0, 0},
@@ -72,7 +74,6 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
     };
     int opt_idx = 0;
     int c;
-    double node_regul_lambda, edge_regul_lambda;
     while (true) {
         c = getopt_long(argc, argv, "ho:", opts, &opt_idx);
         if (c == -1) break;

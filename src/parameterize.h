@@ -55,16 +55,14 @@ class MRFParameterizer {
 
         class Option {
           public:
-            Option(const double& lambda=0.01) : lambda(lambda) {};
+            Option(const double& lambda=0.) : lambda(lambda) {};
 
             double lambda;
         };
 
-        NodePSSMRegularization(Parameter& param, Option& opt) : param(param), opt(opt) {};
+        NodePSSMRegularization(const TraceVector& traces, Parameter& param, Option& opt);
 
         virtual void regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
-
-        void set_pssm(const Float2dArray& pssm);
 
       private:
         const Parameter& param;

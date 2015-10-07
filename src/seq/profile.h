@@ -14,6 +14,8 @@ class Profile {
     Profile(const size_t& length, const Alphabet& abc);
     Profile(const string& seq, const Alphabet& abc);
 
+    const Float2dArray get_prob() const { return prob; }
+
     const Float1dArray get_prob(const size_t& idx) const { return prob(idx, ALL); }
     void set_prob(const size_t& idx, const Float1dArray& v) { prob(idx, ALL) = v; }
 

@@ -52,6 +52,18 @@ int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char
    @class MRFParameterizer::NodePSSMRegularization
  */
 
+MRFParameterizer::NodePSSMRegularization::NodePSSMRegularization(const TraceVector& traces, Parameter& param, Option& opt) : param(param), opt(opt) {
+    if (opt.lambda != 0.) {
+        //TODO: calculate PSSM and set this->mn
+    //mn.resize(pssm.rows(), pssm.cols());
+    //mn = pssm;
+    //        AminoAcid aa;
+    //        ProfileBuilder profile_builder(aa);
+    //        Profile profile = profile_builder.build(traces);
+    //        node_pssm_func.set_pssm(profile.get_pssm());
+    }
+}
+
 void MRFParameterizer::NodePSSMRegularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
     const double& lambda = opt.lambda;
     string letters = param.abc.get_canonical();
@@ -63,11 +75,6 @@ void MRFParameterizer::NodePSSMRegularization::regularize(const lbfgsfloatval_t 
             g[k] += 2. * lambda * (d);
         }
     }
-}
-
-void MRFParameterizer::NodePSSMRegularization::set_pssm(const Float2dArray& pssm) {
-    mn.resize(pssm.rows(), pssm.cols());
-    mn = pssm;
 }
 
 /**
@@ -118,7 +125,7 @@ MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces
   param(param), 
   opt(opt), 
   node_l2_func(param, opt.node_l2_opt),
-  node_pssm_func(param, opt.node_pssm_opt),
+  node_pssm_func(traces, param, opt.node_pssm_opt),
   edge_l2_func(param, opt.edge_l2_opt),
   msa_analyzer(msa_analyzer) {
     vector<string> msa = traces.get_trimmed_aseq_vec();
