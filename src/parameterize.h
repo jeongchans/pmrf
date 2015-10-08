@@ -68,6 +68,8 @@ class MRFParameterizer {
         const Parameter& param;
         const Option& opt;
         Float2dArray mn;
+
+        Float2dArray calc_pssm(const TraceVector& traces);
     };
 
     // Node L2 regularization (using zero-mean Gaussian prior)

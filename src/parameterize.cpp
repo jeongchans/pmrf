@@ -5,15 +5,15 @@
 #include <cmath>
 
 #include "util/common.h"
-
+#include "seq/profile.h"
 #include "core.h"
+#include "seq/bgfreq.h"
+#include "seq/subsmat.h"
 
 using blitz::pow2;
 using blitz::sum;
 using blitz::mean;
 using blitz::pow;
-
-static const NullSeqWeightEstimator NULL_SEQ_WEIGHT_ESTIMATOR;
 
 /**
    @class MRFParameterizer::Parameter
@@ -54,14 +54,35 @@ int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char
 
 MRFParameterizer::NodePSSMRegularization::NodePSSMRegularization(const TraceVector& traces, Parameter& param, Option& opt) : param(param), opt(opt) {
     if (opt.lambda != 0.) {
-        //TODO: calculate PSSM and set this->mn
-    //mn.resize(pssm.rows(), pssm.cols());
-    //mn = pssm;
-    //        AminoAcid aa;
-    //        ProfileBuilder profile_builder(aa);
-    //        Profile profile = profile_builder.build(traces);
-    //        node_pssm_func.set_pssm(profile.get_pssm());
+        Float2dArray pssm = calc_pssm(traces);
+        string letters = param.abc.get_canonical();
+        mn.resize(param.length, param.num_var);
+        for (int i = 0; i < param.length; ++i) {
+            for (int t = 0; t < param.num_var; ++t) {
+                if (letters[t] == GAP_OPEN_SYMBOL) mn(i, t) = -10.;
+                else if (letters[t] == GAP_EXT_SYMBOL) mn(i, t) = -1.;
+                else if (letters[t] == GAP_UNALI_SYMBOL) mn(i, t) = 0.;
+                else mn(i, t) = pssm(i, t);
+            }
+        }
     }
+}
+
+Float2dArray MRFParameterizer::NodePSSMRegularization::calc_pssm(const TraceVector& traces) {
+    AminoAcid aa;
+    ProfileBuilder profile_builder(aa);
+    SMMEmitProbEstimator emit_prob_estimator(ROBINSON_BGFREQ.get_array(aa), 
+                                             BLOSUM62_MATRIX.get_array(aa), 
+                                             3.2);
+    profile_builder.set_emit_prob_estimator(&emit_prob_estimator);
+    PBSeqWeightEstimator seq_weight_estimator(aa);
+    profile_builder.set_seq_weight_estimator(&seq_weight_estimator);
+    ExpEntropyEffSeqNumEstimator eff_seq_num_estimator(aa, &seq_weight_estimator);
+    profile_builder.set_eff_seq_num_estimator(&eff_seq_num_estimator);
+    TerminalGapRemover termi_gap_remover(aa, 0.1);
+    profile_builder.set_msa_filter(&termi_gap_remover);
+    Profile profile = profile_builder.build(traces);
+    return profile.get_ll();
 }
 
 void MRFParameterizer::NodePSSMRegularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {

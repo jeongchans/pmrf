@@ -14,13 +14,15 @@ class Profile {
     Profile(const size_t& length, const Alphabet& abc);
     Profile(const string& seq, const Alphabet& abc);
 
-    const Float2dArray get_prob() const { return prob; }
-
     const Float1dArray get_prob(const size_t& idx) const { return prob(idx, ALL); }
     void set_prob(const size_t& idx, const Float1dArray& v) { prob(idx, ALL) = v; }
 
+    Float2dArray get_ll() const;
+
     double get_eff_num(const size_t& idx) const { return eff_num(idx); }
     void set_eff_num(const size_t& idx, const double& neff) { eff_num(idx) = neff; }
+
+    void set_bgfreq(const Float1dArray& v) { bgfreq = v; }
 
     size_t get_length() const { return length; }
     string get_seq() const { return seq; }
@@ -31,6 +33,7 @@ class Profile {
     const Alphabet& abc;
     Float2dArray prob;
     Float1dArray eff_num;
+    Float1dArray bgfreq;
 
     void init();
 };

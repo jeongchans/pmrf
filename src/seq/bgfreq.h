@@ -29,4 +29,6 @@ class AltschulBgFreq : public BgFreq {
     AltschulBgFreq();
 };
 
+static const RobinsonBgFreq ROBINSON_BGFREQ;
+
 #endif

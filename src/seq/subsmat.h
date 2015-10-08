@@ -69,4 +69,6 @@ class TargetProbEstimatorGivenBG {
     Float1dArray bgfreq;
 };
 
+static const BLOSUM62Matrix BLOSUM62_MATRIX;
+
 #endif

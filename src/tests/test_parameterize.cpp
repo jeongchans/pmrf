@@ -63,7 +63,7 @@ class MRFParameterizer_RegularizationFunction_Test : public testing::Test {
             g[i] = 0.;
         }
         traces.push_back(Trace("MMMMMMMMMMMMMMMMM", "PPDQEFLRGARVQLGDA"));
-        traces.push_back(Trace("UUMMOEEMIIIIMMMMUUUU", "DQHGNRIVHLQ"));
+        traces.push_back(Trace("UUMMOEEMMIIIMMMMUUUU", "DQHGNRIVHLQ"));
     }
 
     virtual void TearDown() {
@@ -85,14 +85,13 @@ class MRFParameterizer_RegularizationFunction_Test : public testing::Test {
 };
 
 TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_pssm_regularization) {
-    //TODO: LET THIS TEST PASSED
-//    MRFParameterizer::NodePSSMRegularization::Option opt(1.);
-//    MRFParameterizer::NodePSSMRegularization regul_func(traces, param, opt);
-//    lbfgsfloatval_t fx = 0.0;
-//
-//    regul_func.regularize(param.x, g, fx);
-//    EXPECT_TRUE(fx > 0);
-//    EXPECT_NE(0., abs_sum(g));
+    MRFParameterizer::NodePSSMRegularization::Option opt(1.);
+    MRFParameterizer::NodePSSMRegularization regul_func(traces, param, opt);
+    lbfgsfloatval_t fx = 0.0;
+
+    regul_func.regularize(param.x, g, fx);
+    EXPECT_TRUE(fx > 0);
+    EXPECT_NE(0., abs_sum(g));
 }
 
 TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_l2_regularization) {

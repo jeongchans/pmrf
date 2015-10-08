@@ -6,7 +6,6 @@ static const NullSeqWeightEstimator NULL_SEQ_WEIGHT_ESTIMATOR;
 static const NullEffSeqNumEstimator NULL_EFF_SEQ_NUM_ESTIMATOR;
 static const NullMSAFilter NULL_MSA_FILTER;
 static const MLEmitProbEstimator NULL_EMIT_PROB_ESTIMATOR;
-static const RobinsonBgFreq bgfreq;
 
 Profile::Profile(const size_t& length, const Alphabet& abc) : length(length), abc(abc) {
     seq = "";
@@ -23,6 +22,17 @@ Profile::Profile(const string& seq, const Alphabet& abc) : seq(seq), abc(abc) {
 void Profile::init() {
     prob.resize(length, abc.get_canonical_size());
     eff_num.resize(length);
+    bgfreq.resize(abc.get_canonical_size());
+}
+
+Float2dArray Profile::get_ll() const {
+    int n = prob.rows();
+    int m = prob.cols();
+    Float2dArray s(n, m);
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < m; ++j)
+            s(i, j) = log(prob(i, j) / bgfreq(j));
+    return s;
 }
 
 ProfileBuilder::ProfileBuilder(const Alphabet& abc) : abc(abc) {
@@ -44,8 +54,9 @@ Profile ProfileBuilder::build(const TraceVector& traces) const {
         Float1dArray f(abc.get_canonical_size());  // frequency
         f = calc_freq(trs, i, wt, eff_num);
         if (blitz::sum(f) > 0) profile.set_prob(i, emit_prob_estimator->estimate(f));
-        else profile.set_prob(i, bgfreq.get_array(abc));
+        else profile.set_prob(i, ROBINSON_BGFREQ.get_array(abc));
         profile.set_eff_num(i, eff_num);
+        profile.set_bgfreq(ROBINSON_BGFREQ.get_array(abc));
     }
     return profile;
 }
