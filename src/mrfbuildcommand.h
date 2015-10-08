@@ -20,8 +20,8 @@ class MRFBuildCommandLine : public MRFCommandLine {
   protected:
     virtual bool parse_command_line(int argc, char** argv);
     bool parse_msa_fmt(char* optarg, MSAFormat& arg);
-    bool parse_regnode(char* optarg, NodeRegulMethod& arg);
-    bool parse_regedge(char* optarg, EdgeRegulMethod& arg);
+    bool parse_regnode(char* optarg, NodeRegulMethod::NodeRegulMethod& arg);
+    bool parse_regedge(char* optarg, EdgeRegulMethod::EdgeRegulMethod& arg);
     bool parse_double(char* optarg, double& arg);
 };
 

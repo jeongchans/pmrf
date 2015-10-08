@@ -10,8 +10,13 @@
 
 using std::string;
 
-enum class NodeRegulMethod { NONE, L2, PSSM };
-enum class EdgeRegulMethod { NONE, L2 };
+namespace NodeRegulMethod {
+    enum NodeRegulMethod { NONE, L2, PSSM };
+}
+
+namespace EdgeRegulMethod {
+    enum EdgeRegulMethod { NONE, L2 };
+}
 
 class MRFParameterizer {
   public:
@@ -123,14 +128,14 @@ class MRFParameterizer {
 
         class Option {
           public:
-            Option(const NodeRegulMethod& node_regul=NodeRegulMethod::L2, const EdgeRegulMethod& edge_regul=EdgeRegulMethod::L2)
+            Option(const NodeRegulMethod::NodeRegulMethod& node_regul=NodeRegulMethod::L2, const EdgeRegulMethod::EdgeRegulMethod& edge_regul=EdgeRegulMethod::L2)
             : node_regul(node_regul), edge_regul(edge_regul) {};
 
-            NodeRegulMethod node_regul;
+            NodeRegulMethod::NodeRegulMethod node_regul;
             NodeL2Regularization::Option node_l2_opt;
             NodePSSMRegularization::Option node_pssm_opt;
 
-            EdgeRegulMethod edge_regul;
+            EdgeRegulMethod::EdgeRegulMethod edge_regul;
             EdgeL2Regularization::Option edge_l2_opt;
         };
 

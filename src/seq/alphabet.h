@@ -1,7 +1,5 @@
-#ifndef _ALPHABET_H_
-#define _ALPHABET_H_
-
-#include <blitz/array.h>
+#ifndef _SEQ_ALPHABET_H_
+#define _SEQ_ALPHABET_H_
 
 #include <string>
 #include <map>

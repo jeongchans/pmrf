@@ -150,7 +150,7 @@ bool MRFBuildCommandLine::parse_msa_fmt(char* optarg, MSAFormat& arg) {
     return true;
 }
 
-bool MRFBuildCommandLine::parse_regnode(char* optarg, NodeRegulMethod& arg) {
+bool MRFBuildCommandLine::parse_regnode(char* optarg, NodeRegulMethod::NodeRegulMethod& arg) {
     int d = atoi(optarg);
     if (d == 0) arg = NodeRegulMethod::NONE;
     else if (d == 1) arg = NodeRegulMethod::L2;
@@ -167,7 +167,7 @@ bool MRFBuildCommandLine::parse_double(char* optarg, double& arg) {
     return true;
 }
 
-bool MRFBuildCommandLine::parse_regedge(char* optarg, EdgeRegulMethod& arg) {
+bool MRFBuildCommandLine::parse_regedge(char* optarg, EdgeRegulMethod::EdgeRegulMethod& arg) {
     int d = atoi(optarg);
     if (d == 0) arg = EdgeRegulMethod::NONE;
     else if (d == 1) arg = EdgeRegulMethod::L2;
