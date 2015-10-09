@@ -17,6 +17,9 @@ static const string option_message =
     " --seqwt <int>             Sequence weight method\n"
     "                           0: no sequence weight\n"
     "                           1: Henikoff's position-based weights (default)\n"
+    " --effnum <int>            Effective number of sequences\n"
+    "                           0: no effective number (default)\n"
+    "                           1: exponential of average entropy\n"
     "\n"
     "Regularization options:\n"
     " --regnode <int>           Regularization of node weights\n"
@@ -70,6 +73,7 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         {"edge", required_argument, 0, 0},
         {"delta", required_argument, 0, 0},
         {"seqwt", required_argument, 0, 0},
+        {"effnum", required_argument, 0, 0},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -109,6 +113,9 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
                 else return false;
             case 9:
                 if (parse_int(optarg, opt.build_opt.msa_analyzer_opt.seq_wt)) break;
+                else return false;
+            case 10:
+                if (parse_int(optarg, opt.build_opt.msa_analyzer_opt.eff_num)) break;
                 else return false;
             }
             break;

@@ -17,6 +17,9 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_param_default) {
 
     EXPECT_EQ(AFASTA, cmd_line.opt.build_opt.msa_fmt);
 
+    EXPECT_EQ(POSITION_BASED, cmd_line.opt.build_opt.msa_analyzer_opt.seq_wt);
+    EXPECT_EQ(NO_EFFNUM, cmd_line.opt.build_opt.msa_analyzer_opt.eff_num);
+
     EXPECT_EQ(NodeRegulMethod::L2, cmd_line.opt.build_opt.parameterizer_opt.node_regul);
     EXPECT_EQ(0.01, cmd_line.opt.build_opt.parameterizer_opt.node_l2_opt.lambda);
 
@@ -76,4 +79,16 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_input_param) {
     EXPECT_EQ(A3M, cmd_line.opt.build_opt.msa_fmt);
 
     EXPECT_EQ("edges.txt", cmd_line.opt.build_opt.eidx_filename);
+}
+
+TEST_F(MRFBuildCommandLine_Test, test_parse_preproc_param) {
+    int argc = 9;
+    char* argv[9] = {"pmrf", "build",
+                      "aaa.afa", "-o", "aaa.mrf",
+                      "--seqwt", "0",
+                      "--effnum", "1"};
+    MRFBuildCommandLine cmd_line(argc, argv);
+
+    EXPECT_EQ(NO_WEIGHT, cmd_line.opt.build_opt.msa_analyzer_opt.seq_wt);
+    EXPECT_EQ(EXP_ENTROPY, cmd_line.opt.build_opt.msa_analyzer_opt.eff_num);
 }
