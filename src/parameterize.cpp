@@ -150,6 +150,7 @@ MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces
   edge_l2_func(param, opt.edge_l2_opt),
   msa_analyzer(msa_analyzer) {
     vector<string> msa = traces.get_trimmed_aseq_vec();
+    msa = msa_analyzer.termi_gap_remover->filter(msa);
     seq_weight.resize(traces.size());
     seq_weight = msa_analyzer.seq_weight_estimator->estimate(msa);
     scale(seq_weight);
