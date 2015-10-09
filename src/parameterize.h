@@ -60,9 +60,12 @@ class MRFParameterizer {
 
         class Option {
           public:
-            Option(const double& lambda=0.) : lambda(lambda) {};
+            Option(const double& lambda=0., const double& gap_open=-10., const double& gap_ext=-1.) 
+            : lambda(lambda), gap_open(gap_open), gap_ext(gap_ext) {};
 
             double lambda;
+            double gap_open;
+            double gap_ext;
         };
 
         NodePSSMRegularization(const TraceVector& traces, Parameter& param, Option& opt);

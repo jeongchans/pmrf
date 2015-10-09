@@ -29,11 +29,13 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_param_default) {
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_node_regul_param) {
-    int argc = 11;
-    char* argv[11] = {"pmrf", "build",
+    int argc = 15;
+    char* argv[15] = {"pmrf", "build",
                       "aaa.afa", "-o", "aaa.mrf",
                       "--regnode", "2",
                       "--regnode-lambda", "15.0",
+                      "--gap-open", "-5",
+                      "--gap-ext", "-0.5",
                       "--regedge", "0"};
     MRFBuildCommandLine cmd_line(argc, argv);
 
@@ -43,6 +45,8 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_node_regul_param) {
 
     EXPECT_EQ(NodeRegulMethod::PSSM, cmd_line.opt.build_opt.parameterizer_opt.node_regul);
     EXPECT_EQ(15.0, cmd_line.opt.build_opt.parameterizer_opt.node_pssm_opt.lambda);
+    EXPECT_EQ(-5., cmd_line.opt.build_opt.parameterizer_opt.node_pssm_opt.gap_open);
+    EXPECT_EQ(-.5, cmd_line.opt.build_opt.parameterizer_opt.node_pssm_opt.gap_ext);
 
     EXPECT_EQ(EdgeRegulMethod::NONE, cmd_line.opt.build_opt.parameterizer_opt.edge_regul);
 }

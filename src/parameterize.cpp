@@ -59,8 +59,8 @@ MRFParameterizer::NodePSSMRegularization::NodePSSMRegularization(const TraceVect
         mn.resize(param.length, param.num_var);
         for (int i = 0; i < param.length; ++i) {
             for (int t = 0; t < param.num_var; ++t) {
-                if (letters[t] == GAP_OPEN_SYMBOL) mn(i, t) = -10.;
-                else if (letters[t] == GAP_EXT_SYMBOL) mn(i, t) = -1.;
+                if (letters[t] == GAP_OPEN_SYMBOL) mn(i, t) = opt.gap_open;
+                else if (letters[t] == GAP_EXT_SYMBOL) mn(i, t) = opt.gap_ext;
                 else if (letters[t] == GAP_UNALI_SYMBOL) mn(i, t) = 0.;
                 else mn(i, t) = pssm(i, t);
             }

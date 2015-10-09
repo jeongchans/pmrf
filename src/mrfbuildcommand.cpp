@@ -28,6 +28,10 @@ static const string option_message =
     "                           2: profile-based regularization\n"
     " --regnode-lambda <float>  Weighting factor for node regularization (default: 0.01)\n"
     "\n"
+    " Profile-based regularization options\n"
+    " --gap-open <float>        Gap-opening penalty (default: -10)\n"
+    " --gap-ext <float>         Gap-extension penalty (default: -1)\n"
+    "\n"
     " --regedge <int>           Regularization of edge weights\n"
     "                           0: none\n"
     "                           1: L2 regularization (default)\n"
@@ -74,6 +78,8 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         {"delta", required_argument, 0, 0},
         {"seqwt", required_argument, 0, 0},
         {"effnum", required_argument, 0, 0},
+        {"gap-open", required_argument, 0, 0},
+        {"gap-ext", required_argument, 0, 0},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -116,6 +122,12 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
                 else return false;
             case 10:
                 if (parse_int(optarg, opt.build_opt.msa_analyzer_opt.eff_num)) break;
+                else return false;
+            case 11:
+                if (parse_float(optarg, opt.build_opt.parameterizer_opt.node_pssm_opt.gap_open)) break;
+                else return false;
+            case 12:
+                if (parse_float(optarg, opt.build_opt.parameterizer_opt.node_pssm_opt.gap_ext)) break;
                 else return false;
             }
             break;
