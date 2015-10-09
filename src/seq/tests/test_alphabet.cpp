@@ -39,6 +39,8 @@ class AlphabetTest : public testing::Test {
 
 TEST_F(AlphabetTest, test_get_canonical) {
     EXPECT_EQ(canonical_sym, abc.get_canonical());
+    EXPECT_EQ(canonical_sym, abc.get_canonical(false));
+    EXPECT_EQ(canonical_sym + gap_sym, abc.get_canonical(true));
 }
 
 TEST_F(AlphabetTest, test_get_gap) {
@@ -53,10 +55,19 @@ TEST_F(AlphabetTest, test_is_canonical) {
     std::string::iterator pos;
     for (pos = canonical_sym.begin(); pos != canonical_sym.end(); ++pos) {
         EXPECT_TRUE(abc.is_canonical(*pos));
+        EXPECT_TRUE(abc.is_canonical(*pos, false));
+        EXPECT_TRUE(abc.is_canonical(*pos, true));
     }
-    std::string s = gap_sym + degenerate_sym + unknown_sym + none_sym + missing_sym + undefined_sym;
+    for (pos = gap_sym.begin(); pos != gap_sym.end(); ++pos) {
+        EXPECT_FALSE(abc.is_canonical(*pos));
+        EXPECT_FALSE(abc.is_canonical(*pos, false));
+        EXPECT_TRUE(abc.is_canonical(*pos, true));
+    }
+    std::string s = degenerate_sym + unknown_sym + none_sym + missing_sym + undefined_sym;
     for (pos = s.begin(); pos != s.end(); ++pos) {
         EXPECT_FALSE(abc.is_canonical(*pos));
+        EXPECT_FALSE(abc.is_canonical(*pos, false));
+        EXPECT_FALSE(abc.is_canonical(*pos, true));
     }
 }
 
@@ -157,6 +168,8 @@ TEST_F(AlphabetTest, test_is_valid) {
 
 TEST_F(AlphabetTest, test_get_canonical_size) {
     EXPECT_EQ(canonical_sym.size(), abc.get_canonical_size());
+    EXPECT_EQ(canonical_sym.size(), abc.get_canonical_size(false));
+    EXPECT_EQ(canonical_sym.size() + gap_sym.size(), abc.get_canonical_size(true));
 }
 
 TEST_F(AlphabetTest, test_get_degeneracy) {

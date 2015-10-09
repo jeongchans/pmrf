@@ -30,10 +30,12 @@ class Alphabet {
              const char* unknown, const char* none, const char* missing,
              const bool& nocase = false, const bool& gapres = false);
 
-    std::string get_canonical() const;
+    std::string get_canonical() const { return get_canonical(gapres); }
+    std::string get_canonical(const bool& gapres) const;
     std::string get_gap() const { return sym_grp[GAP].get_member(); }
     std::string get_unknown() const { return sym_grp[UNKNOWN].get_member(); }
-    bool is_canonical(const char& x) const;
+    bool is_canonical(const char& x) const { return is_canonical(x, gapres); }
+    bool is_canonical(const char& x, const bool& gapres) const;
     bool is_gap(const char& x) const;
     bool is_degenerate(const char& x) const;
     bool is_unknown(const char& x) const;
@@ -41,7 +43,8 @@ class Alphabet {
     bool is_missing(const char& x) const;
     bool is_valid(const char& x) const;
     int get_idx(const char& x) const;
-    size_t get_canonical_size() const;
+    size_t get_canonical_size() const { return get_canonical_size(gapres); }
+    size_t get_canonical_size(const bool& gapres) const;
     size_t get_gap_size() const { return sym_grp[GAP].get_uniq_size(); }
     size_t get_valid_size() const { return get_valid_symbol().size(); }
     Float1dArray get_count(const char& x) const;

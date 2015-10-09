@@ -8,7 +8,7 @@ double RTEffSeqNumEstimator::estimate(const vector<string>& msa) const {
         string column = "";
         for (vector<string>::const_iterator pos = msa.begin(); pos != msa.end(); ++pos) {
             c = (*pos)[i];
-            if (abc.is_canonical(c)) column += c;
+            if (abc.is_canonical(c, false)) column += c;
         }
         num_res_types(i) = calc_num_res_type(column);
     }
@@ -17,7 +17,7 @@ double RTEffSeqNumEstimator::estimate(const vector<string>& msa) const {
 
 size_t RTEffSeqNumEstimator::calc_num_res_type(const string& column) const {
     using blitz::count;
-    Float1dArray n(abc.get_canonical_size());
+    Float1dArray n(abc.get_canonical_size(false));
     n = 0;
     for (string::const_iterator pos = column.begin(); pos != column.end(); ++pos)
         n(abc.get_idx(*pos)) += 1;
@@ -30,7 +30,7 @@ double ExpEntropyEffSeqNumEstimator::estimate(const vector<string>& msa) const {
     int cols = msa[0].size();
     Float1dArray wt = seq_weight_estimator->estimate(msa);
     double s = 0;
-    int n = abc.get_canonical_size();
+    int n = abc.get_canonical_size(false);
     Float1dArray p(n);
     for (int i = 0; i < cols; ++i) {
         p = 0;
