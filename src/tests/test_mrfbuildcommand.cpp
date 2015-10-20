@@ -28,14 +28,36 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_param_default) {
     EXPECT_EQ(true, cmd_line.opt.build_opt.parameterizer_opt.edge_l2_opt.sc);
 }
 
+//TEST_F(MRFBuildCommandLine_Test, test_parse_node_regul_param) {
+//    int argc = 15;
+//    char* argv[15] = {"pmrf", "build",
+//                      "aaa.afa", "-o", "aaa.mrf",
+//                      "--regnode", "2",
+//                      "--regnode-lambda", "15.0",
+//                      "--gap-open", "-5",
+//                      "--gap-ext", "-0.5",
+//                      "--regedge", "0"};
+//    MRFBuildCommandLine cmd_line(argc, argv);
+//
+//    ASSERT_TRUE(cmd_line.is_valid());
+//    EXPECT_EQ("aaa.afa", cmd_line.opt.msa_filename);
+//    EXPECT_EQ("aaa.mrf", cmd_line.opt.out_filename);
+//
+//    EXPECT_EQ(NodeRegulMethod::PROFILE, cmd_line.opt.build_opt.parameterizer_opt.node_regul);
+//    EXPECT_EQ(15.0, cmd_line.opt.build_opt.parameterizer_opt.node_pssm_opt.lambda);
+//    EXPECT_EQ(-5., cmd_line.opt.build_opt.parameterizer_opt.node_pssm_opt.gap_open);
+//    EXPECT_EQ(-.5, cmd_line.opt.build_opt.parameterizer_opt.node_pssm_opt.gap_ext);
+//
+//    EXPECT_EQ(EdgeRegulMethod::NONE, cmd_line.opt.build_opt.parameterizer_opt.edge_regul);
+//}
+
 TEST_F(MRFBuildCommandLine_Test, test_parse_node_regul_param) {
-    int argc = 15;
-    char* argv[15] = {"pmrf", "build",
+    int argc = 13;
+    char* argv[13] = {"pmrf", "build",
                       "aaa.afa", "-o", "aaa.mrf",
                       "--regnode", "2",
                       "--regnode-lambda", "15.0",
-                      "--gap-open", "-5",
-                      "--gap-ext", "-0.5",
+                      "--gap-prob", "0.05",
                       "--regedge", "0"};
     MRFBuildCommandLine cmd_line(argc, argv);
 
@@ -43,10 +65,9 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_node_regul_param) {
     EXPECT_EQ("aaa.afa", cmd_line.opt.msa_filename);
     EXPECT_EQ("aaa.mrf", cmd_line.opt.out_filename);
 
-    EXPECT_EQ(NodeRegulMethod::PSSM, cmd_line.opt.build_opt.parameterizer_opt.node_regul);
-    EXPECT_EQ(15.0, cmd_line.opt.build_opt.parameterizer_opt.node_pssm_opt.lambda);
-    EXPECT_EQ(-5., cmd_line.opt.build_opt.parameterizer_opt.node_pssm_opt.gap_open);
-    EXPECT_EQ(-.5, cmd_line.opt.build_opt.parameterizer_opt.node_pssm_opt.gap_ext);
+    EXPECT_EQ(NodeRegulMethod::PROFILE, cmd_line.opt.build_opt.parameterizer_opt.node_regul);
+    EXPECT_EQ(15.0, cmd_line.opt.build_opt.parameterizer_opt.node_pb_opt.lambda);
+    EXPECT_EQ(0.05, cmd_line.opt.build_opt.parameterizer_opt.node_pb_opt.gap_prob);
 
     EXPECT_EQ(EdgeRegulMethod::NONE, cmd_line.opt.build_opt.parameterizer_opt.edge_regul);
 }

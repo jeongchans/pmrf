@@ -48,27 +48,75 @@ int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char
     return k;
 }
 
+///**
+//   @class MRFParameterizer::NodePSSMRegularization
+// */
+//
+//MRFParameterizer::NodePSSMRegularization::NodePSSMRegularization(const TraceVector& traces, Parameter& param, Option& opt) : param(param), opt(opt) {
+//    if (opt.lambda != 0.) {
+//        Float2dArray pssm = calc_pssm(traces);
+//        string letters = param.abc.get_canonical();
+//        mn.resize(param.length, param.num_var);
+//        for (int i = 0; i < param.length; ++i) {
+//            for (int t = 0; t < param.num_var; ++t) {
+//                if (letters[t] == GAP_OPEN_SYMBOL) mn(i, t) = opt.gap_open;
+//                else if (letters[t] == GAP_EXT_SYMBOL) mn(i, t) = opt.gap_ext;
+//                else if (letters[t] == GAP_UNALI_SYMBOL) mn(i, t) = 0.;
+//                else mn(i, t) = pssm(i, t);
+//            }
+//        }
+//    }
+//}
+//
+//Float2dArray MRFParameterizer::NodePSSMRegularization::calc_pssm(const TraceVector& traces) {
+//    AminoAcid aa;
+//    ProfileBuilder profile_builder(aa);
+//    SMMEmitProbEstimator emit_prob_estimator(ROBINSON_BGFREQ.get_array(aa), 
+//                                             BLOSUM62_MATRIX.get_array(aa), 
+//                                             3.2);
+//    profile_builder.set_emit_prob_estimator(&emit_prob_estimator);
+//    PBSeqWeightEstimator seq_weight_estimator(aa);
+//    profile_builder.set_seq_weight_estimator(&seq_weight_estimator);
+//    ExpEntropyEffSeqNumEstimator eff_seq_num_estimator(aa, &seq_weight_estimator);
+//    profile_builder.set_eff_seq_num_estimator(&eff_seq_num_estimator);
+//    TerminalGapRemover termi_gap_remover(aa, 0.1);
+//    profile_builder.set_msa_filter(&termi_gap_remover);
+//    Profile profile = profile_builder.build(traces);
+//    return profile.get_ll();
+//}
+//
+//void MRFParameterizer::NodePSSMRegularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
+//    const double& lambda = opt.lambda;
+//    string letters = param.abc.get_canonical();
+//    for (int i = 0; i < param.length; ++i) {
+//        for (int t = 0; t < param.num_var; ++t) {
+//            int k = param.get_nidx(i, letters[t]);
+//            double d = x[k] - mn(i, t);
+//            fx += lambda * pow2(d);
+//            g[k] += 2. * lambda * (d);
+//        }
+//    }
+//}
+
 /**
-   @class MRFParameterizer::NodePSSMRegularization
+   @class MRFParameterizer::NodeProfileRegularization
  */
 
-MRFParameterizer::NodePSSMRegularization::NodePSSMRegularization(const TraceVector& traces, Parameter& param, Option& opt) : param(param), opt(opt) {
+MRFParameterizer::NodeProfileRegularization::NodeProfileRegularization(const TraceVector& traces, Parameter& param, Option& opt) : param(param), opt(opt) {
     if (opt.lambda != 0.) {
-        Float2dArray pssm = calc_pssm(traces);
+        Float2dArray freq = calc_profile(traces);
         string letters = param.abc.get_canonical();
         mn.resize(param.length, param.num_var);
         for (int i = 0; i < param.length; ++i) {
             for (int t = 0; t < param.num_var; ++t) {
-                if (letters[t] == GAP_OPEN_SYMBOL) mn(i, t) = opt.gap_open;
-                else if (letters[t] == GAP_EXT_SYMBOL) mn(i, t) = opt.gap_ext;
-                else if (letters[t] == GAP_UNALI_SYMBOL) mn(i, t) = 0.;
-                else mn(i, t) = pssm(i, t);
+                if (param.abc.is_gap(letters[t])) mn(i, t) = 0.;
+                else mn(i, t) = log(freq(i, t) * (1. - opt.gap_prob) / opt.gap_prob);
             }
         }
     }
 }
 
-Float2dArray MRFParameterizer::NodePSSMRegularization::calc_pssm(const TraceVector& traces) {
+Float2dArray MRFParameterizer::NodeProfileRegularization::calc_profile(const TraceVector& traces) {
     AminoAcid aa;
     ProfileBuilder profile_builder(aa);
     SMMEmitProbEstimator emit_prob_estimator(ROBINSON_BGFREQ.get_array(aa), 
@@ -82,10 +130,10 @@ Float2dArray MRFParameterizer::NodePSSMRegularization::calc_pssm(const TraceVect
     TerminalGapRemover termi_gap_remover(aa, 0.1);
     profile_builder.set_msa_filter(&termi_gap_remover);
     Profile profile = profile_builder.build(traces);
-    return profile.get_ll();
+    return profile.get_prob();
 }
 
-void MRFParameterizer::NodePSSMRegularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
+void MRFParameterizer::NodeProfileRegularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
     const double& lambda = opt.lambda;
     string letters = param.abc.get_canonical();
     for (int i = 0; i < param.length; ++i) {
@@ -146,7 +194,8 @@ MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces
   param(param), 
   opt(opt), 
   node_l2_func(param, opt.node_l2_opt),
-  node_pssm_func(traces, param, opt.node_pssm_opt),
+  //node_pssm_func(traces, param, opt.node_pssm_opt),
+  node_pb_func(traces, param, opt.node_pb_opt),
   edge_l2_func(param, opt.edge_l2_opt),
   msa_analyzer(msa_analyzer) {
     vector<string> msa = traces.get_trimmed_aseq_vec();
@@ -169,7 +218,8 @@ lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatva
         update_gradient(x, g, logpot, logz, seq, sw);
     }
     if (opt.node_regul == NodeRegulMethod::L2) node_l2_func.regularize(x, g, fx);
-    else if (opt.node_regul == NodeRegulMethod::PSSM) node_pssm_func.regularize(x, g, fx);
+    //else if (opt.node_regul == NodeRegulMethod::PSSM) node_pssm_func.regularize(x, g, fx);
+    else if (opt.node_regul == NodeRegulMethod::PROFILE) node_pb_func.regularize(x, g, fx);
     if (opt.edge_regul == EdgeRegulMethod::L2) edge_l2_func.regularize(x, g, fx);
     return fx;
 }

@@ -29,8 +29,9 @@ static const string option_message =
     " --regnode-lambda <float>  Weighting factor for node regularization (default: 0.01)\n"
     "\n"
     " Profile-based regularization options\n"
-    " --gap-open <float>        Gap-opening penalty (default: -10)\n"
-    " --gap-ext <float>         Gap-extension penalty (default: -1)\n"
+    " --gap-prob <float>        Gap probability (default: 0.14)\n"
+//    " --gap-open <float>        Gap-opening penalty (default: -10)\n"
+//    " --gap-ext <float>         Gap-extension penalty (default: -1)\n"
     "\n"
     " --regedge <int>           Regularization of edge weights\n"
     "                           0: none\n"
@@ -78,8 +79,9 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         {"delta", required_argument, 0, 0},
         {"seqwt", required_argument, 0, 0},
         {"effnum", required_argument, 0, 0},
-        {"gap-open", required_argument, 0, 0},
-        {"gap-ext", required_argument, 0, 0},
+//        {"gap-open", required_argument, 0, 0},
+//        {"gap-ext", required_argument, 0, 0},
+        {"gap-prob", required_argument, 0, 0},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -123,11 +125,14 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
             case 10:
                 if (parse_int(optarg, opt.build_opt.msa_analyzer_opt.eff_num)) break;
                 else return false;
+//            case 11:
+//                if (parse_float(optarg, opt.build_opt.parameterizer_opt.node_pssm_opt.gap_open)) break;
+//                else return false;
+//            case 12:
+//                if (parse_float(optarg, opt.build_opt.parameterizer_opt.node_pssm_opt.gap_ext)) break;
+//                else return false;
             case 11:
-                if (parse_float(optarg, opt.build_opt.parameterizer_opt.node_pssm_opt.gap_open)) break;
-                else return false;
-            case 12:
-                if (parse_float(optarg, opt.build_opt.parameterizer_opt.node_pssm_opt.gap_ext)) break;
+                if (parse_float(optarg, opt.build_opt.parameterizer_opt.node_pb_opt.gap_prob)) break;
                 else return false;
             }
             break;
@@ -151,8 +156,10 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
     }
     if (opt.build_opt.parameterizer_opt.node_regul == NodeRegulMethod::L2)
         opt.build_opt.parameterizer_opt.node_l2_opt.lambda = node_regul_lambda;
-    else if (opt.build_opt.parameterizer_opt.node_regul == NodeRegulMethod::PSSM)
-        opt.build_opt.parameterizer_opt.node_pssm_opt.lambda = node_regul_lambda;
+    //else if (opt.build_opt.parameterizer_opt.node_regul == NodeRegulMethod::PSSM)
+    //    opt.build_opt.parameterizer_opt.node_pssm_opt.lambda = node_regul_lambda;
+    else if (opt.build_opt.parameterizer_opt.node_regul == NodeRegulMethod::PROFILE)
+        opt.build_opt.parameterizer_opt.node_pb_opt.lambda = node_regul_lambda;
     if (opt.build_opt.parameterizer_opt.edge_regul == EdgeRegulMethod::L2)
         opt.build_opt.parameterizer_opt.edge_l2_opt.lambda = edge_regul_lambda;
     return true;
@@ -173,7 +180,8 @@ bool MRFBuildCommandLine::parse_regnode(char* optarg, NodeRegulMethod::NodeRegul
     int d = atoi(optarg);
     if (d == 0) arg = NodeRegulMethod::NONE;
     else if (d == 1) arg = NodeRegulMethod::L2;
-    else if (d == 2) arg = NodeRegulMethod::PSSM;
+    //else if (d == 2) arg = NodeRegulMethod::PSSM;
+    else if (d == 2) arg = NodeRegulMethod::PROFILE;
     else {
         error_message = "Unknown node regularization option: " + d;
         return false;

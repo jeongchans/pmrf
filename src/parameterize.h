@@ -11,7 +11,8 @@
 using std::string;
 
 namespace NodeRegulMethod {
-    enum NodeRegulMethod { NONE, L2, PSSM };
+//    enum NodeRegulMethod { NONE, L2, PSSM };
+    enum NodeRegulMethod { NONE, L2, PROFILE };
 }
 
 namespace EdgeRegulMethod {
@@ -53,22 +54,48 @@ class MRFParameterizer {
         virtual void regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) = 0;
     };
 
-    // Node regularization using PSSM-based Gaussian prior
+//    // Node regularization using PSSM-based Gaussian prior
+//
+//    class NodePSSMRegularization : public RegularizationFunction {
+//      public:
+//
+//        class Option {
+//          public:
+//            Option(const double& lambda=0., const double& gap_open=-10., const double& gap_ext=-1.) 
+//            : lambda(lambda), gap_open(gap_open), gap_ext(gap_ext) {};
+//
+//            double lambda;
+//            double gap_open;
+//            double gap_ext;
+//        };
+//
+//        NodePSSMRegularization(const TraceVector& traces, Parameter& param, Option& opt);
+//
+//        virtual void regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
+//
+//      private:
+//        const Parameter& param;
+//        const Option& opt;
+//        Float2dArray mn;
+//
+//        Float2dArray calc_pssm(const TraceVector& traces);
+//    };
 
-    class NodePSSMRegularization : public RegularizationFunction {
+    // Node regularization using profile-based Gaussian prior
+
+    class NodeProfileRegularization : public RegularizationFunction {
       public:
 
         class Option {
           public:
-            Option(const double& lambda=0., const double& gap_open=-10., const double& gap_ext=-1.) 
-            : lambda(lambda), gap_open(gap_open), gap_ext(gap_ext) {};
+            Option(const double& lambda=0., const double& gap_prob=0.14) 
+            : lambda(lambda), gap_prob(gap_prob) {};
 
             double lambda;
-            double gap_open;
-            double gap_ext;
+            double gap_prob;
         };
 
-        NodePSSMRegularization(const TraceVector& traces, Parameter& param, Option& opt);
+        NodeProfileRegularization(const TraceVector& traces, Parameter& param, Option& opt);
 
         virtual void regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
 
@@ -77,7 +104,7 @@ class MRFParameterizer {
         const Option& opt;
         Float2dArray mn;
 
-        Float2dArray calc_pssm(const TraceVector& traces);
+        Float2dArray calc_profile(const TraceVector& traces);
     };
 
     // Node L2 regularization (using zero-mean Gaussian prior)
@@ -136,7 +163,8 @@ class MRFParameterizer {
 
             NodeRegulMethod::NodeRegulMethod node_regul;
             NodeL2Regularization::Option node_l2_opt;
-            NodePSSMRegularization::Option node_pssm_opt;
+            //NodePSSMRegularization::Option node_pssm_opt;
+            NodeProfileRegularization::Option node_pb_opt;
 
             EdgeRegulMethod::EdgeRegulMethod edge_regul;
             EdgeL2Regularization::Option edge_l2_opt;
@@ -156,7 +184,8 @@ class MRFParameterizer {
         const MSAAnalyzer msa_analyzer;
 
         NodeL2Regularization node_l2_func;
-        NodePSSMRegularization node_pssm_func;
+        //NodePSSMRegularization node_pssm_func;
+        NodeProfileRegularization node_pb_func;
         EdgeL2Regularization edge_l2_func;
 
         Float2dArray calc_logpot(const lbfgsfloatval_t *x, const string& seq, const double& sw);

@@ -9,7 +9,8 @@ string seq2  = "DQHGNRIVHLQ";
 string aseq1 = "PPDQEFLRGARVQLGDA";
 string aseq2 = "--DQ---HGNRIVHLQ----";
 string st1   = "MMMMMMMMMMMMMMMMM";
-string st2   = "UUMMOEEMMIIIMMMMUUUU";
+//string st2   = "UUMMOEEMMIIIMMMMUUUU";
+string st2   = "DDMMDDDMMIIIMMMMDDDD";
 
 class TraceTest : public testing::Test {
   protected:
@@ -36,7 +37,8 @@ TEST_F(TraceTest, test_is_matched) {
 
 TEST_F(TraceTest, test_get_trimmed_seq) {
     EXPECT_EQ(string("PPDQEFLRGARVQLGDA"), trace1.get_trimmed_aseq());
-    EXPECT_EQ(string("^^DQ=--HGVHLQ^^^^"), trace2.get_trimmed_aseq());
+    //EXPECT_EQ(string("^^DQ=--HGVHLQ^^^^"), trace2.get_trimmed_aseq());
+    EXPECT_EQ(string("--DQ---HGVHLQ----"), trace2.get_trimmed_aseq());
 }
 
 TEST_F(TraceTest, test_operator_eq) {
@@ -47,7 +49,8 @@ TEST_F(TraceTest, test_operator_eq) {
 
 TEST_F(TraceTest, test_get_symbol_at) {
     EXPECT_EQ('P', trace1.get_symbol_at(0));
-    EXPECT_EQ('^', trace2.get_symbol_at(0));
+    //EXPECT_EQ('^', trace2.get_symbol_at(0));
+    EXPECT_EQ('-', trace2.get_symbol_at(0));
     EXPECT_EQ('H', trace2.get_symbol_at(7));
 }
 

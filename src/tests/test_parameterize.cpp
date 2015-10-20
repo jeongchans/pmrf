@@ -63,7 +63,8 @@ class MRFParameterizer_RegularizationFunction_Test : public testing::Test {
             g[i] = 0.;
         }
         traces.push_back(Trace("MMMMMMMMMMMMMMMMM", "PPDQEFLRGARVQLGDA"));
-        traces.push_back(Trace("UUMMOEEMMIIIMMMMUUUU", "DQHGNRIVHLQ"));
+//        traces.push_back(Trace("UUMMOEEMMIIIMMMMUUUU", "DQHGNRIVHLQ"));
+        traces.push_back(Trace("DDMMDDDMMIIIMMMMDDDD", "DQHGNRIVHLQ"));
     }
 
     virtual void TearDown() {
@@ -84,9 +85,19 @@ class MRFParameterizer_RegularizationFunction_Test : public testing::Test {
     TraceVector traces;
 };
 
-TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_pssm_regularization) {
-    MRFParameterizer::NodePSSMRegularization::Option opt(1.);
-    MRFParameterizer::NodePSSMRegularization regul_func(traces, param, opt);
+//TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_pssm_regularization) {
+//    MRFParameterizer::NodePSSMRegularization::Option opt(1.);
+//    MRFParameterizer::NodePSSMRegularization regul_func(traces, param, opt);
+//    lbfgsfloatval_t fx = 0.0;
+//
+//    regul_func.regularize(param.x, g, fx);
+//    EXPECT_TRUE(fx > 0);
+//    EXPECT_NE(0., abs_sum(g));
+//}
+
+TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_pb_regularization) {
+    MRFParameterizer::NodeProfileRegularization::Option opt(1.);
+    MRFParameterizer::NodeProfileRegularization regul_func(traces, param, opt);
     lbfgsfloatval_t fx = 0.0;
 
     regul_func.regularize(param.x, g, fx);
@@ -121,7 +132,8 @@ class MRFParameterizer_ObjectiveFunction_Test : public testing::Test {
     virtual void SetUp() {
         size_t n = abc.get_canonical_size();
         traces.push_back(Trace("MMMMMMMMMMMMMMMMM", "PPDQEFLRGARVQLGDA"));
-        traces.push_back(Trace("UUMMOEEMIIIIMMMMUUUU", "DQHGNRIVHLQ"));
+//        traces.push_back(Trace("UUMMOEEMIIIIMMMMUUUU", "DQHGNRIVHLQ"));
+        traces.push_back(Trace("DDMMDDDMIIIIMMMMDDDD", "DQHGNRIVHLQ"));
         seq_weight.resize(2);
         seq_weight = 0.5, 0.5;
 
