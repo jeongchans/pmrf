@@ -95,55 +95,15 @@ TEST_F(MRFParameterizer_RegularizationFunction_Test, test_l2_regularization) {
     EXPECT_NE(0., abs_sum(g));
 }
 
-//TEST_F(MRFParameterizer_RegularizationFunction_Test, test_pb_regularization) {
-//    MRFParameterizer::ProfileRegularization::Option opt(1.);
-//    MRFParameterizer::ProfileRegularization regul_func(traces, param, opt);
-//    lbfgsfloatval_t fx = 0.0;
-//
-//    regul_func.regularize(param.x, g, fx);
-//    EXPECT_TRUE(fx > 0);
-//    EXPECT_NE(0., abs_sum(g));
-//}
+TEST_F(MRFParameterizer_RegularizationFunction_Test, test_pb_regularization) {
+    MRFParameterizer::ProfileRegularization::Option opt;
+    MRFParameterizer::ProfileRegularization regul_func(traces, param, opt);
+    lbfgsfloatval_t fx = 0.0;
 
-//TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_pb_regularization) {
-//    MRFParameterizer::NodeProfileRegularization::Option opt(1.);
-//    MRFParameterizer::NodeProfileRegularization regul_func(traces, param, opt);
-//    lbfgsfloatval_t fx = 0.0;
-//
-//    regul_func.regularize(param.x, g, fx);
-//    EXPECT_TRUE(fx > 0);
-//    EXPECT_NE(0., abs_sum(g));
-//}
-//
-//TEST_F(MRFParameterizer_RegularizationFunction_Test, test_edge_pb_regularization) {
-//    MRFParameterizer::EdgeProfileRegularization::Option opt(1.);
-//    MRFParameterizer::EdgeProfileRegularization regul_func(traces, param, opt);
-//    lbfgsfloatval_t fx = 0.0;
-//
-//    regul_func.regularize(param.x, g, fx);
-//    EXPECT_TRUE(fx > 0);
-//    EXPECT_NE(0., abs_sum(g));
-//}
-
-//TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_l2_regularization) {
-//    MRFParameterizer::NodeL2Regularization::Option opt;
-//    MRFParameterizer::NodeL2Regularization regul_func(param, opt);
-//    lbfgsfloatval_t fx = 0.0;
-//
-//    regul_func.regularize(param.x, g, fx);
-//    EXPECT_TRUE(fx > 0);
-//    EXPECT_NE(0., abs_sum(g));
-//}
-//
-//TEST_F(MRFParameterizer_RegularizationFunction_Test, test_edge_l2_regularization) {
-//    MRFParameterizer::EdgeL2Regularization::Option opt;
-//    MRFParameterizer::EdgeL2Regularization regul_func(param, opt);
-//    lbfgsfloatval_t fx = 0.0;
-//
-//    regul_func.regularize(param.x, g, fx);
-//    EXPECT_TRUE(fx > 0);
-//    EXPECT_NE(0., abs_sum(g));
-//}
+    regul_func.regularize(param.x, g, fx);
+    EXPECT_TRUE(fx > 0);
+    EXPECT_NE(0., abs_sum(g));
+}
 
 class MRFParameterizer_ObjectiveFunction_Test : public testing::Test {
   protected:
@@ -152,8 +112,8 @@ class MRFParameterizer_ObjectiveFunction_Test : public testing::Test {
     virtual void SetUp() {
         size_t n = abc.get_canonical_size();
         traces.push_back(Trace("MMMMMMMMMMMMMMMMM", "PPDQEFLRGARVQLGDA"));
-//        traces.push_back(Trace("UUMMOEEMIIIIMMMMUUUU", "DQHGNRIVHLQ"));
-        traces.push_back(Trace("DDMMDDDMIIIIMMMMDDDD", "DQHGNRIVHLQ"));
+//        traces.push_back(Trace("UUMMOEEMMIIIMMMMUUUU", "DQHGNRIVHLQ"));
+        traces.push_back(Trace("DDMMDDDMMIIIMMMMDDDD", "DQHGNRIVHLQ"));
         seq_weight.resize(2);
         seq_weight = 0.5, 0.5;
 
