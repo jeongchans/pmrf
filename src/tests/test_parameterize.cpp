@@ -85,9 +85,19 @@ class MRFParameterizer_RegularizationFunction_Test : public testing::Test {
     TraceVector traces;
 };
 
-//TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_pssm_regularization) {
-//    MRFParameterizer::NodePSSMRegularization::Option opt(1.);
-//    MRFParameterizer::NodePSSMRegularization regul_func(traces, param, opt);
+TEST_F(MRFParameterizer_RegularizationFunction_Test, test_l2_regularization) {
+    MRFParameterizer::L2Regularization::Option opt;
+    MRFParameterizer::L2Regularization regul_func(param, opt);
+    lbfgsfloatval_t fx = 0.0;
+
+    regul_func.regularize(param.x, g, fx);
+    EXPECT_TRUE(fx > 0);
+    EXPECT_NE(0., abs_sum(g));
+}
+
+//TEST_F(MRFParameterizer_RegularizationFunction_Test, test_pb_regularization) {
+//    MRFParameterizer::ProfileRegularization::Option opt(1.);
+//    MRFParameterizer::ProfileRegularization regul_func(traces, param, opt);
 //    lbfgsfloatval_t fx = 0.0;
 //
 //    regul_func.regularize(param.x, g, fx);
@@ -95,45 +105,45 @@ class MRFParameterizer_RegularizationFunction_Test : public testing::Test {
 //    EXPECT_NE(0., abs_sum(g));
 //}
 
-TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_pb_regularization) {
-    MRFParameterizer::NodeProfileRegularization::Option opt(1.);
-    MRFParameterizer::NodeProfileRegularization regul_func(traces, param, opt);
-    lbfgsfloatval_t fx = 0.0;
+//TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_pb_regularization) {
+//    MRFParameterizer::NodeProfileRegularization::Option opt(1.);
+//    MRFParameterizer::NodeProfileRegularization regul_func(traces, param, opt);
+//    lbfgsfloatval_t fx = 0.0;
+//
+//    regul_func.regularize(param.x, g, fx);
+//    EXPECT_TRUE(fx > 0);
+//    EXPECT_NE(0., abs_sum(g));
+//}
+//
+//TEST_F(MRFParameterizer_RegularizationFunction_Test, test_edge_pb_regularization) {
+//    MRFParameterizer::EdgeProfileRegularization::Option opt(1.);
+//    MRFParameterizer::EdgeProfileRegularization regul_func(traces, param, opt);
+//    lbfgsfloatval_t fx = 0.0;
+//
+//    regul_func.regularize(param.x, g, fx);
+//    EXPECT_TRUE(fx > 0);
+//    EXPECT_NE(0., abs_sum(g));
+//}
 
-    regul_func.regularize(param.x, g, fx);
-    EXPECT_TRUE(fx > 0);
-    EXPECT_NE(0., abs_sum(g));
-}
-
-TEST_F(MRFParameterizer_RegularizationFunction_Test, test_edge_pb_regularization) {
-    MRFParameterizer::EdgeProfileRegularization::Option opt(1.);
-    MRFParameterizer::EdgeProfileRegularization regul_func(traces, param, opt);
-    lbfgsfloatval_t fx = 0.0;
-
-    regul_func.regularize(param.x, g, fx);
-    EXPECT_TRUE(fx > 0);
-    EXPECT_NE(0., abs_sum(g));
-}
-
-TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_l2_regularization) {
-    MRFParameterizer::NodeL2Regularization::Option opt;
-    MRFParameterizer::NodeL2Regularization regul_func(param, opt);
-    lbfgsfloatval_t fx = 0.0;
-
-    regul_func.regularize(param.x, g, fx);
-    EXPECT_TRUE(fx > 0);
-    EXPECT_NE(0., abs_sum(g));
-}
-
-TEST_F(MRFParameterizer_RegularizationFunction_Test, test_edge_l2_regularization) {
-    MRFParameterizer::EdgeL2Regularization::Option opt;
-    MRFParameterizer::EdgeL2Regularization regul_func(param, opt);
-    lbfgsfloatval_t fx = 0.0;
-
-    regul_func.regularize(param.x, g, fx);
-    EXPECT_TRUE(fx > 0);
-    EXPECT_NE(0., abs_sum(g));
-}
+//TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_l2_regularization) {
+//    MRFParameterizer::NodeL2Regularization::Option opt;
+//    MRFParameterizer::NodeL2Regularization regul_func(param, opt);
+//    lbfgsfloatval_t fx = 0.0;
+//
+//    regul_func.regularize(param.x, g, fx);
+//    EXPECT_TRUE(fx > 0);
+//    EXPECT_NE(0., abs_sum(g));
+//}
+//
+//TEST_F(MRFParameterizer_RegularizationFunction_Test, test_edge_l2_regularization) {
+//    MRFParameterizer::EdgeL2Regularization::Option opt;
+//    MRFParameterizer::EdgeL2Regularization regul_func(param, opt);
+//    lbfgsfloatval_t fx = 0.0;
+//
+//    regul_func.regularize(param.x, g, fx);
+//    EXPECT_TRUE(fx > 0);
+//    EXPECT_NE(0., abs_sum(g));
+//}
 
 class MRFParameterizer_ObjectiveFunction_Test : public testing::Test {
   protected:
