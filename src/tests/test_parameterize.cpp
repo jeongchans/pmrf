@@ -105,6 +105,16 @@ TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_pb_regularization
     EXPECT_NE(0., abs_sum(g));
 }
 
+TEST_F(MRFParameterizer_RegularizationFunction_Test, test_edge_pb_regularization) {
+    MRFParameterizer::EdgeProfileRegularization::Option opt(1.);
+    MRFParameterizer::EdgeProfileRegularization regul_func(traces, param, opt);
+    lbfgsfloatval_t fx = 0.0;
+
+    regul_func.regularize(param.x, g, fx);
+    EXPECT_TRUE(fx > 0);
+    EXPECT_NE(0., abs_sum(g));
+}
+
 TEST_F(MRFParameterizer_RegularizationFunction_Test, test_node_l2_regularization) {
     MRFParameterizer::NodeL2Regularization::Option opt;
     MRFParameterizer::NodeL2Regularization regul_func(param, opt);

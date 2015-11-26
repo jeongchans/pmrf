@@ -147,6 +147,58 @@ void MRFParameterizer::NodeProfileRegularization::regularize(const lbfgsfloatval
 }
 
 /**
+   @class MRFParameterizer::EdgeProfileRegularization
+ */
+
+MRFParameterizer::EdgeProfileRegularization::EdgeProfileRegularization(const TraceVector& traces, Parameter& param, Option& opt) : param(param), opt(opt) {
+    if (opt.lambda != 0.) {
+        if (opt.sc) lambda = 2. * ((double)(param.eidx.size())) / ((double)(param.length)) * opt.lambda;
+        Float2dArray freq = calc_profile(traces);
+        string letters = param.abc.get_canonical();
+        mn.resize(param.length, param.num_var);
+        for (int i = 0; i < param.length; ++i) {
+            for (int t = 0; t < param.num_var; ++t) {
+                if (param.abc.is_gap(letters[t])) mn(i, t) = 0.;
+                else mn(i, t) = log(freq(i, t) * (1. - opt.gap_prob) / opt.gap_prob);
+            }
+        }
+    }
+}
+
+Float2dArray MRFParameterizer::EdgeProfileRegularization::calc_profile(const TraceVector& traces) {
+    AminoAcid aa;
+    ProfileBuilder profile_builder(aa);
+    SMMEmitProbEstimator emit_prob_estimator(ROBINSON_BGFREQ.get_array(aa), 
+                                             BLOSUM62_MATRIX.get_array(aa), 
+                                             3.2);
+    profile_builder.set_emit_prob_estimator(&emit_prob_estimator);
+    PBSeqWeightEstimator seq_weight_estimator(aa);
+    profile_builder.set_seq_weight_estimator(&seq_weight_estimator);
+    ExpEntropyEffSeqNumEstimator eff_seq_num_estimator(aa, &seq_weight_estimator);
+    profile_builder.set_eff_seq_num_estimator(&eff_seq_num_estimator);
+    TerminalGapRemover termi_gap_remover(aa, 0.1);
+    profile_builder.set_msa_filter(&termi_gap_remover);
+    Profile profile = profile_builder.build(traces);
+    return profile.get_prob();
+}
+
+void MRFParameterizer::EdgeProfileRegularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
+    string letters = param.abc.get_canonical();
+    for (map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
+        int i = pos->first.idx1;
+        int j = pos->first.idx2;
+        for (int p = 0; p < param.num_var; ++p) {
+            for (int q = 0; q < param.num_var; ++q) {
+                int k = param.get_eidx(i, j, letters[p], letters[q]);
+                double d = x[k] - (mn(i, p) + mn(j, q));
+                fx += lambda * pow2(d);
+                g[k] += 2. * lambda * d;
+            }
+        }
+    }
+}
+
+/**
    @class MRFParameterizer::NodeL2Regularization
  */
 
@@ -197,6 +249,7 @@ MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces
   //node_pssm_func(traces, param, opt.node_pssm_opt),
   node_pb_func(traces, param, opt.node_pb_opt),
   edge_l2_func(param, opt.edge_l2_opt),
+  edge_pb_func(traces, param, opt.edge_pb_opt),
   msa_analyzer(msa_analyzer) {
     vector<string> msa = traces.get_trimmed_aseq_vec();
     msa = msa_analyzer.termi_gap_remover->filter(msa);
@@ -221,6 +274,7 @@ lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatva
     //else if (opt.node_regul == NodeRegulMethod::PSSM) node_pssm_func.regularize(x, g, fx);
     else if (opt.node_regul == NodeRegulMethod::PROFILE) node_pb_func.regularize(x, g, fx);
     if (opt.edge_regul == EdgeRegulMethod::L2) edge_l2_func.regularize(x, g, fx);
+    if (opt.edge_regul == EdgeRegulMethod::PROFILE) edge_pb_func.regularize(x, g, fx);
     return fx;
 }
 

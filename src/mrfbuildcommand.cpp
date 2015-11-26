@@ -36,6 +36,7 @@ static const string option_message =
     " --regedge <int>           Regularization of edge weights\n"
     "                           0: none\n"
     "                           1: L2 regularization (default)\n"
+    "                           2: profile-based regularization\n"
     " --regedge-lambda <float>  Weighting factor for edge regularization (default: 0.2)\n"
     " --regedge-scale <int>     Scaling edge regularization\n"
     "                           0: no\n"
@@ -66,6 +67,7 @@ void MRFBuildCommandLine::show_help() {
 bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
     double node_regul_lambda = 0.01;
     double edge_regul_lambda = 0.2;
+    bool edge_regul_sc = true;
     optind = 0;     // initialize getopt_long()
     static struct option opts[] = {
         {"help", 0, 0, 0},
@@ -108,7 +110,7 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
                 if (parse_double(optarg, edge_regul_lambda)) break;
                 else return false;
             case 5:
-                if (parse_bool(optarg, opt.build_opt.parameterizer_opt.edge_l2_opt.sc)) break;
+                if (parse_bool(optarg, edge_regul_sc)) break;
                 else return false;
             case 6:
                 if (parse_msa_fmt(optarg, opt.build_opt.msa_fmt)) break;
@@ -132,8 +134,10 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
 //                if (parse_float(optarg, opt.build_opt.parameterizer_opt.node_pssm_opt.gap_ext)) break;
 //                else return false;
             case 11:
-                if (parse_float(optarg, opt.build_opt.parameterizer_opt.node_pb_opt.gap_prob)) break;
-                else return false;
+                if (parse_float(optarg, opt.build_opt.parameterizer_opt.node_pb_opt.gap_prob)) {
+                    opt.build_opt.parameterizer_opt.edge_pb_opt.gap_prob = opt.build_opt.parameterizer_opt.node_pb_opt.gap_prob;
+                    break;
+                } else return false;
             }
             break;
         case 'h':
@@ -160,8 +164,13 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
     //    opt.build_opt.parameterizer_opt.node_pssm_opt.lambda = node_regul_lambda;
     else if (opt.build_opt.parameterizer_opt.node_regul == NodeRegulMethod::PROFILE)
         opt.build_opt.parameterizer_opt.node_pb_opt.lambda = node_regul_lambda;
-    if (opt.build_opt.parameterizer_opt.edge_regul == EdgeRegulMethod::L2)
+    if (opt.build_opt.parameterizer_opt.edge_regul == EdgeRegulMethod::L2) {
         opt.build_opt.parameterizer_opt.edge_l2_opt.lambda = edge_regul_lambda;
+        opt.build_opt.parameterizer_opt.edge_l2_opt.sc = edge_regul_sc;
+    } else if (opt.build_opt.parameterizer_opt.edge_regul == EdgeRegulMethod::PROFILE) {
+        opt.build_opt.parameterizer_opt.edge_pb_opt.lambda = edge_regul_lambda;
+        opt.build_opt.parameterizer_opt.edge_pb_opt.sc = edge_regul_sc;
+    }
     return true;
 }
 
@@ -198,6 +207,7 @@ bool MRFBuildCommandLine::parse_regedge(char* optarg, EdgeRegulMethod::EdgeRegul
     int d = atoi(optarg);
     if (d == 0) arg = EdgeRegulMethod::NONE;
     else if (d == 1) arg = EdgeRegulMethod::L2;
+    else if (d == 2) arg = EdgeRegulMethod::PROFILE;
     else {
         error_message = "Unknown edge regularization option: " + d;
         return false;

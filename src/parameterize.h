@@ -16,7 +16,7 @@ namespace NodeRegulMethod {
 }
 
 namespace EdgeRegulMethod {
-    enum EdgeRegulMethod { NONE, L2 };
+    enum EdgeRegulMethod { NONE, L2, PROFILE };
 }
 
 class MRFParameterizer {
@@ -107,6 +107,34 @@ class MRFParameterizer {
         Float2dArray calc_profile(const TraceVector& traces);
     };
 
+    // Edge regularization using profile-based Gaussian prior
+
+    class EdgeProfileRegularization : public RegularizationFunction {
+      public:
+
+        class Option {
+          public:
+            Option(const double& lambda=0., const bool& sc=true, const double& gap_prob=0.14) 
+            : lambda(lambda), sc(sc), gap_prob(gap_prob) {};
+
+            double lambda;
+            bool sc;
+            double gap_prob;
+        };
+
+        EdgeProfileRegularization(const TraceVector& traces, Parameter& param, Option& opt);
+
+        virtual void regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
+
+      private:
+        const Parameter& param;
+        const Option& opt;
+        Float2dArray mn;
+        double lambda;
+
+        Float2dArray calc_profile(const TraceVector& traces);
+    };
+
     // Node L2 regularization (using zero-mean Gaussian prior)
 
     class NodeL2Regularization : public RegularizationFunction {
@@ -168,6 +196,7 @@ class MRFParameterizer {
 
             EdgeRegulMethod::EdgeRegulMethod edge_regul;
             EdgeL2Regularization::Option edge_l2_opt;
+            EdgeProfileRegularization::Option edge_pb_opt;
         };
 
         ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const MSAAnalyzer& msa_analyzer);
@@ -187,6 +216,7 @@ class MRFParameterizer {
         //NodePSSMRegularization node_pssm_func;
         NodeProfileRegularization node_pb_func;
         EdgeL2Regularization edge_l2_func;
+        EdgeProfileRegularization edge_pb_func;
 
         Float2dArray calc_logpot(const lbfgsfloatval_t *x, const string& seq, const double& sw);
         Float1dArray logsumexp(const Float2dArray& b);
