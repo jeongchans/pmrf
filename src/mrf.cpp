@@ -99,4 +99,5 @@ void MRF::init(const EdgeIndexVector* eidxs) {
             for (size_t j = i + 1; j < length; ++j)
                 edges[EdgeIndex(i, j)] = EdgeElement(n, n);
     }
+    resize_and_fill(psfm, length, n, 0);
 }

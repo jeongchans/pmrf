@@ -65,7 +65,7 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_pb_regul_param) {
     EXPECT_EQ(15.0, cmd_line.opt.build_opt.parameterizer_opt.pb_opt.lambda1);
     EXPECT_EQ(3.0, cmd_line.opt.build_opt.parameterizer_opt.pb_opt.lambda2);
     EXPECT_EQ(false, cmd_line.opt.build_opt.parameterizer_opt.pb_opt.sc);
-    EXPECT_EQ(0.25, cmd_line.opt.build_opt.parameterizer_opt.pb_opt.gap_prob);
+    EXPECT_EQ(0.25, cmd_line.opt.build_opt.parameterizer_opt.gap_prob);
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_input_param) {

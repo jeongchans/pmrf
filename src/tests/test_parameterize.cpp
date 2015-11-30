@@ -96,8 +96,14 @@ TEST_F(MRFParameterizer_RegularizationFunction_Test, test_l2_regularization) {
 }
 
 TEST_F(MRFParameterizer_RegularizationFunction_Test, test_pb_regularization) {
+    Float2dArray psfm = zeros(length, param.n); 
+    for (int i = 0; i < length; ++i) {
+        for (int j = 0; j < param.n; ++j) psfm(i, j) = exp(randn());
+        psfm(i, ALL) = psfm(i, ALL) / sum(psfm(i, ALL));
+    }
+
     MRFParameterizer::ProfileRegularization::Option opt;
-    MRFParameterizer::ProfileRegularization regul_func(traces, param, opt);
+    MRFParameterizer::ProfileRegularization regul_func(&psfm, param, opt);
     lbfgsfloatval_t fx = 0.0;
 
     regul_func.regularize(param.x, g, fx);

@@ -83,16 +83,15 @@ class MRFParameterizer {
 
         class Option {
           public:
-            Option(const double& lambda1=0.01, const double& lambda2=0.2, const bool& sc=true, const double& gap_prob=0.14) 
-            : lambda1(lambda1), lambda2(lambda2), sc(sc), gap_prob(gap_prob) {};
+            Option(const double& lambda1=0.01, const double& lambda2=0.2, const bool& sc=true)
+            : lambda1(lambda1), lambda2(lambda2), sc(sc) {};
 
             double lambda1;
             double lambda2;
             bool sc;
-            double gap_prob;
         };
 
-        ProfileRegularization(const TraceVector& traces, Parameter& param, Option& opt);
+        ProfileRegularization(const Float2dArray* psfm, Parameter& param, Option& opt);
 
         virtual void regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
 
@@ -101,7 +100,6 @@ class MRFParameterizer {
         const Option& opt;
         Float2dArray mn;
 
-        Float2dArray calc_profile(const TraceVector& traces);
         void regularize_node(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
         void regularize_edge(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
     };
@@ -113,14 +111,16 @@ class MRFParameterizer {
 
         class Option {
           public:
-            Option(const RegulMethod::RegulMethod& regul=RegulMethod::RegulMethod::L2) : regul(regul) {};
+            Option(const RegulMethod::RegulMethod& regul=RegulMethod::RegulMethod::L2, const double& gap_prob=0.14) : regul(regul), gap_prob(gap_prob) {};
 
             RegulMethod::RegulMethod regul;
             L2Regularization::Option l2_opt;
             ProfileRegularization::Option pb_opt;
+
+            double gap_prob;
         };
 
-        ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const MSAAnalyzer& msa_analyzer);
+        ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const MSAAnalyzer& msa_analyzer, const Float2dArray* psfm=NULL);
 
         virtual lbfgsfloatval_t evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step);
 
@@ -162,6 +162,7 @@ class MRFParameterizer {
     const MSAAnalyzer& msa_analyzer;
 
     void update_model(MRF& model, Parameter& param);
+    Float2dArray calc_profile(const TraceVector& traces);
 
     FRIEND_TEST(MRFParameterizer_Test, test_update_model);
 };

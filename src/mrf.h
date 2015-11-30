@@ -104,12 +104,18 @@ class MRF {
         { return edges.find(EdgeIndex(idx1, idx2))->second; }
     EdgeIndexVector get_edge_idxs() const;
 
+    // Profile setter and getter
+    void set_psfm(const Float2dArray& m) { psfm = m; }
+    Float2dArray get_psfm() const { return psfm; }
+    const Float1dArray get_psfm(const size_t& idx) const { return psfm(idx, ALL); }
+
   private:
     const Alphabet& abc;
     string seq;
     size_t length;
     vector<NodeElement> nodes;
     map<EdgeIndex, EdgeElement> edges;
+    Float2dArray psfm;  // Position-specific frequency matrix
 
     void init(const EdgeIndexVector* eidxs);
 };

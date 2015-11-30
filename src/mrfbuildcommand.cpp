@@ -115,7 +115,7 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
                 if (parse_int(optarg, opt.build_opt.msa_analyzer_opt.eff_num)) break;
                 else return false;
             case 10:
-                if (parse_float(optarg, opt.build_opt.parameterizer_opt.pb_opt.gap_prob)) break;
+                if (parse_float(optarg, opt.build_opt.parameterizer_opt.gap_prob)) break;
                 else return false;
             }
             break;
