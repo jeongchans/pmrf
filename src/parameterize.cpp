@@ -93,9 +93,10 @@ void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *
 MRFParameterizer::ProfileRegularization::ProfileRegularization(const Float2dArray* psfm, Parameter& param, Option& opt) : param(param), opt(opt) {
     mn.resize(param.length, param.num_var);
     if (psfm != NULL) {
-        for (int i = 0; i < param.length; ++i)
-            for (int t = 0; t < param.num_var; ++t)
-                mn(i, t) = log((*psfm)(i, t) / (*psfm)(i, param.num_var - 1));
+        for (int i = 0; i < param.length; ++i) {
+            double avglog = sum(log((*psfm)(i, ALL))) / param.num_var;
+            mn(i, ALL) = log((*psfm)(i, ALL)) - avglog;
+        }
     }
 }
 
