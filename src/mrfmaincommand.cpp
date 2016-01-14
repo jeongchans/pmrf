@@ -7,7 +7,11 @@ using std::cout;
 using std::endl;
 
 static const string command_list_message =
-    " build         Build an MRF form an input alignment\n";
+    "generate MRF model\n"
+    "  build        Build an MRF form an input alignment\n"
+    "\n"
+    "examine evolutionary information\n"
+    "  infer        Calculate a sequence distribution\n";
 
 MRFMainCommandLine::MRFMainCommandLine(int argc, char** argv) : MRFCommandLine(argc, argv) {
     subcmd = NONE;
@@ -22,6 +26,7 @@ void MRFMainCommandLine::show_help() {
     cout << "Usage: " << PROGNAME << " <command> [<args>]" << endl
          << endl
          << "The available commands are:" << endl
+         << endl
          << command_list_message
          << endl;
     cout << "Use '" << PROGNAME << " <command> -h' for help on a specific command" << endl;
@@ -57,6 +62,7 @@ bool MRFMainCommandLine::parse_command_line(int argc, char** argv) {
         string s = argv[optind];
         if (s == "help") subcmd = HELP;
         else if (s == "build") subcmd = BUILD;
+        else if (s == "infer") subcmd = INFER;
         else {
             error_message = "Unknown subcommand\n";
             return false;
@@ -67,10 +73,6 @@ bool MRFMainCommandLine::parse_command_line(int argc, char** argv) {
             error_message = "Subcommand is required\n";
             return false;
         }
-    }
-    if (subcmd == HELP) {
-        show_help();
-        exit(0);
     }
     return true;
 }
