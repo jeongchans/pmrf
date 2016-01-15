@@ -11,7 +11,7 @@ MRFInferProcessor::~MRFInferProcessor() {
 }
 
 int MRFInferProcessor::infer(const string& mrf_filename, const string& seq_filename) {
-    MRFModelAnalyzer analyzer;
+    MRFModelAnalyzer analyzer(AA);
     int ret = analyzer.infer(mrf_filename, seq_filename);
     return ret;
 }
