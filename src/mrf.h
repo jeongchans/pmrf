@@ -94,6 +94,7 @@ class MRF {
     size_t get_num_var() const { return abc.get_canonical_size(); }
     string get_var_symbol() const { return abc.get_canonical(); }
     const Alphabet& get_alphabet() const { return abc; }
+    int get_idx(const char& x) const { return abc.get_idx(x); }
 
     // element getter
     NodeElement& get_node(const size_t& idx) { return nodes[idx]; }
