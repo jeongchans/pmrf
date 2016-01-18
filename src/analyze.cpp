@@ -5,12 +5,32 @@
 #include "mrfio.h"
 #include "core.h"
 
+using std::setw;
+using std::setprecision;
+using std::fixed;
+using std::left;
+using std::right;
+
 int MRFModelAnalyzer::infer(const string& mrf_filename, const string& seq_filename) {
     MRF model = read_mrf(mrf_filename);
+    double wtscore = calc_pll(model, model.get_seq());
     TraceVector traces = read_traces(seq_filename);
+    string delim = " ";
+    std::cout << setw(4) << right << "#" << delim
+              << setw(10) << "Score" << delim
+              << setw(10) << "Diff" << delim
+              << setw(30) << left << "Description" << std::endl;
+    std::cout << "----" << delim
+              << "----------" << delim
+              << "----------" << delim
+              << "--------------------" << std::endl;
+    size_t idx = 0;
     for (TraceVector::const_iterator pos = traces.begin(); pos != traces.end(); ++pos) {
-        double pll = calc_pll(model, pos->get_matched_aseq());
-        std::cout << pos->get_matched_aseq() << "\t" << pll << std::endl;
+        double mtscore = calc_pll(model, pos->get_matched_aseq());
+        std::cout << setw(4) << right << ++idx << delim
+                  << setw(10) << fixed << setprecision(2) << mtscore << delim
+                  << setw(10) << fixed << setprecision(2) << mtscore - wtscore << delim
+                  << setw(30) << left << pos->get_desc().substr(0, 30) << std::endl;
     }
     return 0;
 }

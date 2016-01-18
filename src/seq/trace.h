@@ -43,6 +43,7 @@ class Trace {
     Trace(const string& ststr, const string& seq, const string& id, const string& desc);
 
     std::string get_seq() const;
+    std::string get_desc() const { return desc; }
     size_t get_length() const { return get_seq().size(); }
 
     bool operator==(const Trace& rhs) const;
