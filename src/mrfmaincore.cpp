@@ -3,6 +3,7 @@
 #include <cstdlib>
 
 #include "mrfbuildcore.h"
+#include "mrfinfercore.h"
 
 MRFMainProcessor::MRFMainProcessor(int argc, char** argv) {
     cmd_line = new MRFMainCommandLine(argc, argv);
@@ -16,8 +17,13 @@ MRFMainProcessor::~MRFMainProcessor() {
 
 int MRFMainProcessor::run_mrf_cmd(const SubCommand& cmd) {
     switch (cmd) {
+    case HELP:
+        cmd_line->show_help();
+        exit(0);
     case BUILD:
-        MRFBuildProcessor processor(argc, argv);
-        return processor.run();
+        return MRFBuildProcessor(argc, argv).run();
+    case INFER:
+        MRFInferProcessor(argc, argv).run();
     }
+    return 1;
 }

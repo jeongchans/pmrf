@@ -3,7 +3,7 @@
 
 #include "command.h"
 
-enum SubCommand { NONE, HELP, BUILD };
+enum SubCommand { NONE, HELP, BUILD, INFER };
 
 class MRFMainCommandLine : public MRFCommandLine {
   public:
