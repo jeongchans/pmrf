@@ -128,7 +128,8 @@ void MRFParameterizer::ProfileRegularization::regularize_edge(const lbfgsfloatva
         for (int p = 0; p < param.num_var; ++p) {
             for (int q = 0; q < param.num_var; ++q) {
                 int k = param.get_eidx(i, j, letters[p], letters[q]);
-                double d = x[k] - (mn(i, p) + mn(j, q));
+                //double d = x[k] - (mn(i, p) + mn(j, q));
+                double d = x[k];
                 fx += lambda * pow2(d);
                 g[k] += 2. * lambda * d;
             }
