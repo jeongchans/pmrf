@@ -5,35 +5,35 @@ This is an evolutionary analysis tool using Markov random field.
 ## Installation
 
 ### Prerequisites
-The following libraries are essential for running this software.
-
-- [GSL - GNU Scientific Library] (http://www.gnu.org/software/gsl/)
-- [Blitz++] (http://blitz.sourceforge.net)
-
-The following library is required only for test.
-
-- [Google Test] (https://github.com/google/googletest)
+The [Blitz++] (http://blitz.sourceforge.net) library is essential for running this software.
 
 ### Download
-TBA
+Download the latest release from [the git repository] (https://github.com/jeongchans/pmrf/releases).
 
 ### Building the software
+1. Uncompress the downloaded file in the directory where the PMRF software will be installed.
 
-1. Compile the software.
-
-```
+2. Compile the source code.
+  ```sh
   $ make
-```
+  ```
 
-2. The executable will be placed in the directory where you untarred PMRF.
+3. The executable will be placed in the directory.
 
 
 ## Usage
 TBA
 
 ### Help messages
-`pmrf --help` shows the general help page.
-`pmrf <COMMAND> --help` shows the help page for the specific command.
+Show the general help page.
+  ```sh
+  $ pmrf --help
+  ```
+
+Show the help page for a specific command.
+  ```sh
+  $ pmrf <COMMAND> --help
+  ```
 
 
 ## Examples
@@ -49,5 +49,4 @@ TBA
 
 
 ## Acknowledgements
-
 This software includes and uses [libLBFGS] (http://www.chokkan.org/software/liblbfgs/).
