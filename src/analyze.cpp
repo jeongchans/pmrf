@@ -51,11 +51,11 @@ double MRFModelAnalyzer::calc_pll(const MRF& model, const string& aseq) {
     double pll = 0.;
     size_t n = model.get_length();
     for (size_t i = 0; i < n; ++i) {
-        int idx1 = model.get_idx(aseq[i]);
+        int idx1 = model.get_var_idx(aseq[i]);
         pll += model.get_node(i).get_weight()(idx1);
         for (size_t j = i + 1; j < n; ++j) {
-            int idx2 = model.get_idx(aseq[j]);
-            pll += model.get_edge(i, j).get_weight()(idx1, idx2);
+            int idx2 = model.get_var_idx(aseq[j]);
+            if (model.has_edge(i, j)) pll += model.get_edge(i, j).get_weight()(idx1, idx2);
         }
     }
     return pll;

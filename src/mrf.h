@@ -94,7 +94,7 @@ class MRF {
     size_t get_num_var() const { return abc.get_canonical_size(); }
     string get_var_symbol() const { return abc.get_canonical(); }
     const Alphabet& get_alphabet() const { return abc; }
-    int get_idx(const char& x) const { return abc.get_idx(x); }
+    int get_var_idx(const char& x) const { return abc.get_idx(x); }
 
     // element getter
     NodeElement& get_node(const size_t& idx) { return nodes[idx]; }
@@ -105,6 +105,9 @@ class MRF {
     const EdgeElement& get_edge(const size_t& idx1, const size_t& idx2) const
         { return edges.find(EdgeIndex(idx1, idx2))->second; }
     EdgeIndexVector get_edge_idxs() const;
+
+    bool has_edge(const size_t& idx1, const size_t& idx2) const
+        { return edges.find(EdgeIndex(idx1, idx2)) != edges.end(); }
 
   private:
     const Alphabet& abc;
