@@ -4,6 +4,7 @@
 
 #include "mrfbuildcore.h"
 #include "mrfinfercore.h"
+#include "mrfstatcore.h"
 
 MRFMainProcessor::MRFMainProcessor(int argc, char** argv) {
     cmd_line = new MRFMainCommandLine(argc, argv);
@@ -24,6 +25,8 @@ int MRFMainProcessor::run_mrf_cmd(const SubCommand& cmd) {
         return MRFBuildProcessor(argc, argv).run();
     case INFER:
         MRFInferProcessor(argc, argv).run();
+    case STAT:
+        MRFStatProcessor(argc, argv).run();
     }
     return 1;
 }

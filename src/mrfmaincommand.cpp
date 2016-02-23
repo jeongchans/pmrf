@@ -8,10 +8,11 @@ using std::endl;
 
 static const string command_list_message =
     "generate MRF model\n"
-    "  build        Build an MRF form an input alignment\n"
+    "  build        Build an MRF for an input alignment\n"
     "\n"
     "examine evolutionary information\n"
-    "  infer        Calculate a sequence distribution\n";
+    "  infer        Calculate a sequence distribution\n"
+    "  stat         Estimate evolutionary constraints for an MRF model\n";
 
 MRFMainCommandLine::MRFMainCommandLine(int argc, char** argv) : MRFCommandLine(argc, argv) {
     subcmd = NONE;
@@ -63,6 +64,7 @@ bool MRFMainCommandLine::parse_command_line(int argc, char** argv) {
         if (s == "help") subcmd = HELP;
         else if (s == "build") subcmd = BUILD;
         else if (s == "infer") subcmd = INFER;
+        else if (s == "stat") subcmd = STAT;
         else {
             error_message = "Unknown subcommand\n";
             return false;
