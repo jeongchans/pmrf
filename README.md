@@ -44,7 +44,10 @@ TBA
 ### Generating MRF model by specifying the network architecture
 `pmrf-build` can specify the network architecture of MRF model with `--edge` option.
 
-### Calculating the pseudolikelihood for aligned sequeces
+### Calculating the coevolution scores for an MRF model
+TBA
+
+### Calculating the pseudolikelihood of aligned sequeces
 TBA
 
 
