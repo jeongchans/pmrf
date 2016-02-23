@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Calculate pseudolikelihood value for an aligned sequence. Use `pmrf-infer` command.
+- Calculate coevolution scores for an MRF model. Use `pmrf-stat` command.
 
 
 ## 0.2.0 - 2016-02-04
