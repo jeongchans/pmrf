@@ -13,10 +13,12 @@ class MRFStatCommandLine : public MRFCommandLine {
 
     struct Option {
         string mrf_filename;
+        MRFModelAnalyzer::StatOption stat_opt;
     } opt;
 
   protected:
     virtual bool parse_command_line(int argc, char** argv);
+    bool parse_mode(char* optarg, StatMode& arg);
 };
 
 #endif

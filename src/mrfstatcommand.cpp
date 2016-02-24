@@ -7,11 +7,20 @@ using std::cout;
 using std::endl;
 
 static const string option_message =
-//    "Options:\n"
-//    " --mode                Calculation mode of evolutionary constraints\n"
-//    "                       pos: positional mode\n"
-//    "                       pair: pairwise mode\n"
-//    "\n"
+    "Options:\n"
+    " --mode <mode>         Calculation mode of evolutionary constraints\n"
+    "                       pos: positional mode\n"
+    "                       pair: pairwise mode (default)\n"
+//TODO
+//    " --correct <int>       Score correction method (Work only with `--mode pair`)\n"
+//    "                       0: no correction\n"
+//    "                       1: average product correction (APC) (default)\n"
+//    "                       2: normalized coevolutionary pattern similarity (NCPS)\n"
+//TODO
+//    " --zscore <int>        Z-score transformation\n"
+//    "                       0: no\n"
+//    "                       1: yes (default)\n"
+    "\n"
     " -h, --help            Help\n";
 
 MRFStatCommandLine::MRFStatCommandLine(int argc, char** argv) : MRFCommandLine(argc, argv) {
@@ -48,7 +57,7 @@ bool MRFStatCommandLine::parse_command_line(int argc, char** argv) {
                 show_help();
                 exit(0);
             case 1:
-                //TODO
+                if (parse_mode(optarg, opt.stat_opt.mode)) break;
                 return false;
             }
             break;
@@ -65,6 +74,17 @@ bool MRFStatCommandLine::parse_command_line(int argc, char** argv) {
         opt.mrf_filename = argv[optind];
     } else {
         error_message = "Not enough arguments\n";
+        return false;
+    }
+    return true;
+}
+
+bool MRFStatCommandLine::parse_mode(char* optarg, StatMode& arg) {
+    string mode = string(optarg);
+    if (mode == "pair") arg = STATMODE_PAIR;
+    else if (mode == "pos") arg = STATMODE_POS;
+    else {
+        error_message = "Unsupported mode: " + mode;
         return false;
     }
     return true;

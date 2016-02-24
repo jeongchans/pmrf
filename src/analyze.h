@@ -9,9 +9,22 @@
 
 using std::string;
 
+enum StatMode { STATMODE_PAIR, STATMODE_POS };
+enum StatCorrect { STATCORR_NONE, STATCORR_APC, STATCORR_NCPS };
+
 class MRFModelAnalyzer {
 
   public:
+    class StatOption {
+      public:
+        StatOption(const StatMode& mode=STATMODE_PAIR, const StatCorrect& corr=STATCORR_APC, const bool& zscore=true)
+        : mode(mode), corr(corr), zscore(zscore) {};
+        
+        StatMode mode;
+        StatCorrect corr;
+        bool zscore;
+    };
+
     struct PairScore {
         EdgeIndex idx;
         FloatType score;
@@ -26,6 +39,8 @@ class MRFModelAnalyzer {
     int infer(const string& mrf_filename, const string& seq_filename);
     int stat_pair(const string& mrf_filename);
     //TODO: int calc_pos_score(const string& mrf_filename) { return 0; }
+
+    StatOption stat_opt;
 
   protected:
     const Alphabet& abc;
