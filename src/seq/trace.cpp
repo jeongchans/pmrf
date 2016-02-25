@@ -67,11 +67,19 @@ string Trace::get_seq() const {
     return seq;
 }
 
+bool Trace::is_matched(const size_t& ref_idx) const {
+    return st[aidx[ref_idx]].st == MATCH;
+}
+
 string Trace::get_matched_aseq() const {
     string seq;
     for (vector<size_t>::const_iterator pos = aidx.begin(); pos != aidx.end(); ++pos)
         seq += st[*pos].aa;
     return seq;
+}
+
+char Trace::get_symbol_at(const size_t& ref_idx) const {
+    return st[aidx[ref_idx]].aa;
 }
 
 bool Trace::operator==(const Trace& rhs) const {
@@ -85,6 +93,13 @@ bool Trace::operator==(const Trace& rhs) const {
 /**
    @class TraceVector
  */
+
+TraceVector TraceVector::subset_matched(const size_t& ref_idx) const {
+    TraceVector trs;
+    for (const_iterator pos = begin(); pos != end(); ++pos)
+        if (pos->is_matched(ref_idx)) trs.push_back(*pos);
+    return trs;
+}
 
 vector<string> TraceVector::get_matched_aseq_vec() const {
     vector<string> r;

@@ -96,6 +96,11 @@ class MRF {
     const Alphabet& get_alphabet() const { return abc; }
     int get_var_idx(const char& x) const { return abc.get_idx(x); }
 
+    // Profile setter and getter
+    void set_psfm(const Float2dArray& m) { psfm = m; }
+    Float2dArray get_psfm() const { return psfm; }
+    const Float1dArray get_psfm(const size_t& idx) const { return psfm(idx, ALL); }
+
     // element getter
     NodeElement& get_node(const size_t& idx) { return nodes[idx]; }
     EdgeElement& get_edge(const size_t& idx1, const size_t& idx2) { return edges[EdgeIndex(idx1, idx2)]; }
@@ -115,6 +120,7 @@ class MRF {
     size_t length;
     vector<NodeElement> nodes;
     map<EdgeIndex, EdgeElement> edges;
+    Float2dArray psfm;  // Position-specific frequency matrix
 
     void init(const EdgeIndexVector* eidxs);
 };

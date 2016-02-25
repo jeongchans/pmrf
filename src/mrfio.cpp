@@ -32,6 +32,15 @@ void MRFExporter::export_body(const MRF& model, ostream& os) {
     string seq = model.get_seq();
     size_t n = model.get_length();
     EdgeIndexVector edge_idxs = model.get_edge_idxs();
+    os << "# PROFILE" << endl;
+    os << "RES\t";
+    export_node_symbol(symbols, os);
+    os << endl;
+    for (size_t i = 0; i < n; ++i) {
+        os << seq[i] << " " << i + 1 << "\t";
+        export_psfm(model.get_psfm(i), os);
+        os << endl;
+    }
     os << "# NODE" << endl;
     os << "RES\t";
     export_node_symbol(symbols, os);
@@ -63,6 +72,11 @@ void MRFExporter::export_seq(const string& seq, const size_t& width, ostream& os
         os << seq.substr(i, width) << endl;
         i += width;
     } while (i < n);
+}
+
+void MRFExporter::export_psfm(const Float1dArray& w, ostream& os) {
+    export_elem(w(0), os);
+    for (int i = 1; i < w.size(); ++i) export_elem(w(i), os, true);
 }
 
 void MRFExporter::export_node_symbol(const string& sym, ostream& os) {

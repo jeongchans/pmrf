@@ -23,6 +23,7 @@ class MRFExporter {
     void export_body(const MRF& model, ostream& os);
 
     void export_seq(const string& seq, const size_t& width, ostream& os);
+    void export_psfm(const Float1dArray& w, ostream& os);
     void export_node_symbol(const string& sym, ostream& os);
     void export_node_weight(const Float1dArray& w, ostream& os);
     void export_edge_symbol(const string& sym, ostream& os);

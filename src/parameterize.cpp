@@ -5,6 +5,9 @@
 #include <cmath>
 
 #include "util/common.h"
+#include "seq/profile.h"
+#include "seq/bgfreq.h"
+#include "seq/subsmat.h"
 
 #include "core.h"
 
@@ -204,11 +207,33 @@ void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t 
 
 int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     Parameter param(model, optim_opt);
+    Float2dArray psfm = zeros(param.length, param.num_var);
+    FloatType gap_prob = 0.14;
+    psfm(ALL, Range(blitz::fromStart, 19)) = calc_profile(traces) * (1. - gap_prob);
+    psfm(ALL, param.num_var - 1) = gap_prob;
     ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
     LBFGS::Optimizer optimizer;
     int ret = optimizer.optimize(&param, &obj_func);
+    model.set_psfm(psfm);
     update_model(model, param);
     return ret;
+}
+
+Float2dArray MRFParameterizer::calc_profile(const TraceVector& traces) {
+    AminoAcid aa;
+    ProfileBuilder profile_builder(aa);
+    SMMEmitProbEstimator emit_prob_estimator(ROBINSON_BGFREQ.get_array(aa), 
+                                             BLOSUM62_MATRIX.get_array(aa), 
+                                             3.2);
+    profile_builder.set_emit_prob_estimator(&emit_prob_estimator);
+    PBSeqWeightEstimator seq_weight_estimator(aa);
+    profile_builder.set_seq_weight_estimator(&seq_weight_estimator);
+    ExpEntropyEffSeqNumEstimator eff_seq_num_estimator(aa, &seq_weight_estimator);
+    profile_builder.set_eff_seq_num_estimator(&eff_seq_num_estimator);
+    TerminalGapRemover termi_gap_remover(aa, 0.1);
+    profile_builder.set_msa_filter(&termi_gap_remover);
+    Profile profile = profile_builder.build(traces);
+    return profile.get_prob();
 }
 
 void MRFParameterizer::update_model(MRF& model, Parameter& param) {
