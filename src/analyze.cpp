@@ -163,7 +163,7 @@ MRFModelAnalyzer::PosScoreVector MRFModelAnalyzer::calc_pos_score(const MRF& mod
         Float1dArray p = exp(w);
         p /= blitz::sum(p);
         Float1dArray f = psfm(i, r);
-        scores.push_back(PosScore(i, blitz::sum(f * log(f / p))));
+        scores.push_back(PosScore(i, calc_kld(f, p)));
     }
     return scores;
 }
