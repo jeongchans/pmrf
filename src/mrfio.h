@@ -52,10 +52,12 @@ class MRFImporter {
     void import_body(istream& is, MRF& model);
     Float1dArray import_node_weight(istream& is, const size_t& num_var);
     Float2dArray import_edge_weight(istream& is, const size_t& num_var);
+    Float1dArray import_psfm(istream& is, const size_t& num_var);
 
     FRIEND_TEST(MRFImporter_Test, test_import_seq);
     FRIEND_TEST(MRFImporter_Test, test_import_node_weight);
     FRIEND_TEST(MRFImporter_Test, test_import_edge_weight);
+    FRIEND_TEST(MRFImporter_Test, test_import_psfm);
 
   private:
     double import_elem(istream& is);

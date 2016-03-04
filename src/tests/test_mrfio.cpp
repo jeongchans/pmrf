@@ -115,3 +115,13 @@ TEST_F(MRFImporter_Test, test_import_edge_weight) {
     MRFImporter importer;
     EXPECT_TRUE(allclose(w, importer.import_edge_weight(is, num_var)));
 }
+
+TEST_F(MRFImporter_Test, test_import_psfm) {
+    buf = "0.102\t0.005\t*";
+    std::istringstream is(buf);
+    size_t num_var = 3;
+    Float1dArray w(3);
+    w = 0.102, 0.005, 0.;
+    MRFImporter importer;
+    EXPECT_TRUE(allclose(w, importer.import_psfm(is, num_var)));
+}

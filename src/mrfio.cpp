@@ -216,6 +216,17 @@ void MRFImporter::import_body(istream& is, MRF& model) {
                     is >> idx2;
                     model.get_edge(idx1 - 1, idx2 - 1).set_weight(import_edge_weight(is, num_var));
                 }
+            } else if (s == "PROFILE") {
+                getline(is, dummy);
+                getline(is, dummy);
+                size_t n = model.get_length();
+                Float2dArray psfm = zeros(n, num_var);
+                for (size_t i = 0; i < n; ++i) {
+                    is >> dummy;
+                    is >> dummy;
+                    psfm(i, ALL) = import_psfm(is, num_var);
+                }
+                model.set_psfm(psfm);
             }
         }
     }
@@ -232,6 +243,12 @@ Float2dArray MRFImporter::import_edge_weight(istream& is, const size_t& num_var)
     for (int i = 0; i < num_var; ++i)
         for (int j = 0; j < num_var; ++j)
             w(i, j) = import_elem(is);
+    return w;
+}
+
+Float1dArray MRFImporter::import_psfm(istream& is, const size_t& num_var) {
+    Float1dArray w(num_var);
+    for (int i = 0; i < num_var; ++i) w(i) = import_elem(is);
     return w;
 }
 
