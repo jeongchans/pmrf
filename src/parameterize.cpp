@@ -222,19 +222,26 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
 Float2dArray MRFParameterizer::calc_profile(const TraceVector& traces) {
     AminoAcid aa;
     ProfileBuilder profile_builder(aa);
-    SMMEmitProbEstimator emit_prob_estimator(ROBINSON_BGFREQ.get_array(aa), 
-                                             BLOSUM62_MATRIX.get_array(aa), 
-                                             3.2);
-    profile_builder.set_emit_prob_estimator(&emit_prob_estimator);
-    PBSeqWeightEstimator seq_weight_estimator(aa);
-    profile_builder.set_seq_weight_estimator(&seq_weight_estimator);
-    ExpEntropyEffSeqNumEstimator eff_seq_num_estimator(aa, &seq_weight_estimator);
-    profile_builder.set_eff_seq_num_estimator(&eff_seq_num_estimator);
-    TerminalGapRemover termi_gap_remover(aa, 0.1);
-    profile_builder.set_msa_filter(&termi_gap_remover);
     Profile profile = profile_builder.build(traces);
     return profile.get_prob();
 }
+
+//Float2dArray MRFParameterizer::calc_profile(const TraceVector& traces) {
+//    AminoAcid aa;
+//    ProfileBuilder profile_builder(aa);
+//    SMMEmitProbEstimator emit_prob_estimator(ROBINSON_BGFREQ.get_array(aa), 
+//                                             BLOSUM62_MATRIX.get_array(aa), 
+//                                             3.2);
+//    profile_builder.set_emit_prob_estimator(&emit_prob_estimator);
+//    PBSeqWeightEstimator seq_weight_estimator(aa);
+//    profile_builder.set_seq_weight_estimator(&seq_weight_estimator);
+//    ExpEntropyEffSeqNumEstimator eff_seq_num_estimator(aa, &seq_weight_estimator);
+//    profile_builder.set_eff_seq_num_estimator(&eff_seq_num_estimator);
+//    TerminalGapRemover termi_gap_remover(aa, 0.1);
+//    profile_builder.set_msa_filter(&termi_gap_remover);
+//    Profile profile = profile_builder.build(traces);
+//    return profile.get_prob();
+//}
 
 void MRFParameterizer::update_model(MRF& model, Parameter& param) {
     string letters = param.abc.get_canonical();
