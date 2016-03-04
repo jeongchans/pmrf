@@ -208,7 +208,7 @@ void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t 
 int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     Parameter param(model, optim_opt);
     Float2dArray psfm = zeros(param.length, param.num_var);
-    FloatType gap_prob = 0.14;
+    FloatType gap_prob = 0.;
     psfm(ALL, Range(blitz::fromStart, 19)) = calc_profile(traces) * (1. - gap_prob);
     psfm(ALL, param.num_var - 1) = gap_prob;
     ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
