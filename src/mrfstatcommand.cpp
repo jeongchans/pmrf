@@ -16,10 +16,6 @@ static const string option_message =
 //    "                       0: no correction\n"
 //    "                       1: average product correction (APC) (default)\n"
 //    "                       2: normalized coevolutionary pattern similarity (NCPS)\n"
-//TODO
-//    " --zscore <int>        Z-score transformation\n"
-//    "                       0: no\n"
-//    "                       1: yes (default)\n"
     "\n"
     " -h, --help            Help\n";
 

@@ -44,34 +44,34 @@ int MRFModelAnalyzer::stat(const string& mrf_filename) {
     if (stat_opt.mode == STATMODE_PAIR) {
         PairScoreVector scores = calc_pair_score(model);
         scores = correct_pair_score(scores);
-        vector<FloatType> vec;
-        for (PairScoreVector::const_iterator pos = scores.begin(); pos != scores.end(); ++pos) vec.push_back(pos->score);
-        vec = calc_zscore(vec);
-        for (size_t i = 0; i < scores.size(); ++i) scores[i].score = vec[i];
-        std::cout << setw(4) << right << "Idx1" << delim
-                  << setw(4) << "Idx2" << delim
-                  << setw(10) << "Score" << std::endl;
+        calc_zscore(scores);
+        std::cout << setw(4) << right << "Pos1" << delim
+                  << setw(4) << "Pos2" << delim
+                  << setw(10) << "Score" << delim
+                  << setw(10) << "Z-score" << std::endl;
         std::cout << "----" << delim
                   << "----" << delim
+                  << "----------" << delim
                   << "----------" << std::endl;
         for (PairScoreVector::const_iterator pos = scores.begin(); pos != scores.end(); ++pos) {
             std::cout << setw(4) << right << pos->idx.idx1 + 1 << delim
                       << setw(4) << pos->idx.idx2 + 1 << delim
-                      << setw(10) << fixed << pos->score << std::endl;
+                      << setw(10) << fixed << pos->score << delim
+                      << setw(10) << fixed << pos->zscore << std::endl;
         }
     } else if (stat_opt.mode == STATMODE_POS) {
         PosScoreVector scores = calc_pos_score(model);
-        vector<FloatType> vec;
-        for (PosScoreVector::const_iterator pos = scores.begin(); pos != scores.end(); ++pos) vec.push_back(pos->score);
-        vec = calc_zscore(vec);
-        for (size_t i = 0; i < scores.size(); ++i) scores[i].score = vec[i];
-        std::cout << setw(4) << right << "Idx" << delim
-                  << setw(10) << "Score" << std::endl;
+        calc_zscore(scores);
+        std::cout << setw(4) << right << "Pos" << delim
+                  << setw(10) << "Score" << delim
+                  << setw(10) << "Z-score" << std::endl;
         std::cout << "----" << delim
+                  << "----------" << delim
                   << "----------" << std::endl;
         for (PosScoreVector::const_iterator pos = scores.begin(); pos != scores.end(); ++pos) {
             std::cout << setw(4) << right << pos->idx + 1 << delim
-                      << setw(10) << fixed << pos->score << std::endl;
+                      << setw(10) << fixed << pos->score << delim
+                      << setw(10) << fixed << pos->zscore << std::endl;
         }
     }
     return 0;
@@ -144,6 +144,13 @@ MRFModelAnalyzer::PairScoreVector MRFModelAnalyzer::correct_pair_score(const Pai
     return ret;
 }
 
+void MRFModelAnalyzer::calc_zscore(PairScoreVector& scores) {
+    vector<FloatType> vec;
+    for (PairScoreVector::const_iterator pos = scores.begin(); pos != scores.end(); ++pos) vec.push_back(pos->score);
+    vec = calc_zscore(vec);
+    for (size_t i = 0; i < scores.size(); ++i) scores[i].zscore = vec[i];
+}
+
 vector<FloatType> MRFModelAnalyzer::calc_zscore(const vector<FloatType> scores) {
     FloatType mn = accumulate(scores.begin(), scores.end(), 0.) / scores.size();
     FloatType mn2 = inner_product(scores.begin(), scores.end(), scores.begin(), 0.) / scores.size();
@@ -166,4 +173,11 @@ MRFModelAnalyzer::PosScoreVector MRFModelAnalyzer::calc_pos_score(const MRF& mod
         scores.push_back(PosScore(i, calc_kld(f, p)));
     }
     return scores;
+}
+
+void MRFModelAnalyzer::calc_zscore(PosScoreVector& scores) {
+    vector<FloatType> vec;
+    for (PosScoreVector::const_iterator pos = scores.begin(); pos != scores.end(); ++pos) vec.push_back(pos->score);
+    vec = calc_zscore(vec);
+    for (size_t i = 0; i < scores.size(); ++i) scores[i].zscore = vec[i];
 }
