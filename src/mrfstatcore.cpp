@@ -12,6 +12,7 @@ MRFStatProcessor::~MRFStatProcessor() {
 
 int MRFStatProcessor::stat(const string& mrf_filename) {
     MRFModelAnalyzer analyzer(AA);
-    int ret = analyzer.stat_pair(mrf_filename);
+    analyzer.stat_opt = ((MRFStatCommandLine*)cmd_line)->opt.stat_opt;
+    int ret = analyzer.stat(mrf_filename);
     return ret;
 }

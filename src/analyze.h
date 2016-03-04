@@ -33,12 +33,19 @@ class MRFModelAnalyzer {
     };
     typedef vector<PairScore> PairScoreVector;
 
+    struct PosScore {
+        size_t idx;
+        FloatType score;
+
+        PosScore(const size_t& idx, const FloatType& score) : idx(idx), score(score) {}
+    };
+    typedef vector<PosScore> PosScoreVector;
+
   public:
     MRFModelAnalyzer(const Alphabet& abc) : abc(abc) {}
 
     int infer(const string& mrf_filename, const string& seq_filename);
-    int stat_pair(const string& mrf_filename);
-    //TODO: int calc_pos_score(const string& mrf_filename) { return 0; }
+    int stat(const string& mrf_filename);
 
     StatOption stat_opt;
 
@@ -51,6 +58,7 @@ class MRFModelAnalyzer {
     PairScoreVector calc_pair_score(const MRF& model);
     PairScoreVector correct_pair_score(const PairScoreVector& scores);
     vector<FloatType> calc_zscore(const vector<FloatType> scores);
+    PosScoreVector calc_pos_score(const MRF& model);
 };
 
 #endif
