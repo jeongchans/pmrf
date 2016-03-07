@@ -10,7 +10,11 @@
 using std::string;
 
 enum StatMode { STATMODE_PAIR, STATMODE_POS };
-enum StatCorrect { STATCORR_NONE, STATCORR_APC, STATCORR_NCPS };
+
+typedef int StatCorrect;
+const int STATCORR_NONE = 0;
+const int STATCORR_APC = 1;
+const int STATCORR_NCPS = 2;
 
 class MRFModelAnalyzer {
 
@@ -58,7 +62,8 @@ class MRFModelAnalyzer {
     TraceVector read_traces(const string& filename);
     double calc_pll(const MRF& model, const string& aseq);
     PairScoreVector calc_pair_score(const MRF& model);
-    PairScoreVector correct_pair_score(const PairScoreVector& scores);
+    PairScoreVector correct_apc_pair_score(const PairScoreVector& scores);
+    PairScoreVector correct_ncps_pair_score(const PairScoreVector& scores);
     void calc_zscore(PairScoreVector& scores);
     vector<FloatType> calc_zscore(const vector<FloatType> scores);
     PosScoreVector calc_pos_score(const MRF& model);

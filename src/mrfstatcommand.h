@@ -19,6 +19,7 @@ class MRFStatCommandLine : public MRFCommandLine {
   protected:
     virtual bool parse_command_line(int argc, char** argv);
     bool parse_mode(char* optarg, StatMode& arg);
+    bool parse_corr(char* optarg, StatCorrect& arg);
 };
 
 #endif

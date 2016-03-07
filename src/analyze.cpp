@@ -43,7 +43,8 @@ int MRFModelAnalyzer::stat(const string& mrf_filename) {
     MRF model = read_mrf(mrf_filename);
     if (stat_opt.mode == STATMODE_PAIR) {
         PairScoreVector scores = calc_pair_score(model);
-        scores = correct_pair_score(scores);
+        if (stat_opt.corr == STATCORR_APC) scores = correct_apc_pair_score(scores);
+        else if (stat_opt.corr == STATCORR_NCPS) scores = correct_ncps_pair_score(scores);
         calc_zscore(scores);
         std::cout << setw(4) << right << "Pos1" << delim
                   << setw(4) << "Pos2" << delim
@@ -118,7 +119,7 @@ MRFModelAnalyzer::PairScoreVector MRFModelAnalyzer::calc_pair_score(const MRF& m
     return scores;
 }
 
-MRFModelAnalyzer::PairScoreVector MRFModelAnalyzer::correct_pair_score(const PairScoreVector& scores) {
+MRFModelAnalyzer::PairScoreVector MRFModelAnalyzer::correct_apc_pair_score(const PairScoreVector& scores) {
     map<size_t, FloatType> mn;
     map<size_t, size_t> num_edge;
     for (PairScoreVector::const_iterator pos = scores.begin(); pos != scores.end(); ++pos) {
@@ -141,6 +142,38 @@ MRFModelAnalyzer::PairScoreVector MRFModelAnalyzer::correct_pair_score(const Pai
     for (PairScoreVector::const_iterator pos = scores.begin(); pos != scores.end(); ++pos) {
         ret.push_back(PairScore(pos->idx, pos->score - mn[pos->idx.idx1] * mn[pos->idx.idx2] / tot_mn));
     }
+    return ret;
+}
+
+MRFModelAnalyzer::PairScoreVector MRFModelAnalyzer::correct_ncps_pair_score(const PairScoreVector& scores) {
+    map<size_t, map<size_t, FloatType> > cm;
+    for (PairScoreVector::const_iterator pos = scores.begin(); pos != scores.end(); ++pos) {
+        cm[pos->idx.idx1][pos->idx.idx2] = pos->score;
+        cm[pos->idx.idx2][pos->idx.idx1] = pos->score;
+    }
+    PairScoreVector ncps;
+    for (PairScoreVector::const_iterator pos = scores.begin(); pos != scores.end(); ++pos) {
+        map<size_t, FloatType>& cm1 = cm[pos->idx.idx1];
+        map<size_t, FloatType>& cm2 = cm[pos->idx.idx2];
+        FloatType s = 0.;
+        size_t n = 0;
+        for (map<size_t, FloatType>::const_iterator p = cm1.begin(); p != cm1.end(); ++p) {
+            if (p->first != pos->idx.idx2 && cm2.find(p->first) != cm2.end()) {
+                s += p->second * cm2[p->first];
+                ++n;
+            }
+        }
+        if (n > 0) s /= n;
+        ncps.push_back(PairScore(pos->idx, s));
+    }
+    FloatType tot_mn = 0.;
+    for (PairScoreVector::const_iterator pos = ncps.begin(); pos != ncps.end(); ++pos) tot_mn += pos->score;
+    tot_mn /= ncps.size();
+    tot_mn = sqrt(tot_mn);
+    for (PairScoreVector::iterator pos = ncps.begin(); pos != ncps.end(); ++pos) pos->score /= tot_mn;
+    PairScoreVector ret;
+    for (size_t i = 0; i < scores.size(); ++i)
+        ret.push_back(PairScore(scores[i].idx, scores[i].score - ncps[i].score));
     return ret;
 }
 

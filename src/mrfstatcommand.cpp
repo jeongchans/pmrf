@@ -11,11 +11,10 @@ static const string option_message =
     " --mode <mode>         Calculation mode of evolutionary constraints\n"
     "                       pos: positional mode\n"
     "                       pair: pairwise mode (default)\n"
-//TODO
-//    " --correct <int>       Score correction method (Work only with `--mode pair`)\n"
-//    "                       0: no correction\n"
-//    "                       1: average product correction (APC) (default)\n"
-//    "                       2: normalized coevolutionary pattern similarity (NCPS)\n"
+    " --corr <int>          Score correction method (Work only with `--mode pair`)\n"
+    "                       0: no correction\n"
+    "                       1: average product correction (APC) (default)\n"
+    "                       2: normalized coevolutionary pattern similarity (NCPS)\n"
     "\n"
     " -h, --help            Help\n";
 
@@ -39,6 +38,7 @@ bool MRFStatCommandLine::parse_command_line(int argc, char** argv) {
     static struct option opts[] = {
         {"help", 0, 0, 0},
         {"mode", required_argument, 0, 0},
+        {"corr", required_argument, 0, 0},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -54,6 +54,9 @@ bool MRFStatCommandLine::parse_command_line(int argc, char** argv) {
                 exit(0);
             case 1:
                 if (parse_mode(optarg, opt.stat_opt.mode)) break;
+                return false;
+            case 2:
+                if (parse_corr(optarg, opt.stat_opt.corr)) break;
                 return false;
             }
             break;
@@ -84,4 +87,8 @@ bool MRFStatCommandLine::parse_mode(char* optarg, StatMode& arg) {
         return false;
     }
     return true;
+}
+
+bool MRFStatCommandLine::parse_corr(char* optarg, StatCorrect& arg) {
+    return parse_int(optarg, arg) && arg >= 0 && arg <= 2;
 }
