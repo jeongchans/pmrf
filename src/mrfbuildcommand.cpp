@@ -31,9 +31,6 @@ static const string option_message =
     "                           0: no\n"
     "                           1: yes (default)\n"
     "\n"
-    " Profile-based regularization options\n"
-    " --gap-prob <float>        Gap probability (default: 0.14)\n"
-    "\n"
     "Optimization options:\n"
     " --delta <float>           Minimum rate of decrease of objective function (default: 1e-4)\n"
     "\n"
@@ -72,7 +69,6 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         {"delta", required_argument, 0, 0},
         {"seqwt", required_argument, 0, 0},
         {"effnum", required_argument, 0, 0},
-        {"gap-prob", required_argument, 0, 0},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -112,9 +108,6 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
                 else return false;
             case 9:
                 if (parse_int(optarg, opt.build_opt.msa_analyzer_opt.eff_num)) break;
-                else return false;
-            case 10:
-                if (parse_float(optarg, opt.build_opt.parameterizer_opt.gap_prob)) break;
                 else return false;
             }
             break;
