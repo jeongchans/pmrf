@@ -25,7 +25,6 @@ static const string option_message =
     " --regul <int>             Regularization of node and edge weights\n"
     "                           0: no\n"
     "                           1: L2 regularization (default)\n"
-    "                           2: profile-based regularization\n"
     " --regnode-lambda <float>  Weighting factor for node regularization (default: 0.01)\n"
     " --regedge-lambda <float>  Weighting factor for edge regularization (default: 0.2)\n"
     " --regedge-scale <int>     Scaling edge regularization\n"
@@ -141,10 +140,6 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         opt.build_opt.parameterizer_opt.l2_opt.lambda1 = regnode_lambda;
         opt.build_opt.parameterizer_opt.l2_opt.lambda2 = regedge_lambda;
         opt.build_opt.parameterizer_opt.l2_opt.sc = regedge_scale;
-    } else if (opt.build_opt.parameterizer_opt.regul == RegulMethod::RegulMethod::PROFILE) {
-        opt.build_opt.parameterizer_opt.pb_opt.lambda1 = regnode_lambda;
-        opt.build_opt.parameterizer_opt.pb_opt.lambda2 = regedge_lambda;
-        opt.build_opt.parameterizer_opt.pb_opt.sc = regedge_scale;
     }
     return true;
 }
@@ -164,7 +159,6 @@ bool MRFBuildCommandLine::parse_regul(char* optarg, RegulMethod::RegulMethod& ar
     int d = atoi(optarg);
     if (d == 0) arg = RegulMethod::RegulMethod::NONE;
     else if (d == 1) arg = RegulMethod::RegulMethod::L2;
-    else if (d == 2) arg = RegulMethod::RegulMethod::PROFILE;
     else {
         error_message = "Unknown node regularization option: " + d;
         return false;

@@ -87,57 +87,6 @@ void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *
 }
 
 /**
-   @class MRFParameterizer::ProfileRegularization
- */
-
-MRFParameterizer::ProfileRegularization::ProfileRegularization(const Float2dArray* psfm, Parameter& param, Option& opt) : param(param), opt(opt) {
-    mn.resize(param.length, param.num_var);
-    if (psfm != NULL) {
-        for (int i = 0; i < param.length; ++i) {
-            double avglog = sum(log((*psfm)(i, ALL))) / param.num_var;
-            mn(i, ALL) = log((*psfm)(i, ALL)) - avglog;
-        }
-    }
-}
-
-void MRFParameterizer::ProfileRegularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
-    regularize_node(x, g, fx);
-    regularize_edge(x, g, fx);
-}
-
-void MRFParameterizer::ProfileRegularization::regularize_node(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
-    const double& lambda = opt.lambda1;
-    string letters = param.abc.get_canonical();
-    for (int i = 0; i < param.length; ++i) {
-        for (int t = 0; t < param.num_var; ++t) {
-            int k = param.get_nidx(i, letters[t]);
-            double d = x[k] - mn(i, t);
-            fx += lambda * pow2(d);
-            g[k] += 2. * lambda * (d);
-        }
-    }
-}
-
-void MRFParameterizer::ProfileRegularization::regularize_edge(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
-    double lambda = opt.lambda2;
-    if (opt.sc) lambda *= 2. * ((double)(param.eidx.size())) / ((double)(param.length));
-    string letters = param.abc.get_canonical();
-    for (map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
-        int i = pos->first.idx1;
-        int j = pos->first.idx2;
-        for (int p = 0; p < param.num_var; ++p) {
-            for (int q = 0; q < param.num_var; ++q) {
-                int k = param.get_eidx(i, j, letters[p], letters[q]);
-                //double d = x[k] - (mn(i, p) + mn(j, q));
-                double d = x[k];
-                fx += lambda * pow2(d);
-                g[k] += 2. * lambda * d;
-            }
-        }
-    }
-}
-
-/**
    @class MRFParameterizer::ObjectiveFunction
  */
 
@@ -146,7 +95,6 @@ MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces
   param(param), 
   opt(opt), 
   l2_func(param, opt.l2_opt),
-  pb_func(psfm, param, opt.pb_opt),
   msa_analyzer(msa_analyzer) {
     vector<string> msa = traces.get_trimmed_aseq_vec();
     msa = msa_analyzer.termi_gap_remover->filter(msa);
@@ -168,7 +116,6 @@ lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatva
         update_gradient(x, g, logpot, logz, seq, sw);
     }
     if (opt.regul == RegulMethod::RegulMethod::L2) l2_func.regularize(x, g, fx);
-    else if (opt.regul == RegulMethod::RegulMethod::PROFILE) pb_func.regularize(x, g, fx);
     return fx;
 }
 

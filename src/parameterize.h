@@ -76,34 +76,6 @@ class MRFParameterizer {
         void regularize_edge(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
     };
 
-    // Profile-based regularization
-
-    class ProfileRegularization : public RegularizationFunction {
-      public:
-
-        class Option {
-          public:
-            Option(const double& lambda1=0.01, const double& lambda2=0.2, const bool& sc=true)
-            : lambda1(lambda1), lambda2(lambda2), sc(sc) {};
-
-            double lambda1;
-            double lambda2;
-            bool sc;
-        };
-
-        ProfileRegularization(const Float2dArray* psfm, Parameter& param, Option& opt);
-
-        virtual void regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
-
-      private:
-        const Parameter& param;
-        const Option& opt;
-        Float2dArray mn;
-
-        void regularize_node(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
-        void regularize_edge(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
-    };
-
     // Objective function
 
     class ObjectiveFunction : public LBFGS::ObjectiveFunction {
@@ -115,7 +87,6 @@ class MRFParameterizer {
 
             RegulMethod::RegulMethod regul;
             L2Regularization::Option l2_opt;
-            ProfileRegularization::Option pb_opt;
 
             double gap_prob;
         };
@@ -134,7 +105,6 @@ class MRFParameterizer {
         const MSAAnalyzer msa_analyzer;
 
         L2Regularization l2_func;
-        ProfileRegularization pb_func;
 
         Float2dArray calc_logpot(const lbfgsfloatval_t *x, const string& seq, const double& sw);
         Float1dArray logsumexp(const Float2dArray& b);

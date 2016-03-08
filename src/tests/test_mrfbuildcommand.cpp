@@ -46,28 +46,6 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_l2_regul_param) {
     EXPECT_EQ(false, cmd_line.opt.build_opt.parameterizer_opt.l2_opt.sc);
 }
 
-TEST_F(MRFBuildCommandLine_Test, test_parse_pb_regul_param) {
-    int argc = 15;
-    char* argv[15] = {"pmrf", "build",
-                      "aaa.afa", "-o", "aaa.mrf",
-                      "--regul", "2",
-                      "--regnode-lambda", "15.0",
-                      "--regedge-lambda", "3.0",
-                      "--regedge-scale", "0",
-                      "--gap-prob", "0.25"};
-    MRFBuildCommandLine cmd_line(argc, argv);
-
-    ASSERT_TRUE(cmd_line.is_valid());
-    EXPECT_EQ("aaa.afa", cmd_line.opt.msa_filename);
-    EXPECT_EQ("aaa.mrf", cmd_line.opt.out_filename);
-
-    EXPECT_EQ(RegulMethod::RegulMethod::PROFILE, cmd_line.opt.build_opt.parameterizer_opt.regul);
-    EXPECT_EQ(15.0, cmd_line.opt.build_opt.parameterizer_opt.pb_opt.lambda1);
-    EXPECT_EQ(3.0, cmd_line.opt.build_opt.parameterizer_opt.pb_opt.lambda2);
-    EXPECT_EQ(false, cmd_line.opt.build_opt.parameterizer_opt.pb_opt.sc);
-    EXPECT_EQ(0.25, cmd_line.opt.build_opt.parameterizer_opt.gap_prob);
-}
-
 TEST_F(MRFBuildCommandLine_Test, test_parse_input_param) {
     int argc = 9;
     char* argv[9] = {"pmrf", "build",
