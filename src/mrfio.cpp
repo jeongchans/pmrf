@@ -32,6 +32,15 @@ void MRFExporter::export_body(const MRF& model, ostream& os) {
     string seq = model.get_seq();
     size_t n = model.get_length();
     EdgeIndexVector edge_idxs = model.get_edge_idxs();
+    os << "# PROFILE" << endl;
+    os << "RES\t";
+    export_node_symbol(symbols, os);
+    os << endl;
+    for (size_t i = 0; i < n; ++i) {
+        os << seq[i] << " " << i + 1 << "\t";
+        export_psfm(model.get_psfm(i), os);
+        os << endl;
+    }
     os << "# NODE" << endl;
     os << "RES\t";
     export_node_symbol(symbols, os);
@@ -63,6 +72,11 @@ void MRFExporter::export_seq(const string& seq, const size_t& width, ostream& os
         os << seq.substr(i, width) << endl;
         i += width;
     } while (i < n);
+}
+
+void MRFExporter::export_psfm(const Float1dArray& w, ostream& os) {
+    export_elem(w(0), os);
+    for (int i = 1; i < w.size(); ++i) export_elem(w(i), os, true);
 }
 
 void MRFExporter::export_node_symbol(const string& sym, ostream& os) {
@@ -202,6 +216,17 @@ void MRFImporter::import_body(istream& is, MRF& model) {
                     is >> idx2;
                     model.get_edge(idx1 - 1, idx2 - 1).set_weight(import_edge_weight(is, num_var));
                 }
+            } else if (s == "PROFILE") {
+                getline(is, dummy);
+                getline(is, dummy);
+                size_t n = model.get_length();
+                Float2dArray psfm = zeros(n, num_var);
+                for (size_t i = 0; i < n; ++i) {
+                    is >> dummy;
+                    is >> dummy;
+                    psfm(i, ALL) = import_psfm(is, num_var);
+                }
+                model.set_psfm(psfm);
             }
         }
     }
@@ -218,6 +243,12 @@ Float2dArray MRFImporter::import_edge_weight(istream& is, const size_t& num_var)
     for (int i = 0; i < num_var; ++i)
         for (int j = 0; j < num_var; ++j)
             w(i, j) = import_elem(is);
+    return w;
+}
+
+Float1dArray MRFImporter::import_psfm(istream& is, const size_t& num_var) {
+    Float1dArray w(num_var);
+    for (int i = 0; i < num_var; ++i) w(i) = import_elem(is);
     return w;
 }
 

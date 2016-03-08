@@ -11,7 +11,7 @@ class MRFInferProcessor : public MRFCmdProcessor {
     MRFInferProcessor(int argc, char** argv);
     ~MRFInferProcessor();
 
-    int infer(const string& msa_filename, const string& out_filename);
+    int infer(const string& mrf_filename, const string& seq_filename);
 
 };
 

@@ -147,6 +147,7 @@ class MRFParameterizer {
     const MSAAnalyzer& msa_analyzer;
 
     void update_model(MRF& model, Parameter& param);
+    Float2dArray calc_profile(const TraceVector& traces);
 
     FRIEND_TEST(MRFParameterizer_Test, test_update_model);
 };
