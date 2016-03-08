@@ -29,7 +29,8 @@ class ProfileBuilderTest : public testing::Test {
 
     virtual void SetUp() {
         traces.push_back(Trace("MMMMMMMMMMMMMMMM", "PPDQEFLRARVQLGDA"));
-        traces.push_back(Trace("UUUUUMMMIIIIMMMMUUUU", "SSHGNRIVHLQ"));
+//        traces.push_back(Trace("UUUUUMMMIIIIMMMMUUUU", "SSHGNRIVHLQ"));
+        traces.push_back(Trace("DDDDDMMMIIIIMMMMDDDD", "SSHGNRIVHLQ"));
     }
 
     AminoAcid abc;

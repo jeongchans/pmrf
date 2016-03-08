@@ -22,23 +22,18 @@ static const string option_message =
     "                           1: exponential of average entropy\n"
     "\n"
     "Regularization options:\n"
-    " --regnode <int>           Regularization of node weights\n"
+    " --regul <int>             Regularization of node and edge weights\n"
     "                           0: no\n"
     "                           1: L2 regularization (default)\n"
     "                           2: profile-based regularization\n"
     " --regnode-lambda <float>  Weighting factor for node regularization (default: 0.01)\n"
-    "\n"
-    " Profile-based regularization options\n"
-    " --gap-open <float>        Gap-opening penalty (default: -10)\n"
-    " --gap-ext <float>         Gap-extension penalty (default: -1)\n"
-    "\n"
-    " --regedge <int>           Regularization of edge weights\n"
-    "                           0: none\n"
-    "                           1: L2 regularization (default)\n"
     " --regedge-lambda <float>  Weighting factor for edge regularization (default: 0.2)\n"
     " --regedge-scale <int>     Scaling edge regularization\n"
     "                           0: no\n"
     "                           1: yes (default)\n"
+    "\n"
+    " Profile-based regularization options\n"
+    " --gap-prob <float>        Gap probability (default: 0.14)\n"
     "\n"
     "Optimization options:\n"
     " --delta <float>           Minimum rate of decrease of objective function (default: 1e-4)\n"
@@ -63,14 +58,14 @@ void MRFBuildCommandLine::show_help() {
 }
 
 bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
-    double node_regul_lambda = 0.01;
-    double edge_regul_lambda = 0.2;
+    double regnode_lambda = 0.01;
+    double regedge_lambda = 0.2;
+    bool regedge_scale = true;
     optind = 0;     // initialize getopt_long()
     static struct option opts[] = {
         {"help", 0, 0, 0},
-        {"regnode", required_argument, 0, 0},
+        {"regul", required_argument, 0, 0},
         {"regnode-lambda", required_argument, 0, 0},
-        {"regedge", required_argument, 0, 0},
         {"regedge-lambda", required_argument, 0, 0},
         {"regedge-scale", required_argument, 0, 0},
         {"msa", required_argument, 0, 0},
@@ -78,8 +73,7 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         {"delta", required_argument, 0, 0},
         {"seqwt", required_argument, 0, 0},
         {"effnum", required_argument, 0, 0},
-        {"gap-open", required_argument, 0, 0},
-        {"gap-ext", required_argument, 0, 0},
+        {"gap-prob", required_argument, 0, 0},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -94,40 +88,34 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
                 show_help();
                 exit(0);
             case 1:
-                if (parse_regnode(optarg, opt.build_opt.parameterizer_opt.node_regul)) break;
+                if (parse_regul(optarg, opt.build_opt.parameterizer_opt.regul)) break;
                 else return false;
             case 2:
-                if (parse_double(optarg, node_regul_lambda)) break;
+                if (parse_double(optarg, regnode_lambda)) break;
                 else return false;
             case 3:
-                if (parse_regedge(optarg, opt.build_opt.parameterizer_opt.edge_regul)) break;
+                if (parse_double(optarg, regedge_lambda)) break;
                 else return false;
             case 4:
-                if (parse_double(optarg, edge_regul_lambda)) break;
+                if (parse_bool(optarg, regedge_scale)) break;
                 else return false;
             case 5:
-                if (parse_bool(optarg, opt.build_opt.parameterizer_opt.edge_l2_opt.sc)) break;
-                else return false;
-            case 6:
                 if (parse_msa_fmt(optarg, opt.build_opt.msa_fmt)) break;
                 else return false;
-            case 7:
+            case 6:
                 if (parse_str(optarg, opt.build_opt.eidx_filename)) break;
                 else return false;
-            case 8:
+            case 7:
                 if (parse_float(optarg, opt.build_opt.optim_opt.delta)) break;
                 else return false;
-            case 9:
+            case 8:
                 if (parse_int(optarg, opt.build_opt.msa_analyzer_opt.seq_wt)) break;
                 else return false;
-            case 10:
+            case 9:
                 if (parse_int(optarg, opt.build_opt.msa_analyzer_opt.eff_num)) break;
                 else return false;
-            case 11:
-                if (parse_float(optarg, opt.build_opt.parameterizer_opt.node_pssm_opt.gap_open)) break;
-                else return false;
-            case 12:
-                if (parse_float(optarg, opt.build_opt.parameterizer_opt.node_pssm_opt.gap_ext)) break;
+            case 10:
+                if (parse_float(optarg, opt.build_opt.parameterizer_opt.gap_prob)) break;
                 else return false;
             }
             break;
@@ -149,12 +137,15 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         error_message = "Not enough arguments\n";
         return false;
     }
-    if (opt.build_opt.parameterizer_opt.node_regul == NodeRegulMethod::L2)
-        opt.build_opt.parameterizer_opt.node_l2_opt.lambda = node_regul_lambda;
-    else if (opt.build_opt.parameterizer_opt.node_regul == NodeRegulMethod::PSSM)
-        opt.build_opt.parameterizer_opt.node_pssm_opt.lambda = node_regul_lambda;
-    if (opt.build_opt.parameterizer_opt.edge_regul == EdgeRegulMethod::L2)
-        opt.build_opt.parameterizer_opt.edge_l2_opt.lambda = edge_regul_lambda;
+    if (opt.build_opt.parameterizer_opt.regul == RegulMethod::RegulMethod::L2) {
+        opt.build_opt.parameterizer_opt.l2_opt.lambda1 = regnode_lambda;
+        opt.build_opt.parameterizer_opt.l2_opt.lambda2 = regedge_lambda;
+        opt.build_opt.parameterizer_opt.l2_opt.sc = regedge_scale;
+    } else if (opt.build_opt.parameterizer_opt.regul == RegulMethod::RegulMethod::PROFILE) {
+        opt.build_opt.parameterizer_opt.pb_opt.lambda1 = regnode_lambda;
+        opt.build_opt.parameterizer_opt.pb_opt.lambda2 = regedge_lambda;
+        opt.build_opt.parameterizer_opt.pb_opt.sc = regedge_scale;
+    }
     return true;
 }
 
@@ -169,11 +160,11 @@ bool MRFBuildCommandLine::parse_msa_fmt(char* optarg, MSAFormat& arg) {
     return true;
 }
 
-bool MRFBuildCommandLine::parse_regnode(char* optarg, NodeRegulMethod::NodeRegulMethod& arg) {
+bool MRFBuildCommandLine::parse_regul(char* optarg, RegulMethod::RegulMethod& arg) {
     int d = atoi(optarg);
-    if (d == 0) arg = NodeRegulMethod::NONE;
-    else if (d == 1) arg = NodeRegulMethod::L2;
-    else if (d == 2) arg = NodeRegulMethod::PSSM;
+    if (d == 0) arg = RegulMethod::RegulMethod::NONE;
+    else if (d == 1) arg = RegulMethod::RegulMethod::L2;
+    else if (d == 2) arg = RegulMethod::RegulMethod::PROFILE;
     else {
         error_message = "Unknown node regularization option: " + d;
         return false;
@@ -183,16 +174,5 @@ bool MRFBuildCommandLine::parse_regnode(char* optarg, NodeRegulMethod::NodeRegul
 
 bool MRFBuildCommandLine::parse_double(char* optarg, double& arg) {
     arg = atof(optarg);
-    return true;
-}
-
-bool MRFBuildCommandLine::parse_regedge(char* optarg, EdgeRegulMethod::EdgeRegulMethod& arg) {
-    int d = atoi(optarg);
-    if (d == 0) arg = EdgeRegulMethod::NONE;
-    else if (d == 1) arg = EdgeRegulMethod::L2;
-    else {
-        error_message = "Unknown edge regularization option: " + d;
-        return false;
-    }
     return true;
 }

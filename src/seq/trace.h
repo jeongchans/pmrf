@@ -7,16 +7,25 @@
 class Trace {
   public:
 
+//    enum StateType {
+//        MATCH = 0,
+//        INSERT = 1,
+//        GAPOPEN = 2,
+//        GAPEXT = 3,
+//        UNALIGNED = 4,
+//        UNDEFINED = 99
+//    };
+//    static const size_t NUM_STATE_TYPE = 5;
+//    static const char STATE_SYMBOL[5];
+
     enum StateType {
         MATCH = 0,
         INSERT = 1,
-        GAPOPEN = 2,
-        GAPEXT = 3,
-        UNALIGNED = 4,
+        DELETE = 2,
         UNDEFINED = 99
     };
-    static const size_t NUM_STATE_TYPE = 5;
-    static const char STATE_SYMBOL[5];
+    static const size_t NUM_STATE_TYPE = 3;
+    static const char STATE_SYMBOL[3];
 
     class State {
       public:

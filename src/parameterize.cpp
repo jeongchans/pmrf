@@ -49,61 +49,16 @@ int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char
 }
 
 /**
-   @class MRFParameterizer::NodePSSMRegularization
+   @class MRFParameterizer::L2Regularization
  */
 
-MRFParameterizer::NodePSSMRegularization::NodePSSMRegularization(const TraceVector& traces, Parameter& param, Option& opt) : param(param), opt(opt) {
-    if (opt.lambda != 0.) {
-        Float2dArray pssm = calc_pssm(traces);
-        string letters = param.abc.get_canonical();
-        mn.resize(param.length, param.num_var);
-        for (int i = 0; i < param.length; ++i) {
-            for (int t = 0; t < param.num_var; ++t) {
-                if (letters[t] == GAP_OPEN_SYMBOL) mn(i, t) = opt.gap_open;
-                else if (letters[t] == GAP_EXT_SYMBOL) mn(i, t) = opt.gap_ext;
-                else if (letters[t] == GAP_UNALI_SYMBOL) mn(i, t) = 0.;
-                else mn(i, t) = pssm(i, t);
-            }
-        }
-    }
+void MRFParameterizer::L2Regularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
+    regularize_node(x, g, fx);
+    regularize_edge(x, g, fx);
 }
 
-Float2dArray MRFParameterizer::NodePSSMRegularization::calc_pssm(const TraceVector& traces) {
-    AminoAcid aa;
-    ProfileBuilder profile_builder(aa);
-    SMMEmitProbEstimator emit_prob_estimator(ROBINSON_BGFREQ.get_array(aa), 
-                                             BLOSUM62_MATRIX.get_array(aa), 
-                                             3.2);
-    profile_builder.set_emit_prob_estimator(&emit_prob_estimator);
-    PBSeqWeightEstimator seq_weight_estimator(aa);
-    profile_builder.set_seq_weight_estimator(&seq_weight_estimator);
-    ExpEntropyEffSeqNumEstimator eff_seq_num_estimator(aa, &seq_weight_estimator);
-    profile_builder.set_eff_seq_num_estimator(&eff_seq_num_estimator);
-    TerminalGapRemover termi_gap_remover(aa, 0.1);
-    profile_builder.set_msa_filter(&termi_gap_remover);
-    Profile profile = profile_builder.build(traces);
-    return profile.get_ll();
-}
-
-void MRFParameterizer::NodePSSMRegularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
-    const double& lambda = opt.lambda;
-    string letters = param.abc.get_canonical();
-    for (int i = 0; i < param.length; ++i) {
-        for (int t = 0; t < param.num_var; ++t) {
-            int k = param.get_nidx(i, letters[t]);
-            double d = x[k] - mn(i, t);
-            fx += lambda * pow2(d);
-            g[k] += 2. * lambda * (d);
-        }
-    }
-}
-
-/**
-   @class MRFParameterizer::NodeL2Regularization
- */
-
-void MRFParameterizer::NodeL2Regularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
-    const double& lambda = opt.lambda;
+void MRFParameterizer::L2Regularization::regularize_node(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
+    const double& lambda = opt.lambda1;
     string letters = param.abc.get_canonical();
     for (int i = 0; i < param.length; ++i) {
         for (int t = 0; t < param.num_var; ++t) {
@@ -114,15 +69,9 @@ void MRFParameterizer::NodeL2Regularization::regularize(const lbfgsfloatval_t *x
     }
 }
 
-/**
-   @class MRFParameterizer::EdgeL2Regularization
- */
-
-MRFParameterizer::EdgeL2Regularization::EdgeL2Regularization(Parameter& param, Option& opt) : param(param), opt(opt), lambda(opt.lambda) {
-    if (opt.sc) lambda = 2. * ((double)(param.eidx.size())) / ((double)(param.length)) * opt.lambda;
-}
-
-void MRFParameterizer::EdgeL2Regularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
+void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
+    double lambda = opt.lambda2;
+    if (opt.sc) lambda *= 2. * ((double)(param.eidx.size())) / ((double)(param.length));
     string letters = param.abc.get_canonical();
     for (map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
         int i = pos->first.idx1;
@@ -138,16 +87,66 @@ void MRFParameterizer::EdgeL2Regularization::regularize(const lbfgsfloatval_t *x
 }
 
 /**
+   @class MRFParameterizer::ProfileRegularization
+ */
+
+MRFParameterizer::ProfileRegularization::ProfileRegularization(const Float2dArray* psfm, Parameter& param, Option& opt) : param(param), opt(opt) {
+    mn.resize(param.length, param.num_var);
+    if (psfm != NULL) {
+        for (int i = 0; i < param.length; ++i) {
+            double avglog = sum(log((*psfm)(i, ALL))) / param.num_var;
+            mn(i, ALL) = log((*psfm)(i, ALL)) - avglog;
+        }
+    }
+}
+
+void MRFParameterizer::ProfileRegularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
+    regularize_node(x, g, fx);
+    regularize_edge(x, g, fx);
+}
+
+void MRFParameterizer::ProfileRegularization::regularize_node(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
+    const double& lambda = opt.lambda1;
+    string letters = param.abc.get_canonical();
+    for (int i = 0; i < param.length; ++i) {
+        for (int t = 0; t < param.num_var; ++t) {
+            int k = param.get_nidx(i, letters[t]);
+            double d = x[k] - mn(i, t);
+            fx += lambda * pow2(d);
+            g[k] += 2. * lambda * (d);
+        }
+    }
+}
+
+void MRFParameterizer::ProfileRegularization::regularize_edge(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
+    double lambda = opt.lambda2;
+    if (opt.sc) lambda *= 2. * ((double)(param.eidx.size())) / ((double)(param.length));
+    string letters = param.abc.get_canonical();
+    for (map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
+        int i = pos->first.idx1;
+        int j = pos->first.idx2;
+        for (int p = 0; p < param.num_var; ++p) {
+            for (int q = 0; q < param.num_var; ++q) {
+                int k = param.get_eidx(i, j, letters[p], letters[q]);
+                //double d = x[k] - (mn(i, p) + mn(j, q));
+                double d = x[k];
+                fx += lambda * pow2(d);
+                g[k] += 2. * lambda * d;
+            }
+        }
+    }
+}
+
+/**
    @class MRFParameterizer::ObjectiveFunction
  */
 
-MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const MSAAnalyzer& msa_analyzer) 
+MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const MSAAnalyzer& msa_analyzer, const Float2dArray* psfm) 
 : traces(traces), 
   param(param), 
   opt(opt), 
-  node_l2_func(param, opt.node_l2_opt),
-  node_pssm_func(traces, param, opt.node_pssm_opt),
-  edge_l2_func(param, opt.edge_l2_opt),
+  l2_func(param, opt.l2_opt),
+  pb_func(psfm, param, opt.pb_opt),
   msa_analyzer(msa_analyzer) {
     vector<string> msa = traces.get_trimmed_aseq_vec();
     msa = msa_analyzer.termi_gap_remover->filter(msa);
@@ -168,9 +167,8 @@ lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatva
         update_obj_score(fx, logpot, logz, seq, sw);
         update_gradient(x, g, logpot, logz, seq, sw);
     }
-    if (opt.node_regul == NodeRegulMethod::L2) node_l2_func.regularize(x, g, fx);
-    else if (opt.node_regul == NodeRegulMethod::PSSM) node_pssm_func.regularize(x, g, fx);
-    if (opt.edge_regul == EdgeRegulMethod::L2) edge_l2_func.regularize(x, g, fx);
+    if (opt.regul == RegulMethod::RegulMethod::L2) l2_func.regularize(x, g, fx);
+    else if (opt.regul == RegulMethod::RegulMethod::PROFILE) pb_func.regularize(x, g, fx);
     return fx;
 }
 
@@ -256,11 +254,32 @@ void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t 
 
 int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     Parameter param(model, optim_opt);
-    ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
+    Float2dArray psfm = zeros(param.length, param.num_var);
+    psfm(ALL, Range(blitz::fromStart, 19)) = calc_profile(traces) * (1. - opt.gap_prob);
+    psfm(ALL, param.num_var - 1) = opt.gap_prob;
+    ObjectiveFunction obj_func(traces, param, opt, msa_analyzer, &psfm);
     LBFGS::Optimizer optimizer;
     int ret = optimizer.optimize(&param, &obj_func);
+    model.set_psfm(psfm);
     update_model(model, param);
     return ret;
+}
+
+Float2dArray MRFParameterizer::calc_profile(const TraceVector& traces) {
+    AminoAcid aa;
+    ProfileBuilder profile_builder(aa);
+    SMMEmitProbEstimator emit_prob_estimator(ROBINSON_BGFREQ.get_array(aa), 
+                                             BLOSUM62_MATRIX.get_array(aa), 
+                                             3.2);
+    profile_builder.set_emit_prob_estimator(&emit_prob_estimator);
+    PBSeqWeightEstimator seq_weight_estimator(aa);
+    profile_builder.set_seq_weight_estimator(&seq_weight_estimator);
+    ExpEntropyEffSeqNumEstimator eff_seq_num_estimator(aa, &seq_weight_estimator);
+    profile_builder.set_eff_seq_num_estimator(&eff_seq_num_estimator);
+    TerminalGapRemover termi_gap_remover(aa, 0.1);
+    profile_builder.set_msa_filter(&termi_gap_remover);
+    Profile profile = profile_builder.build(traces);
+    return profile.get_prob();
 }
 
 void MRFParameterizer::update_model(MRF& model, Parameter& param) {
