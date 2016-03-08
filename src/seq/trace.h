@@ -43,11 +43,12 @@ class Trace {
     Trace(const string& ststr, const string& seq, const string& id, const string& desc);
 
     std::string get_seq() const;
+    std::string get_desc() const { return desc; }
     size_t get_length() const { return get_seq().size(); }
 
     bool operator==(const Trace& rhs) const;
     bool is_matched(const size_t& ref_idx) const;
-    std::string get_trimmed_aseq() const;
+    std::string get_matched_aseq() const;
     char get_symbol_at(const size_t& ref_idx) const;
 
   private:
@@ -72,7 +73,7 @@ class TraceVector {
     bool empty() const { return data.empty(); }
 
     TraceVector subset_matched(const size_t& ref_idx) const;
-    vector<string> get_trimmed_aseq_vec() const;
+    vector<string> get_matched_aseq_vec() const;
 
   private:
     std::vector<Trace> data;

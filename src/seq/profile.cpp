@@ -63,7 +63,7 @@ Profile ProfileBuilder::build(const TraceVector& traces) const {
 
 void ProfileBuilder::collect_trace(const TraceVector& traces, const size_t& idx, TraceVector& r_trs, vector<string>& r_msa) const {
     r_trs = traces.subset_matched(idx);
-    r_msa = r_trs.get_trimmed_aseq_vec();
+    r_msa = r_trs.get_matched_aseq_vec();
     if (r_msa.empty()) return;
     r_msa = msa_filter->filter(r_msa);
 }

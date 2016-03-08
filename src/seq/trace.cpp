@@ -72,7 +72,7 @@ bool Trace::is_matched(const size_t& ref_idx) const {
     return st[aidx[ref_idx]].st == MATCH;
 }
 
-string Trace::get_trimmed_aseq() const {
+string Trace::get_matched_aseq() const {
     string seq;
     for (vector<size_t>::const_iterator pos = aidx.begin(); pos != aidx.end(); ++pos)
         seq += st[*pos].aa;
@@ -102,10 +102,10 @@ TraceVector TraceVector::subset_matched(const size_t& ref_idx) const {
     return trs;
 }
 
-vector<string> TraceVector::get_trimmed_aseq_vec() const {
+vector<string> TraceVector::get_matched_aseq_vec() const {
     vector<string> r;
     for (const_iterator pos = begin(); pos != end(); ++pos)
-        r.push_back(pos->get_trimmed_aseq());
+        r.push_back(pos->get_matched_aseq());
     return r;
 }
 

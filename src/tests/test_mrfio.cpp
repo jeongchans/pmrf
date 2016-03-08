@@ -77,3 +77,51 @@ TEST_F(MRFExporter_Test, test_export_edge_weight) {
     exporter.export_edge_weight(w, oss);
     EXPECT_EQ(s, oss.str());
 }
+
+class MRFImporter_Test : public testing::Test {
+  protected:
+    virtual void SetUp() {
+        buf = "";
+    }
+
+    string buf;
+};
+
+TEST_F(MRFImporter_Test, test_import_seq) {
+    buf = "DG";
+    std::istringstream is(buf);
+    MRFImporter importer;
+    EXPECT_EQ("DG", importer.import_seq(is, 2));
+}
+
+TEST_F(MRFImporter_Test, test_import_node_weight) {
+    buf = "1.222\t-0.611\t-0.611";
+    std::istringstream is(buf);
+    size_t num_var = 3;
+    Float1dArray w(3);
+    w = 1.222, -0.611, -0.611;
+    MRFImporter importer;
+    EXPECT_TRUE(allclose(w, importer.import_node_weight(is, num_var)));
+}
+
+TEST_F(MRFImporter_Test, test_import_edge_weight) {
+    buf = "-0.111\t0.444\t-0.111\t*\t-0.111\t*\t*\t-0.111\t*";
+    std::istringstream is(buf);
+    size_t num_var = 3;
+    Float2dArray w(num_var, num_var);
+    w(0, ALL) = -0.111, 0.444, -0.111;
+    w(1, ALL) = 0., -0.111, 0.;
+    w(2, ALL) = 0., -0.111, 0.;
+    MRFImporter importer;
+    EXPECT_TRUE(allclose(w, importer.import_edge_weight(is, num_var)));
+}
+
+TEST_F(MRFImporter_Test, test_import_psfm) {
+    buf = "0.102\t0.005\t*";
+    std::istringstream is(buf);
+    size_t num_var = 3;
+    Float1dArray w(3);
+    w = 0.102, 0.005, 0.;
+    MRFImporter importer;
+    EXPECT_TRUE(allclose(w, importer.import_psfm(is, num_var)));
+}

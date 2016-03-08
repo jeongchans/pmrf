@@ -90,9 +90,16 @@ class MRF {
     // length, sequence
     string get_seq() const { return seq; }
     size_t get_length() const { return length; }
+    size_t get_num_edge() const { return edges.size(); }
     size_t get_num_var() const { return abc.get_canonical_size(); }
     string get_var_symbol() const { return abc.get_canonical(); }
     const Alphabet& get_alphabet() const { return abc; }
+    int get_var_idx(const char& x) const { return abc.get_idx(x); }
+
+    // Profile setter and getter
+    void set_psfm(const Float2dArray& m) { psfm = m; }
+    Float2dArray get_psfm() const { return psfm; }
+    const Float1dArray get_psfm(const size_t& idx) const { return psfm(idx, ALL); }
 
     // element getter
     NodeElement& get_node(const size_t& idx) { return nodes[idx]; }
@@ -104,10 +111,8 @@ class MRF {
         { return edges.find(EdgeIndex(idx1, idx2))->second; }
     EdgeIndexVector get_edge_idxs() const;
 
-    // Profile setter and getter
-    void set_psfm(const Float2dArray& m) { psfm = m; }
-    Float2dArray get_psfm() const { return psfm; }
-    const Float1dArray get_psfm(const size_t& idx) const { return psfm(idx, ALL); }
+    bool has_edge(const size_t& idx1, const size_t& idx2) const
+        { return edges.find(EdgeIndex(idx1, idx2)) != edges.end(); }
 
   private:
     const Alphabet& abc;

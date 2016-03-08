@@ -352,4 +352,11 @@ inline std::vector<const FloatType*> raw_data(const Float2dArray& x) {
     return r;
 }
 
+inline FloatType calc_kld(const Float1dArray f, const Float1dArray p) {
+    FloatType d = 0.;
+    for (size_t t = 0; t < f.size(); ++t)
+        if (f(t) > 0) d += f(t) * log(f(t) / p(t));
+    return d;
+}
+
 #endif

@@ -6,9 +6,10 @@
 
 #include "util/common.h"
 #include "seq/profile.h"
-#include "core.h"
 #include "seq/bgfreq.h"
 #include "seq/subsmat.h"
+
+#include "core.h"
 
 using blitz::pow2;
 using blitz::sum;
@@ -96,7 +97,7 @@ MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces
   opt(opt), 
   l2_func(param, opt.l2_opt),
   msa_analyzer(msa_analyzer) {
-    vector<string> msa = traces.get_trimmed_aseq_vec();
+    vector<string> msa = traces.get_matched_aseq_vec();
     msa = msa_analyzer.termi_gap_remover->filter(msa);
     seq_weight.resize(traces.size());
     seq_weight = msa_analyzer.seq_weight_estimator->estimate(msa);
@@ -108,7 +109,7 @@ lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatva
     lbfgsfloatval_t fx = 0.;
     for (int i = 0; i < param.n; ++i) g[i] = 0.;
     for (int i = 0; i < traces.size(); ++i) {
-        string seq = traces[i].get_trimmed_aseq();
+        string seq = traces[i].get_matched_aseq();
         double sw = seq_weight(i);
         Float2dArray logpot = calc_logpot(x, seq, sw);
         Float1dArray logz = calc_logz(logpot);
@@ -202,9 +203,10 @@ void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t 
 int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     Parameter param(model, optim_opt);
     Float2dArray psfm = zeros(param.length, param.num_var);
-    psfm(ALL, Range(blitz::fromStart, 19)) = calc_profile(traces) * (1. - opt.gap_prob);
-    psfm(ALL, param.num_var - 1) = opt.gap_prob;
-    ObjectiveFunction obj_func(traces, param, opt, msa_analyzer, &psfm);
+    FloatType gap_prob = 0.;
+    psfm(ALL, Range(blitz::fromStart, 19)) = calc_profile(traces) * (1. - gap_prob);
+    psfm(ALL, param.num_var - 1) = gap_prob;
+    ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
     LBFGS::Optimizer optimizer;
     int ret = optimizer.optimize(&param, &obj_func);
     model.set_psfm(psfm);
@@ -215,16 +217,16 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
 Float2dArray MRFParameterizer::calc_profile(const TraceVector& traces) {
     AminoAcid aa;
     ProfileBuilder profile_builder(aa);
-    SMMEmitProbEstimator emit_prob_estimator(ROBINSON_BGFREQ.get_array(aa), 
-                                             BLOSUM62_MATRIX.get_array(aa), 
-                                             3.2);
-    profile_builder.set_emit_prob_estimator(&emit_prob_estimator);
-    PBSeqWeightEstimator seq_weight_estimator(aa);
-    profile_builder.set_seq_weight_estimator(&seq_weight_estimator);
-    ExpEntropyEffSeqNumEstimator eff_seq_num_estimator(aa, &seq_weight_estimator);
-    profile_builder.set_eff_seq_num_estimator(&eff_seq_num_estimator);
-    TerminalGapRemover termi_gap_remover(aa, 0.1);
-    profile_builder.set_msa_filter(&termi_gap_remover);
+//    SMMEmitProbEstimator emit_prob_estimator(ROBINSON_BGFREQ.get_array(aa), 
+//                                             BLOSUM62_MATRIX.get_array(aa), 
+//                                             3.2);
+//    profile_builder.set_emit_prob_estimator(&emit_prob_estimator);
+//    PBSeqWeightEstimator seq_weight_estimator(aa);
+//    profile_builder.set_seq_weight_estimator(&seq_weight_estimator);
+//    ExpEntropyEffSeqNumEstimator eff_seq_num_estimator(aa, &seq_weight_estimator);
+//    profile_builder.set_eff_seq_num_estimator(&eff_seq_num_estimator);
+//    TerminalGapRemover termi_gap_remover(aa, 0.1);
+//    profile_builder.set_msa_filter(&termi_gap_remover);
     Profile profile = profile_builder.build(traces);
     return profile.get_prob();
 }

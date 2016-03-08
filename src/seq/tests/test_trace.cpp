@@ -35,10 +35,10 @@ TEST_F(TraceTest, test_is_matched) {
     EXPECT_TRUE(trace2.is_matched(7));
 }
 
-TEST_F(TraceTest, test_get_trimmed_seq) {
-    EXPECT_EQ(string("PPDQEFLRGARVQLGDA"), trace1.get_trimmed_aseq());
-    //EXPECT_EQ(string("^^DQ=--HGVHLQ^^^^"), trace2.get_trimmed_aseq());
-    EXPECT_EQ(string("--DQ---HGVHLQ----"), trace2.get_trimmed_aseq());
+TEST_F(TraceTest, test_get_matched_seq) {
+    EXPECT_EQ(string("PPDQEFLRGARVQLGDA"), trace1.get_matched_aseq());
+    //EXPECT_EQ(string("^^DQ=--HGVHLQ^^^^"), trace2.get_matched_aseq());
+    EXPECT_EQ(string("--DQ---HGVHLQ----"), trace2.get_matched_aseq());
 }
 
 TEST_F(TraceTest, test_operator_eq) {
@@ -75,11 +75,11 @@ TEST_F(TraceVectorTest, test_subset_matched) {
     ASSERT_EQ((size_t) 2, trs.size());
 }
 
-TEST_F(TraceVectorTest, test_get_trimmed_aseq_vec) {
-    vector<string> vec = traces.get_trimmed_aseq_vec();
+TEST_F(TraceVectorTest, test_get_matched_aseq_vec) {
+    vector<string> vec = traces.get_matched_aseq_vec();
     ASSERT_EQ(traces.size(), vec.size());
-    EXPECT_EQ(traces[0].get_trimmed_aseq(), vec[0]);
-    EXPECT_EQ(traces[1].get_trimmed_aseq(), vec[1]);
+    EXPECT_EQ(traces[0].get_matched_aseq(), vec[0]);
+    EXPECT_EQ(traces[1].get_matched_aseq(), vec[1]);
 }
 
 string a3m(">seq1 Sample #1\n"
@@ -120,7 +120,7 @@ TEST_F(TraceImporterTest, test_import_a3m) {
         EXPECT_TRUE(traces[i] == trs[i]) 
         << "i = " << i << endl                                    
         << trs[i].get_seq() << endl
-        << trs[i].get_trimmed_aseq() << endl;
+        << trs[i].get_matched_aseq() << endl;
     }
 }
 
