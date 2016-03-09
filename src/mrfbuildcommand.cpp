@@ -8,31 +8,34 @@ using std::endl;
 
 static const string option_message =
     "Input options:\n"
-    " --msa <fmt>               Multiple sequence alignment format\n"
+    " --msa <fmt>               choose format of MSA file\n"
     "                           fasta: aligned FASTA (default)\n"
     "                           a3m: HHsearch A3M format\n"
-    " --edge <file>             Restrict edges to list of index pairs\n"
+    " --edge <edge_file>        list of edges\n"
+    "\n"
+    "Output options:\n"
+    " -o <mrf_file>             write MRF model to file\n"
     "\n"
     "Preprocessing options:\n"
-    " --seqwt <int>             Sequence weight method\n"
-    "                           0: no sequence weight\n"
+    " --seqwt <int>             sequence weighting\n"
+    "                           0: no sequence weighting\n"
     "                           1: Henikoff's position-based weights (default)\n"
-    " --effnum <int>            Effective number of sequences\n"
+    " --effnum <int>            effective number of sequences\n"
     "                           0: no effective number (default)\n"
     "                           1: exponential of average entropy\n"
     "\n"
     "Regularization options:\n"
-    " --regul <int>             Regularization of node and edge weights\n"
+    " --regul <int>             regularization of node and edge weights\n"
     "                           0: no\n"
     "                           1: L2 regularization (default)\n"
-    " --regnode-lambda <float>  Weighting factor for node regularization (default: 0.01)\n"
-    " --regedge-lambda <float>  Weighting factor for edge regularization (default: 0.2)\n"
-    " --regedge-scale <int>     Scaling edge regularization\n"
+    " --regnode-lambda <float>  weighting factor for node regularization (default: 0.01)\n"
+    " --regedge-lambda <float>  weighting factor for edge regularization (default: 0.2)\n"
+    " --regedge-scale <int>     scaling edge regularization term\n"
     "                           0: no\n"
     "                           1: yes (default)\n"
     "\n"
     "Optimization options:\n"
-    " --delta <float>           Minimum rate of decrease of objective function (default: 1e-4)\n"
+    " --delta <float>           minimum rate of decrease for objective function (default: 1e-4)\n"
     "\n"
     " -h, --help                Help\n";
 
@@ -47,7 +50,7 @@ int MRFBuildCommandLine::process_command(MRFCmdProcessor *processor) {
 }
 
 void MRFBuildCommandLine::show_help() {
-    cout << "Usage: " << PROGNAME << " build <file> [options]" << endl
+    cout << "Usage: " << PROGNAME << " build <msa_file> [options]" << endl
          << endl
          << option_message
          << endl;
