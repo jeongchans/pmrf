@@ -67,7 +67,6 @@ bool MRFStatCommandLine::parse_command_line(int argc, char** argv) {
             return false;
         }
     }
-    optind++;
     if (optind < argc) {
         opt.mrf_filename = argv[optind];
     } else {

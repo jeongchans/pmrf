@@ -17,6 +17,8 @@ MRFMainProcessor::~MRFMainProcessor() {
 }
 
 int MRFMainProcessor::run_mrf_cmd(const SubCommand& cmd) {
+    argv++;
+    argc--;
     switch (cmd) {
     case HELP:
         cmd_line->show_help();
@@ -24,9 +26,9 @@ int MRFMainProcessor::run_mrf_cmd(const SubCommand& cmd) {
     case BUILD:
         return MRFBuildProcessor(argc, argv).run();
     case INFER:
-        MRFInferProcessor(argc, argv).run();
+        return MRFInferProcessor(argc, argv).run();
     case STAT:
-        MRFStatProcessor(argc, argv).run();
+        return MRFStatProcessor(argc, argv).run();
     }
     return 1;
 }

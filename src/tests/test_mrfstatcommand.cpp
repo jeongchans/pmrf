@@ -7,8 +7,8 @@ class MRFStatCommandLine_Test : public testing::Test {
 };
 
 TEST_F(MRFStatCommandLine_Test, test_parse_param) {
-    int argc = 3;
-    char* argv[3] = {"pmrf", "stat",
+    int argc = 2;
+    char* argv[2] = {"stat",
                      "aaa.mrf"};
     MRFStatCommandLine cmd_line(argc, argv);
     ASSERT_TRUE(cmd_line.is_valid());
@@ -19,8 +19,8 @@ TEST_F(MRFStatCommandLine_Test, test_parse_param) {
 }
 
 TEST_F(MRFStatCommandLine_Test, test_parse_opt_param) {
-    int argc = 7;
-    char* argv[7] = {"pmrf", "stat",
+    int argc = 6;
+    char* argv[6] = {"stat",
                      "aaa.mrf",
                      "--mode", "pos",
                      "--corr", "2"};

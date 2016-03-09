@@ -124,7 +124,6 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
             return false;
         }
     }
-    optind++;
     if (optind < argc) {
         opt.msa_filename = argv[optind];
     } else {
