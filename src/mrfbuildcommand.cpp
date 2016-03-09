@@ -11,7 +11,7 @@ static const string option_message =
     " --msa <fmt>               choose format of MSA file\n"
     "                           fasta: aligned FASTA (default)\n"
     "                           a3m: HHsearch A3M format\n"
-    " --edge <edge_file>        list of edges\n"
+    " --edge <edge_file>        specify list of edges to determine MRF architecture\n"
     "\n"
     "Output options:\n"
     " -o <mrf_file>             write MRF model to file\n"
@@ -37,7 +37,7 @@ static const string option_message =
     "Optimization options:\n"
     " --delta <float>           minimum rate of decrease for objective function (default: 1e-4)\n"
     "\n"
-    " -h, --help                Help\n";
+    " -h, --help                show this help message\n";
 
 MRFBuildCommandLine::MRFBuildCommandLine(int argc, char** argv) : MRFCommandLine(argc, argv) {
     opt.out_filename = "";
