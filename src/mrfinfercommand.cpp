@@ -7,7 +7,8 @@ using std::cout;
 using std::endl;
 
 static const string option_message =
-    " -h, --help            Help\n";
+    "Options:\n"
+    " -h, --help                show this help message\n";
 
 MRFInferCommandLine::MRFInferCommandLine(int argc, char** argv) : MRFCommandLine(argc, argv) {
     validity = parse_command_line(this->argc, (char**)(this->argv));
@@ -18,7 +19,7 @@ int MRFInferCommandLine::process_command(MRFCmdProcessor *processor) {
 }
 
 void MRFInferCommandLine::show_help() {
-    cout << "Usage: " << PROGNAME << " infer <file> [options]" << endl
+    cout << "Usage: " << PROGNAME << " infer <mrf_file> <seq_file> [options]" << endl
          << endl
          << option_message
          << endl;
