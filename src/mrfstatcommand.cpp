@@ -8,15 +8,15 @@ using std::endl;
 
 static const string option_message =
     "Options:\n"
-    " --mode <mode>         Calculation mode of evolutionary constraints\n"
-    "                       pos: positional mode\n"
-    "                       pair: pairwise mode (default)\n"
-    " --corr <int>          Score correction method (Work only with `--mode pair`)\n"
-    "                       0: no correction\n"
-    "                       1: average product correction (APC) (default)\n"
-    "                       2: normalized coevolutionary pattern similarity (NCPS)\n"
+    " --mode <mode>             calculation mode of evolutionary constraints\n"
+    "                           pos: positional mode\n"
+    "                           pair: pairwise mode (default)\n"
+    " --corr <int>              pairwise coevolution score correction\n"
+    "                           0: no correction\n"
+    "                           1: average product (default)\n"
+    "                           2: normalized coevolutionary pattern similarity\n"
     "\n"
-    " -h, --help            Help\n";
+    " -h, --help                show this help message\n";
 
 MRFStatCommandLine::MRFStatCommandLine(int argc, char** argv) : MRFCommandLine(argc, argv) {
     validity = parse_command_line(this->argc, (char**)(this->argv));
