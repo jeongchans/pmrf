@@ -14,9 +14,9 @@ static const string command_list_message =
     "  infer        Estimate sequence distribution with MRF model\n"
     "  stat         Estimate evolutionary constraints for MRF model\n"
     "\n"
-    "Use `pmrf --version` to print the PMRF version\n"
-    "Use `pmrf -h` or `pmrf --help` to print this help message\n"
-    "Use `pmrf <command> -h` to print the help message on a specific command\n";
+    "Use `pmrf --version' to print the PMRF version\n"
+    "Use `pmrf -h' or `pmrf --help' to print this help message\n"
+    "Use `pmrf <command> -h' to print the help message on a specific command\n";
 
 MRFMainCommandLine::MRFMainCommandLine(int argc, char** argv) : MRFCommandLine(argc, argv) {
     subcmd = NONE;
@@ -36,12 +36,30 @@ void MRFMainCommandLine::show_help() {
          << endl;
 }
 
+void MRFMainCommandLine::show_version() {
+    cout << PROGNAME << " version " << VERSION << endl;
+}
+
 bool MRFMainCommandLine::parse_command_line(int argc, char** argv) {
-    optind = 1;
-    opterr = 0;     // disable getopt_long error message
-    bool help = false;
+    if (argc < 2) {
+        show_help();
+        exit(0);
+    }
+    if (argv[1][0] != '-') {
+        string cmd = argv[1];
+        if (cmd == "help") subcmd = HELP;
+        else if (cmd == "build") subcmd = BUILD;
+        else if (cmd == "infer") subcmd = INFER;
+        else if (cmd == "stat") subcmd = STAT;
+        else {
+            error_message = string("Unknown command: ") + cmd + "\n";
+            return false;
+        }
+        return true;
+    }
     static struct option opts[] = {
         {"help", 0, 0, 0},
+        {"version", 0, 0, 0},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -53,30 +71,17 @@ bool MRFMainCommandLine::parse_command_line(int argc, char** argv) {
         case 0:
             switch (opt_idx) {
             case 0:
-                help = true;
-                break;
+                show_help();
+                exit(0);
+            case 1:
+                show_version();
+                exit(0);
             }
             break;
         case 'h':
-            help = true;
-            break;
-        }
-    }
-    if (optind < argc) {
-        string s = argv[optind];
-        if (s == "help") subcmd = HELP;
-        else if (s == "build") subcmd = BUILD;
-        else if (s == "infer") subcmd = INFER;
-        else if (s == "stat") subcmd = STAT;
-        else {
-            error_message = "Unknown subcommand: ";
-            error_message += s + "\n";
-            return false;
-        }
-    } else {
-        if (help) subcmd = HELP;
-        else {
-            error_message = "Subcommand is required\n";
+            show_help();
+            exit(0);
+        default:
             return false;
         }
     }

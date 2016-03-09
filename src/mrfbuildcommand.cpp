@@ -121,7 +121,6 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
             opt.out_filename = optarg;
             break;
         default:
-            error_message = "Unknown option\n";
             return false;
         }
     }

@@ -48,7 +48,6 @@ bool MRFInferCommandLine::parse_command_line(int argc, char** argv) {
             show_help();
             exit(0);
         default:
-            error_message = "Unknown option\n";
             return false;
         }
     }

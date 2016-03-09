@@ -38,3 +38,12 @@ TEST_F(MRFMainCommandLine_Test, test_parse_subcmd_infer) {
     ASSERT_TRUE(cmd_line.is_valid());
     EXPECT_EQ(INFER, cmd_line.subcmd);
 }
+
+TEST_F(MRFMainCommandLine_Test, test_parse_subcmd_stat) {
+    int argc = 3;
+    char* argv[3] = {"pmrf", "stat",
+                     "aaa.mrf"};
+    MRFMainCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
+    EXPECT_EQ(STAT, cmd_line.subcmd);
+}

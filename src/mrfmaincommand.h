@@ -12,6 +12,8 @@ class MRFMainCommandLine : public MRFCommandLine {
     virtual int process_command(MRFCmdProcessor *processor);
     virtual void show_help();
 
+    void show_version();
+
     SubCommand subcmd;
 
   protected:
