@@ -8,11 +8,15 @@ using std::endl;
 
 static const string command_list_message =
     "generate MRF model\n"
-    "  build        Build an MRF for an input alignment\n"
+    "  build        Build MRF model\n"
     "\n"
     "examine evolutionary information\n"
-    "  infer        Calculate a sequence distribution\n"
-    "  stat         Estimate evolutionary constraints for an MRF model\n";
+    "  infer        Estimate sequence distribution with MRF model\n"
+    "  stat         Estimate evolutionary constraints for MRF model\n"
+    "\n"
+    "Use `pmrf --version` to print the PMRF version\n"
+    "Use `pmrf -h` or `pmrf --help` to print this help message\n"
+    "Use `pmrf <command> -h` to print the help message on a specific command\n";
 
 MRFMainCommandLine::MRFMainCommandLine(int argc, char** argv) : MRFCommandLine(argc, argv) {
     subcmd = NONE;
@@ -26,11 +30,10 @@ int MRFMainCommandLine::process_command(MRFCmdProcessor *processor) {
 void MRFMainCommandLine::show_help() {
     cout << "Usage: " << PROGNAME << " <command> [<args>]" << endl
          << endl
-         << "The available commands are:" << endl
+         << "The following commands are available for MRF modeling and varisous applications:" << endl
          << endl
          << command_list_message
          << endl;
-    cout << "Use '" << PROGNAME << " <command> -h' for help on a specific command" << endl;
 }
 
 bool MRFMainCommandLine::parse_command_line(int argc, char** argv) {
@@ -66,7 +69,8 @@ bool MRFMainCommandLine::parse_command_line(int argc, char** argv) {
         else if (s == "infer") subcmd = INFER;
         else if (s == "stat") subcmd = STAT;
         else {
-            error_message = "Unknown subcommand\n";
+            error_message = "Unknown subcommand: ";
+            error_message += s + "\n";
             return false;
         }
     } else {
