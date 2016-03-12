@@ -154,7 +154,7 @@ bool MRFBuildCommandLine::parse_regul(char* optarg, RegulMethod::RegulMethod& ar
     if (d == 0) arg = RegulMethod::RegulMethod::NONE;
     else if (d == 1) arg = RegulMethod::RegulMethod::L2;
     else {
-        error_message = "Unknown node regularization option: " + d;
+        error_message = string("Unknown node regularization option: ") + *optarg;
         return false;
     }
     return true;
