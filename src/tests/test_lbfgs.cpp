@@ -16,7 +16,7 @@ TEST_F(LBFGS_Parameter_Test, test_initialize) {
 
 class MyObjFunc : public LBFGS::ObjectiveFunction {
   public:
-    virtual lbfgsfloatval_t evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step) {
+    virtual lbfgsfloatval_t evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t) {
         lbfgsfloatval_t fx = 0.0;
         for (int i = 0; i < n; i += 2) {
             lbfgsfloatval_t t1 = 1.0 - x[i];

@@ -36,15 +36,15 @@ TEST_F(MRFParameterizer_Parameter_Test, test_get_eidx) {
     int expected = length * 21;
     EdgeIndexVector edge_idxs = mrf.get_edge_idxs();
     for (EdgeIndexVector::iterator pos = edge_idxs.begin(); pos != edge_idxs.end(); ++pos) {
-        if (pos->idx1 == i && pos->idx2 == j) break;
+        if (pos->idx1 == (size_t) i && pos->idx2 == (size_t) j) break;
         else expected += 21 * 21;
     }
     string letters = abc.get_canonical();
-    for (int k = 0; k < letters.size(); ++k) {
+    for (size_t k = 0; k < letters.size(); ++k) {
         if (letters[k] == p) break;
         else expected += 21;
     }
-    for (int k = 0; k < letters.size(); ++k) {
+    for (size_t k = 0; k < letters.size(); ++k) {
         if (letters[k] == q) break;
         else expected++;
     }
@@ -54,7 +54,7 @@ TEST_F(MRFParameterizer_Parameter_Test, test_get_eidx) {
 
 class MRFParameterizer_RegularizationFunction_Test : public testing::Test {
   protected:
-    MRFParameterizer_RegularizationFunction_Test() : length(16), g(NULL), mrf(length, abc), param(mrf, optim_opt) {};
+    MRFParameterizer_RegularizationFunction_Test() : length(16), mrf(length, abc), param(mrf, optim_opt), g(NULL) {};
 
     virtual void SetUp() {
         g = lbfgs_malloc(param.n);
@@ -97,10 +97,9 @@ TEST_F(MRFParameterizer_RegularizationFunction_Test, test_l2_regularization) {
 
 class MRFParameterizer_ObjectiveFunction_Test : public testing::Test {
   protected:
-    MRFParameterizer_ObjectiveFunction_Test() : length(16), g(NULL), mrf(length, abc), param(mrf, optim_opt) {};
+    MRFParameterizer_ObjectiveFunction_Test() : length(16), mrf(length, abc), param(mrf, optim_opt), g(NULL) {};
 
     virtual void SetUp() {
-        size_t n = abc.get_canonical_size();
         traces.push_back(Trace("MMMMMMMMMMMMMMMMM", "PPDQEFLRGARVQLGDA"));
 //        traces.push_back(Trace("UUMMOEEMMIIIMMMMUUUU", "DQHGNRIVHLQ"));
         traces.push_back(Trace("DDMMDDDMMIIIMMMMDDDD", "DQHGNRIVHLQ"));
@@ -133,7 +132,6 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_calc_logpot) {
     MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
 
     string seq = traces[0].get_matched_aseq();
-    FloatType sw = seq_weight(0);
 
     Float2dArray logpot = obj_func.calc_logpot(param.x, seq);
     EXPECT_EQ(param.num_var, logpot.rows());
@@ -216,7 +214,7 @@ class MRFParameterizer_Test : public testing::Test {
         if (ambiguous) letters += "BJZOUX";
         size_t n = letters.size();
         string seq = "";
-        for (int i = 0; i < length; ++i)
+        for (size_t i = 0; i < length; ++i)
             seq += letters[rand() % n];
         return seq;
     }
@@ -245,8 +243,7 @@ TEST_F(MRFParameterizer_Test, test_parameterize) {
     MRF mrf(length, abc);
     MRFParameterizer parameterizer(msa_analyzer);
 
-    int ret = parameterizer.parameterize(mrf, traces);
-    //ASSERT_TRUE(ret >= 0);
+    parameterizer.parameterize(mrf, traces);
     EXPECT_NE(0., sum(pow2(mrf.get_node(2).get_weight())));
     EXPECT_NE(0., sum(pow2(mrf.get_edge(2, 5).get_weight())));
 }
@@ -255,8 +252,7 @@ TEST_F(MRFParameterizer_Test, test_parameterize_ambiguous) {
     MRF mrf(length, abc);
     MRFParameterizer parameterizer(msa_analyzer);
 
-    int ret = parameterizer.parameterize(mrf, ambiguous_traces);
-    //ASSERT_TRUE(ret >= 0);
+    parameterizer.parameterize(mrf, ambiguous_traces);
     EXPECT_NE(0., sum(pow2(mrf.get_node(2).get_weight())));
     EXPECT_NE(0., sum(pow2(mrf.get_edge(2, 5).get_weight())));
 }

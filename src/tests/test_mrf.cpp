@@ -158,9 +158,9 @@ TEST_F(MRF_Test, test_traverse) {
     // Custom visitor for testing
     class MyVisitor : public MRF::Visitor {
       public:
-        virtual void visit_node(MRF::NodeElement* element, const size_t& idx)
+        virtual void visit_node(MRF::NodeElement*, const size_t& idx)
             { nvisits.push_back(idx); }
-        virtual void visit_edge(MRF::EdgeElement* element, const size_t& idx1, const size_t& idx2)
+        virtual void visit_edge(MRF::EdgeElement*, const size_t& idx1, const size_t& idx2)
             { evisits.push_back(pair<size_t, size_t>(idx1, idx2)); }
 
         vector<size_t> nvisits;
