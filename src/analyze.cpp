@@ -93,12 +93,21 @@ TraceVector MRFModelAnalyzer::read_traces(const string& filename) {
 double MRFModelAnalyzer::calc_pll(const MRF& model, const string& aseq) {
     double pll = 0.;
     size_t n = model.get_length();
+    const Alphabet& abc = model.get_alphabet();
     for (size_t i = 0; i < n; ++i) {
-        int idx1 = model.get_var_idx(aseq[i]);
-        pll += model.get_node(i).get_weight()(idx1);
+        FloatType w1;
+        string s1 = abc.get_degeneracy(aseq[i], &w1);
+        for (string::iterator c = s1.begin(); c != s1.end(); ++c)
+            pll += w1 * model.get_node(i).get_weight()(abc.get_idx(*c));
         for (size_t j = i + 1; j < n; ++j) {
-            int idx2 = model.get_var_idx(aseq[j]);
-            if (model.has_edge(i, j)) pll += model.get_edge(i, j).get_weight()(idx1, idx2);
+            if (model.has_edge(i, j)) {
+                FloatType w2;
+                string s2 = abc.get_degeneracy(aseq[j], &w2);
+                for (string::iterator c1 = s1.begin(); c1 != s1.end(); ++c1) {
+                    for (string::iterator c2 = s2.begin(); c2 != s2.end(); ++c2)
+                        pll += w1 * w2 * model.get_edge(i, j).get_weight()(abc.get_idx(*c1), abc.get_idx(*c2));
+                }
+            }
         }
     }
     return pll;
