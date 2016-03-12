@@ -22,7 +22,7 @@ class SeqWeightEstimatorTest : public testing::Test {
 };
 
 TEST_F(SeqWeightEstimatorTest, test_pb_seq_weight_estimator) {
-    PBSeqWeightEstimator estimator(abc);
+    PBSeqWeightEstimator estimator;
     Float1dArray wt(4);
     wt = 0.267, 0.267, 0.200, 0.267;
     Float1dArray v = estimator.estimate(msa1);

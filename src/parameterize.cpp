@@ -91,12 +91,12 @@ void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *
    @class MRFParameterizer::ObjectiveFunction
  */
 
-MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const MSAAnalyzer& msa_analyzer, const Float2dArray* psfm) 
+MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const MSAAnalyzer& msa_analyzer)
 : traces(traces), 
   param(param), 
   opt(opt), 
-  l2_func(param, opt.l2_opt),
-  msa_analyzer(msa_analyzer) {
+  msa_analyzer(msa_analyzer),
+  l2_func(param, opt.l2_opt) {
     vector<string> msa = traces.get_matched_aseq_vec();
     msa = msa_analyzer.termi_gap_remover->filter(msa);
     seq_weight.resize(traces.size());
@@ -108,10 +108,10 @@ MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces
 lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step) {
     lbfgsfloatval_t fx = 0.;
     for (int i = 0; i < param.n; ++i) g[i] = 0.;
-    for (int i = 0; i < traces.size(); ++i) {
+    for (size_t i = 0; i < traces.size(); ++i) {
         string seq = traces[i].get_matched_aseq();
         double sw = seq_weight(i);
-        Float2dArray logpot = calc_logpot(x, seq, sw);
+        Float2dArray logpot = calc_logpot(x, seq);
         Float1dArray logz = calc_logz(logpot);
         update_obj_score(fx, logpot, logz, seq, sw);
         update_gradient(x, g, logpot, logz, seq, sw);
@@ -120,7 +120,7 @@ lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatva
     return fx;
 }
 
-Float2dArray MRFParameterizer::ObjectiveFunction::calc_logpot(const lbfgsfloatval_t *x, const string& seq, const double& sw) {
+Float2dArray MRFParameterizer::ObjectiveFunction::calc_logpot(const lbfgsfloatval_t *x, const string& seq) {
     Float2dArray logpot = zeros(param.num_var, param.length);
     string letters = param.abc.get_canonical();
     FloatType wi, wj;
@@ -230,7 +230,7 @@ Float2dArray MRFParameterizer::calc_profile(const TraceVector& traces) {
 
 void MRFParameterizer::update_model(MRF& model, Parameter& param) {
     string letters = param.abc.get_canonical();
-    for (int i = 0; i < model.get_length(); ++i) {
+    for (size_t i = 0; i < model.get_length(); ++i) {
         Float1dArray w = zeros(param.num_var);
         for (int t = 0; t < param.num_var; ++t) w(t) = (FloatType)param.x[param.get_nidx(i, letters[t])];
         model.get_node(i).set_weight(w);

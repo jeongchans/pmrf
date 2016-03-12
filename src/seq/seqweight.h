@@ -32,12 +32,11 @@ class NullSeqWeightEstimator : public SeqWeightEstimator {
 // sequence weights are additionally normalized with the sequence length.
 class PBSeqWeightEstimator : public SeqWeightEstimator {
   public:
-    PBSeqWeightEstimator(const Alphabet& abc) : abc(abc), dim(26) {};
+    PBSeqWeightEstimator() : dim(26) {};
 
     virtual Float1dArray estimate(const vector<string>& msa) const;
 
   private:
-    const Alphabet& abc;
     const int dim;
 
     Float1dArray calc_residue_weight(const vector<string>& msa, const int& idx) const;
@@ -53,12 +52,11 @@ class PBSeqWeightEstimator : public SeqWeightEstimator {
 // residue.
 class PSIBLASTPBSeqWeightEstimator : public SeqWeightEstimator {
   public:
-    PSIBLASTPBSeqWeightEstimator(const Alphabet& abc) : abc(abc), dim(27), gap_idx(26) {};
+    PSIBLASTPBSeqWeightEstimator() : dim(27), gap_idx(26) {};
 
     virtual Float1dArray estimate(const vector<string>& msa) const;
 
   private:
-    const Alphabet& abc;
     const int dim;
     const int gap_idx;
 

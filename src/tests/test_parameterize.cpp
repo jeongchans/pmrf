@@ -135,7 +135,7 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_calc_logpot) {
     string seq = traces[0].get_matched_aseq();
     FloatType sw = seq_weight(0);
 
-    Float2dArray logpot = obj_func.calc_logpot(param.x, seq, sw);
+    Float2dArray logpot = obj_func.calc_logpot(param.x, seq);
     EXPECT_EQ(param.num_var, logpot.rows());
     EXPECT_EQ(param.length, logpot.cols());
 }

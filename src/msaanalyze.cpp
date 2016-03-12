@@ -1,13 +1,12 @@
 #include "msaanalyze.h"
 
-MSAAnalyzer::MSAAnalyzer(Option& opt, const Alphabet& abc)
-: abc(abc) {
+MSAAnalyzer::MSAAnalyzer(Option& opt, const Alphabet& abc) {
     if (opt.seq_wt == NO_WEIGHT) {
         seq_weight_estimator = std::shared_ptr<NullSeqWeightEstimator>(
             new NullSeqWeightEstimator());
     } else if (opt.seq_wt == POSITION_BASED) {
         seq_weight_estimator = std::shared_ptr<PBSeqWeightEstimator>(
-            new PBSeqWeightEstimator(abc));
+            new PBSeqWeightEstimator());
     }
     if (opt.eff_num == NO_EFFNUM) {
         eff_seq_num_estimator = std::shared_ptr<NullEffSeqNumEstimator>(

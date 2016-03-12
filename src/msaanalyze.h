@@ -35,9 +35,6 @@ class MSAAnalyzer {
     shared_ptr<SeqWeightEstimator> seq_weight_estimator;
     shared_ptr<EffSeqNumEstimator> eff_seq_num_estimator;
     shared_ptr<TerminalGapRemover> termi_gap_remover;
-
-  private:
-    const Alphabet& abc;
 };
 
 #endif

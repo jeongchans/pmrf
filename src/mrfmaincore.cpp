@@ -20,6 +20,7 @@ int MRFMainProcessor::run_mrf_cmd(const SubCommand& cmd) {
     argv++;
     argc--;
     switch (cmd) {
+    case NONE:
     case HELP:
         cmd_line->show_help();
         exit(0);

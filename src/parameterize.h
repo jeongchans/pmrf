@@ -91,7 +91,7 @@ class MRFParameterizer {
             double gap_prob;
         };
 
-        ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const MSAAnalyzer& msa_analyzer, const Float2dArray* psfm=NULL);
+        ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const MSAAnalyzer& msa_analyzer);
 
         virtual lbfgsfloatval_t evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step);
 
@@ -106,7 +106,7 @@ class MRFParameterizer {
 
         L2Regularization l2_func;
 
-        Float2dArray calc_logpot(const lbfgsfloatval_t *x, const string& seq, const double& sw);
+        Float2dArray calc_logpot(const lbfgsfloatval_t *x, const string& seq);
         Float1dArray logsumexp(const Float2dArray& b);
         Float1dArray calc_logz(const Float2dArray& logpot);
         void update_obj_score(lbfgsfloatval_t& fx, const Float2dArray& logpot, const Float1dArray& logz, const string& seq, const double& sw);
