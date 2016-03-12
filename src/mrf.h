@@ -50,7 +50,7 @@ class MRF {
 
         NodeElement& operator=(const NodeElement& rhs);
 
-        virtual void accept(Visitor* visitor, const size_t& idx1, const size_t& idx2);
+        virtual void accept(Visitor* visitor, const size_t& idx1, const size_t& idx2=(size_t) NULL);
 
         // weight getter and setter
         const Float1dArray& get_weight() const;
@@ -69,7 +69,7 @@ class MRF {
 
         EdgeElement& operator=(const EdgeElement& rhs);
 
-        virtual void accept(Visitor* visitor, const size_t& idx1, const size_t& idx2=(size_t) NULL);
+        virtual void accept(Visitor* visitor, const size_t& idx1, const size_t& idx2);
 
         // weight getter and setter
         const Float2dArray& get_weight() const;

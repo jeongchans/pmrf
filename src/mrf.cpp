@@ -17,7 +17,7 @@ MRF::NodeElement& MRF::NodeElement::operator=(const NodeElement& rhs) {
     return *this;
 }
 
-void MRF::NodeElement::accept(Visitor* visitor, const size_t& idx1, const size_t& idx2=(size_t)NULL) {
+void MRF::NodeElement::accept(Visitor* visitor, const size_t& idx1, const size_t&) {
     visitor->visit_node(this, idx1);
 }
 
@@ -60,14 +60,14 @@ void MRF::EdgeElement::set_weight(const double& w) {
 }
 
 /* MRF */
-MRF::MRF(const size_t& length, const Alphabet& abc, const EdgeIndexVector* eidxs) : length(length), abc(abc) {
+MRF::MRF(const size_t& length, const Alphabet& abc, const EdgeIndexVector* eidxs) : abc(abc), length(length) {
     seq = "";
     char c = abc.get_unknown()[0];
     for (size_t i = 0; i < length; ++i) seq += c;
     init(eidxs);
 }
 
-MRF::MRF(const string& seq, const Alphabet& abc, const EdgeIndexVector* eidxs) : seq(seq), abc(abc) {
+MRF::MRF(const string& seq, const Alphabet& abc, const EdgeIndexVector* eidxs) : abc(abc), seq(seq) {
     length = seq.size();
     init(eidxs);
 }
