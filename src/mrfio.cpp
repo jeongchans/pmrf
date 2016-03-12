@@ -1,5 +1,7 @@
 #include "mrfio.h"
 
+#include "command.h"
+
 using std::endl;
 using std::fixed;
 using std::setprecision;
@@ -22,6 +24,7 @@ void MRFExporter::export_model(const MRF& model, ostream& os) {
 }
 
 void MRFExporter::export_header(const MRF& model, ostream& os) {
+    os << "VER\t" << VERSION << endl;
     os << "LENG\t" << model.get_length() << endl;
     os << "SEQ" << endl;
     export_seq(model.get_seq(), 100, os);
@@ -152,6 +155,8 @@ MRF MRFImporter::import_header(istream& is, const Alphabet& abc) {
                 getline(is, dummy);
                 import_eidxs(is, eidxs);
             }
+        } else if (s == "VER") {
+            getline(is, dummy);
         } else if (s == "LENG") {
             is >> length;
             getline(is, dummy);
