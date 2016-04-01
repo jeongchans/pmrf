@@ -1,5 +1,5 @@
 export CXX          = g++
-export CXXFLAGS     = -Wno-write-strings -W -Wall -std=c++0x -O3
+export CXXFLAGS     = -Wno-write-strings -W -Wall -std=c++0x -O3 -DNDEBUG
 
 LBFGS_MODULE 	    = lbfgs
 LBFGS_SRC_DIR 	    = $(LBFGS_MODULE)
