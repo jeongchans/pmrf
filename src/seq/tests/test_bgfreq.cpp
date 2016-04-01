@@ -10,14 +10,14 @@ class BgFreqTest : public testing::Test {
 TEST_F(BgFreqTest, test_bgfreq) {
     std::string s = abc.get_canonical();
     std::map<char, double> freq;
-    Float1dArray f(s.size());
+    VectorXf f(s.size());
     for (int i = 0; i < (int)s.size(); ++i) {
         double val = i + 1;
         freq.insert(make_pair(s[i], val));
         f(i) = val;
     }
-    for (std::map<char, double>::iterator pos = freq.begin(); pos != freq.end(); ++pos) pos->second /= sum(f);
-    f /= sum(f);
+    for (std::map<char, double>::iterator pos = freq.begin(); pos != freq.end(); ++pos) pos->second /= f.sum();
+    f /= f.sum();
 
     BgFreq bgfreq(freq);
     EXPECT_TRUE(f.matrix() == bgfreq.get_array(abc).matrix());
@@ -29,7 +29,7 @@ TEST_F(BgFreqTest, test_bgfreq) {
 
 TEST_F(BgFreqTest, test_robinson) {
     RobinsonBgFreq robinson;
-    Float1dArray v(20);
+    VectorXf v(20);
     v << 0.07805,  // A
          0.01925,  // C
          0.05364,  // D
@@ -57,7 +57,7 @@ TEST_F(BgFreqTest, test_robinson) {
 
 TEST_F(BgFreqTest, test_altschul) {
     AltschulBgFreq altschul;
-    Float1dArray v(20);
+    VectorXf v(20);
     v << 0.08100,  // A
          0.01500,  // C
          0.05400,  // D

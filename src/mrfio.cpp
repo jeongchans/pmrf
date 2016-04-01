@@ -79,7 +79,7 @@ void MRFExporter::export_seq(const string& seq, const size_t& width, ostream& os
     } while (i < n);
 }
 
-void MRFExporter::export_psfm(const Float1dArray& w, ostream& os) {
+void MRFExporter::export_psfm(const VectorXf& w, ostream& os) {
     export_elem(w(0), os);
     for (size_t i = 1; i < w.size(); ++i) export_elem(w(i), os, true);
 }
@@ -89,7 +89,7 @@ void MRFExporter::export_node_symbol(const string& sym, ostream& os) {
     for (size_t i = 1; i < sym.size(); ++i) export_elem(sym[i], os, true);
 }
 
-void MRFExporter::export_node_weight(const Float1dArray& w, ostream& os) {
+void MRFExporter::export_node_weight(const VectorXf& w, ostream& os) {
     export_elem(w(0), os);
     for (size_t i = 1; i < w.size(); ++i) export_elem(w(i), os, true);
 }
@@ -109,7 +109,7 @@ void MRFExporter::export_edge_symbol(const string& sym, ostream& os) {
     }
 }
 
-void MRFExporter::export_edge_weight(const Float2dArray& w, ostream& os) {
+void MRFExporter::export_edge_weight(const MatrixXf& w, ostream& os) {
     export_elem(w(0, 0), os);
     for (int i = 0; i < w.rows(); ++i) {
         for (int j = 0; j < w.cols(); ++j) {
@@ -227,7 +227,7 @@ void MRFImporter::import_body(istream& is, MRF& model) {
                 getline(is, dummy);
                 getline(is, dummy);
                 size_t n = model.get_length();
-                Float2dArray psfm = zeros(n, num_var);
+                MatrixXf psfm = MatrixXf::Zero(n, num_var);
                 for (size_t i = 0; i < n; ++i) {
                     is >> dummy;
                     is >> dummy;
@@ -239,22 +239,22 @@ void MRFImporter::import_body(istream& is, MRF& model) {
     }
 }
 
-Float1dArray MRFImporter::import_node_weight(istream& is, const size_t& num_var) {
-    Float1dArray w(num_var);
+VectorXf MRFImporter::import_node_weight(istream& is, const size_t& num_var) {
+    VectorXf w(num_var);
     for (size_t i = 0; i < num_var; ++i) w(i) = import_elem(is);
     return w;
 }
 
-Float2dArray MRFImporter::import_edge_weight(istream& is, const size_t& num_var) {
-    Float2dArray w(num_var, num_var);
+MatrixXf MRFImporter::import_edge_weight(istream& is, const size_t& num_var) {
+    MatrixXf w(num_var, num_var);
     for (size_t i = 0; i < num_var; ++i)
         for (size_t j = 0; j < num_var; ++j)
             w((int)i, (int)j) = import_elem(is);
     return w;
 }
 
-Float1dArray MRFImporter::import_psfm(istream& is, const size_t& num_var) {
-    Float1dArray w(num_var);
+VectorXf MRFImporter::import_psfm(istream& is, const size_t& num_var) {
+    VectorXf w(num_var);
     for (size_t i = 0; i < num_var; ++i) w(i) = import_elem(is);
     return w;
 }

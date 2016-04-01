@@ -1,8 +1,8 @@
 #include "subsmat.h"
 
-Float2dArray SubstitutionMatrix::get_array(const Alphabet& abc) const {
+MatrixXf SubstitutionMatrix::get_array(const Alphabet& abc) const {
     size_t n = abc.get_canonical_size();
-    Float2dArray m(n, n);
+    MatrixXf m(n, n);
     int i, j;
     for (std::map<SymbolPair, double>::const_iterator pos = score.begin(); pos != score.end(); ++pos) {
         i = abc.get_idx((pos->first).first);
@@ -15,8 +15,8 @@ Float2dArray SubstitutionMatrix::get_array(const Alphabet& abc) const {
 
 BLOSUM62Matrix::BLOSUM62Matrix() {
     std::string s = "ACDEFGHIKLMNPQRSTVWY";
-    Float2dArray m(20, 20);
-    //    A  C  D  E  F  G  H  I  K  L  M  N  P  Q  R  S  T  V  W  Y
+    MatrixXf m(20, 20);
+    //     A  C  D  E  F  G  H  I  K  L  M  N  P  Q  R  S  T  V  W  Y
     m <<   4, 0,-2,-1,-2, 0,-2,-1,-1,-1,-1,-2,-1,-1,-1, 1, 0, 0,-3,-2,  // A
            0, 9,-3,-4,-2,-3,-3,-1,-3,-1,-1,-3,-3,-3,-3,-1,-1,-1,-2,-2,  // C
           -2,-3, 6, 2,-3,-1,-1,-3,-1,-4,-3, 1,-1, 0,-2, 0,-1,-3,-4,-3,  // D
@@ -45,8 +45,8 @@ BLOSUM62Matrix::BLOSUM62Matrix() {
 GonnetMatrix::GonnetMatrix() {
     string s = "ARNDCQEGHILKMFPSTWYVBZX*";
     int n = s.size();
-    Float2dArray m(n, n);
-    //   A     R     N     D     C     Q     E     G     H     I     L     K     M     F     P     S     T     W     Y     V     B     Z     X     *     
+    MatrixXf m(n, n);
+    //    A     R     N     D     C     Q     E     G     H     I     L     K     M     F     P     S     T     W     Y     V     B     Z     X     *     
     m <<  2.4, -0.6, -0.3, -0.3,  0.5, -0.2,  0.0,  0.5, -0.8, -0.8, -1.2, -0.4, -0.7, -2.3,  0.3,  1.1,  0.6, -3.6, -2.2,  0.1, -0.5,  0.0, -0.4, -8.0,  // A
          -0.6,  4.7,  0.3, -0.3, -2.2,  1.5,  0.4, -1.0,  0.6, -2.4, -2.2,  2.7, -1.7, -3.2, -0.9, -0.2, -0.2, -1.6, -1.8, -2.0, -0.2,  1.0, -0.5, -8.0,  // R
          -0.3,  0.3,  3.8,  2.2, -1.8,  0.7,  0.9,  0.4,  1.2, -2.8, -3.0,  0.8, -2.2, -3.1, -0.9,  0.9,  0.5, -3.6, -1.4, -2.2,  2.8,  0.9, -0.2, -8.0,  // N
@@ -76,19 +76,19 @@ GonnetMatrix::GonnetMatrix() {
             score.insert(make_pair(SymbolPair(s[i], s[j]), m(i, j)));
 }
 
-pair<double, Float2dArray> TargetProbEstimatorGivenBG::probify(const Float2dArray& scoremat) {
+pair<double, MatrixXf> TargetProbEstimatorGivenBG::probify(const MatrixXf& scoremat) {
     // initial guest at lambda
     TargetProbFunction target_func(bgfreq, scoremat);
     double lamb;
     double fx;
-    for (lamb = 1. / max(scoremat); lamb < 50.; lamb *= 2.) {
+    for (lamb = 1. / scoremat.maxCoeff(); lamb < 50.; lamb *= 2.) {
         fx = target_func.fx(lamb);
         if (fx > 0) break;
     }
     // use Newton/Raphson method to find the optimal lambda
     NewtonRaphsonRootFinder solver;
     lamb = solver.find_root(target_func, lamb);
-    Float2dArray prob(scoremat.rows(), scoremat.cols());
-    prob = outer(bgfreq, bgfreq) * exp(lamb * scoremat);
+    MatrixXf prob(scoremat.rows(), scoremat.cols());
+    prob = (bgfreq * bgfreq.transpose()).cwiseProduct((lamb * scoremat).unaryExpr(&exp));
     return make_pair(lamb, prob);
 }

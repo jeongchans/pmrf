@@ -9,7 +9,7 @@ class BgFreq {
     BgFreq() {};
     BgFreq(const std::map<char, double>& freq) : freq(freq) {};
 
-    Float1dArray get_array(const Alphabet& abc) const;
+    VectorXf get_array(const Alphabet& abc) const;
     double get_value(const char& x) const { return freq.find(x)->second; }
 
   protected:

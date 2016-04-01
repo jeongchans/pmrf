@@ -2,14 +2,14 @@
 
 #include <cctype>
 
-Float1dArray PBSeqWeightEstimator::estimate(const vector<string>& msa) const {
+VectorXf PBSeqWeightEstimator::estimate(const vector<string>& msa) const {
     int rows = msa.size();
     int cols = msa[0].size();
-    Float1dArray seq_wt = zeros(rows); // sequence weights
-    Float1dArray alen = zeros(rows);   // number of residues for normalization
+    VectorXf seq_wt = VectorXf::Zero(rows); // sequence weights
+    VectorXf alen = VectorXf::Zero(rows);   // number of residues for normalization
     char c;
     for (int j = 0; j < cols; ++j) {
-        Float1dArray res_wt(dim);  // residue weight
+        VectorXf res_wt(dim);  // residue weight
         res_wt = calc_residue_weight(msa, j);
         for (int i = 0; i < rows; ++i) {
             c = msa[i][j];
@@ -21,20 +21,19 @@ Float1dArray PBSeqWeightEstimator::estimate(const vector<string>& msa) const {
     }
     for (int i = 0; i < rows; ++i)
         if (alen(i) > 0) seq_wt(i) /= alen(i);     // normalized by length
-    if (sum(seq_wt) == 0) seq_wt.setOnes();
-    scale(seq_wt);
-    return seq_wt;
+    if (seq_wt.sum() == 0) seq_wt.setOnes();
+    return seq_wt / seq_wt.sum();
 }
 
-Float1dArray PBSeqWeightEstimator::calc_residue_weight(const vector<string>& msa, const int& idx) const {
-    Float1dArray s = zeros(dim);  // number of times a particular residue appears
+VectorXf PBSeqWeightEstimator::calc_residue_weight(const vector<string>& msa, const int& idx) const {
+    VectorXf s = VectorXf::Zero(dim);  // number of times a particular residue appears
     char c;
     for (vector<string>::const_iterator pos = msa.begin(); pos != msa.end(); ++pos) {
         c = (*pos)[idx];
         if (is_allowed(c)) s(abc_idx(c)) += 1;
     }
-    double r = (double) (s > 0).count();    // number of different residues
-    Float1dArray wt(dim);
+    double r = (double) (s.array() > 0).count();    // number of different residues
+    VectorXf wt(dim);
     for (int k = 0; k < dim; ++k) {
         if (s(k) > 0) wt(k) = 1. / (r * s(k));
         else wt(k) = 0;
@@ -51,34 +50,33 @@ int PBSeqWeightEstimator::abc_idx(const char& c) const {
     return toupper((int) c) - 'A';
 }
 
-Float1dArray PSIBLASTPBSeqWeightEstimator::estimate(const vector<string>& msa) const {
+VectorXf PSIBLASTPBSeqWeightEstimator::estimate(const vector<string>& msa) const {
     int rows = msa.size();
     int cols = msa[0].size();
-    Float1dArray seq_wt = zeros(rows); // sequence weights
+    VectorXf seq_wt = VectorXf::Zero(rows); // sequence weights
     char c;
     for (int j = 0; j < cols; ++j) {
-        Float1dArray res_wt(dim);  // residue weight
+        VectorXf res_wt(dim);  // residue weight
         res_wt = calc_residue_weight(msa, j);
-        if (sum(res_wt) == 0) continue;
+        if (res_wt.sum() == 0) continue;
         for (int i = 0; i < rows; ++i) {
             c = msa[i][j];
             seq_wt(i) += res_wt(abc_idx(c));
         }
     }
-    if (sum(seq_wt) == 0) seq_wt.setOnes();
-    scale(seq_wt);
-    return seq_wt;
+    if (seq_wt.sum() == 0) seq_wt.setOnes();
+    return seq_wt / seq_wt.sum();
 }
 
-Float1dArray PSIBLASTPBSeqWeightEstimator::calc_residue_weight(const vector<string>& msa, const int& idx) const {
-    Float1dArray s = zeros(dim);  // number of times a particular residue appears
+VectorXf PSIBLASTPBSeqWeightEstimator::calc_residue_weight(const vector<string>& msa, const int& idx) const {
+    VectorXf s = VectorXf::Zero(dim);  // number of times a particular residue appears
     char c;
     for (vector<string>::const_iterator pos = msa.begin(); pos != msa.end(); ++pos) {
         c = (*pos)[idx];
         s(abc_idx(c)) += 1;
     }
-    double r = (double) (s > 0).count();    // number of different residues
-    Float1dArray wt(dim);
+    double r = (double) (s.array() > 0).count();    // number of different residues
+    VectorXf wt(dim);
     if (r == 1) {
         wt.setZero();
         return wt;

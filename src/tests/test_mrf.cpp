@@ -25,16 +25,16 @@ TEST_F(MRF_NodeElement_Test, test_set_and_get_weight) {
 
     MRF::NodeElement node(abc.get_canonical_size());
     node.set_weight(0);
-    Float1dArray w(node.get_weight());
+    VectorXf w(node.get_weight());
     ASSERT_EQ(num_var, (size_t)w.size());
-    EXPECT_TRUE((0 == node.get_weight()).all());
+    EXPECT_TRUE((0 == node.get_weight().array()).all());
 
     w(3) = 0.1;
-    EXPECT_TRUE((0 == node.get_weight()).all());
+    EXPECT_TRUE((0 == node.get_weight().array()).all());
     node.set_weight(w);
-    EXPECT_TRUE((w == node.get_weight()).all());
+    EXPECT_TRUE((w.array() == node.get_weight().array()).all());
     w.setZero();
-    EXPECT_FALSE((w == node.get_weight()).all());
+    EXPECT_FALSE((w.array() == node.get_weight().array()).all());
 }
 
 class MRF_EdgeElement_Test : public testing::Test {
@@ -58,17 +58,17 @@ TEST_F(MRF_EdgeElement_Test, test_set_and_get_weight) {
 
     MRF::EdgeElement edge(abc.get_canonical_size(), abc.get_canonical_size());
     edge.set_weight(0);
-    Float2dArray w(edge.get_weight());
+    MatrixXf w(edge.get_weight());
     ASSERT_EQ(num_var, (size_t)w.rows());
     ASSERT_EQ(num_var, (size_t)w.cols());
-    EXPECT_TRUE((0 == edge.get_weight()).all());
+    EXPECT_TRUE((0 == edge.get_weight().array()).all());
 
     w(2, 3) = 0.1;
-    EXPECT_TRUE((0 == edge.get_weight()).all());
+    EXPECT_TRUE((0 == edge.get_weight().array()).all());
     edge.set_weight(w);
-    EXPECT_TRUE((w == edge.get_weight()).all());
+    EXPECT_TRUE((w.array() == edge.get_weight().array()).all());
     w.setZero();
-    EXPECT_FALSE((w == edge.get_weight()).all());
+    EXPECT_FALSE((w.array() == edge.get_weight().array()).all());
 }
 
 class MRF_Test : public testing::Test {
@@ -130,28 +130,28 @@ TEST_F(MRF_Test, test_get_num_var) {
 TEST_F(MRF_Test, test_get_node) {
     MRF mrf = MRF(length, abc);
     mrf.get_node(0).set_weight(0);
-    Float1dArray w(mrf.get_node(0).get_weight());
+    VectorXf w(mrf.get_node(0).get_weight());
     ASSERT_EQ(abc.get_canonical_size(), (size_t)w.size());
-    EXPECT_TRUE((w == 0).all());
+    EXPECT_TRUE((w.array() == 0).all());
 
     w(3) = 0.1;
-    EXPECT_FALSE((w == mrf.get_node(0).get_weight()).all());
+    EXPECT_FALSE((w.array() == mrf.get_node(0).get_weight().array()).all());
     mrf.get_node(0).set_weight(w);
-    EXPECT_TRUE((w == mrf.get_node(0).get_weight()).all());
+    EXPECT_TRUE((w.array() == mrf.get_node(0).get_weight().array()).all());
 }
 
 TEST_F(MRF_Test, test_get_edge) {
     MRF mrf = MRF(length, abc);
     mrf.get_edge(0, 2).set_weight(0);
-    Float2dArray w(mrf.get_edge(0, 2).get_weight());
+    MatrixXf w(mrf.get_edge(0, 2).get_weight());
     ASSERT_EQ(abc.get_canonical_size(), (size_t)w.rows());
     ASSERT_EQ(abc.get_canonical_size(), (size_t)w.cols());
-    EXPECT_TRUE((w == 0).all());
+    EXPECT_TRUE((w.array() == 0).all());
 
     w(2, 3) = 0.1;
-    EXPECT_FALSE((w == mrf.get_edge(0, 2).get_weight()).all());
+    EXPECT_FALSE((w.array() == mrf.get_edge(0, 2).get_weight().array()).all());
     mrf.get_edge(0, 2).set_weight(w);
-    EXPECT_TRUE((w == mrf.get_edge(0, 2).get_weight()).all());
+    EXPECT_TRUE((w.array() == mrf.get_edge(0, 2).get_weight().array()).all());
 }
 
 TEST_F(MRF_Test, test_traverse) {

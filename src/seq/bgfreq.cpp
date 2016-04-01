@@ -1,8 +1,8 @@
 #include "bgfreq.h"
 
-Float1dArray BgFreq::get_array(const Alphabet& abc) const {
+VectorXf BgFreq::get_array(const Alphabet& abc) const {
     size_t n = abc.get_canonical_size();
-    Float1dArray v(n);
+    VectorXf v(n);
     int i;
     for (std::map<char, double>::const_iterator pos = freq.begin(); pos != freq.end(); ++pos) {
         i = abc.get_idx(pos->first);

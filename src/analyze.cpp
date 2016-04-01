@@ -120,8 +120,8 @@ MRFModelAnalyzer::PairScoreVector MRFModelAnalyzer::calc_pair_score(const MRF& m
     for (size_t i = 0; i < n; ++i) {
         for (size_t j = i + 1; j < n; ++j) {
             if (model.has_edge(i, j)) {
-                const Float2dArray& w = model.get_edge(i, j).get_weight();
-                scores.push_back(PairScore(EdgeIndex(i, j), norm(w.topLeftCorner<20, 20>())));
+                const MatrixXf& w = model.get_edge(i, j).get_weight();
+                scores.push_back(PairScore(EdgeIndex(i, j), w.topLeftCorner<20, 20>().norm()));
             }
         }
     }
@@ -205,13 +205,13 @@ vector<FloatType> MRFModelAnalyzer::calc_zscore(const vector<FloatType> scores) 
 MRFModelAnalyzer::PosScoreVector MRFModelAnalyzer::calc_pos_score(const MRF& model) {
     PosScoreVector scores;
     size_t n = model.get_length();
-    const Float2dArray psfm = model.get_psfm();
+    const MatrixXf psfm = model.get_psfm();
     for (size_t i = 0; i < n; ++i) {
-        const Float1dArray& w = model.get_node(i).get_weight().head<20>();
-        Float1dArray p = exp(w);
+        const VectorXf& w = model.get_node(i).get_weight().head<20>();
+        VectorXf p = w.unaryExpr(&exp);
         p /= p.sum();
-        Float1dArray f = psfm.row(i).head<20>();
-        scores.push_back(PosScore(i, calc_kld(f, p)));
+        VectorXf f = psfm.row(i).head<20>();
+        scores.push_back(PosScore(i, kld(f, p)));
     }
     return scores;
 }

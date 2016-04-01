@@ -7,7 +7,7 @@
 
 class SeqWeightEstimator {
   public:
-    virtual Float1dArray estimate(const vector<string>& msa) const = 0;
+    virtual VectorXf estimate(const vector<string>& msa) const = 0;
 };
 
 // Null sequence weight estimator gives the same weights for all MSA sequences
@@ -15,10 +15,9 @@ class NullSeqWeightEstimator : public SeqWeightEstimator {
   public:
     NullSeqWeightEstimator() {};
 
-    virtual Float1dArray estimate(const vector<string>& msa) const {
-        Float1dArray v = Float1dArray::Ones(msa.size());
-        scale(v);
-        return v;
+    virtual VectorXf estimate(const vector<string>& msa) const {
+        size_t n = msa.size();
+        return VectorXf::Constant(n, 1. / n);
     }
 };
 
@@ -33,12 +32,12 @@ class PBSeqWeightEstimator : public SeqWeightEstimator {
   public:
     PBSeqWeightEstimator() : dim(26) {};
 
-    virtual Float1dArray estimate(const vector<string>& msa) const;
+    virtual VectorXf estimate(const vector<string>& msa) const;
 
   private:
     const int dim;
 
-    Float1dArray calc_residue_weight(const vector<string>& msa, const int& idx) const;
+    VectorXf calc_residue_weight(const vector<string>& msa, const int& idx) const;
     bool is_allowed(const char& c) const;
     int abc_idx(const char& c) const;
 };
@@ -53,13 +52,13 @@ class PSIBLASTPBSeqWeightEstimator : public SeqWeightEstimator {
   public:
     PSIBLASTPBSeqWeightEstimator() : dim(27), gap_idx(26) {};
 
-    virtual Float1dArray estimate(const vector<string>& msa) const;
+    virtual VectorXf estimate(const vector<string>& msa) const;
 
   private:
     const int dim;
     const int gap_idx;
 
-    Float1dArray calc_residue_weight(const vector<string>& msa, const int& idx) const;
+    VectorXf calc_residue_weight(const vector<string>& msa, const int& idx) const;
     int abc_idx(const char& c) const;
 };
 

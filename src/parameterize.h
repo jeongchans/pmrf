@@ -100,17 +100,17 @@ class MRFParameterizer {
         const Parameter& param;
         const Option& opt;
 
-        Float1dArray seq_weight;
+        VectorXf seq_weight;
 
         const MSAAnalyzer msa_analyzer;
 
         L2Regularization l2_func;
 
-        Float2dArray calc_logpot(const lbfgsfloatval_t *x, const string& seq);
-        Float1dArray logsumexp(const Float2dArray& b);
-        Float1dArray calc_logz(const Float2dArray& logpot);
-        void update_obj_score(lbfgsfloatval_t& fx, const Float2dArray& logpot, const Float1dArray& logz, const string& seq, const double& sw);
-        void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const Float2dArray& logpot, const Float1dArray& logz, const string& seq, const double& sw);
+        MatrixXf calc_logpot(const lbfgsfloatval_t *x, const string& seq);
+        VectorXf logsumexp(const MatrixXf& b);
+        VectorXf calc_logz(const MatrixXf& logpot);
+        void update_obj_score(lbfgsfloatval_t& fx, const MatrixXf& logpot, const VectorXf& logz, const string& seq, const double& sw);
+        void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXf& logpot, const VectorXf& logz, const string& seq, const double& sw);
 
         FRIEND_TEST(MRFParameterizer_ObjectiveFunction_Test, test_calc_logpot);
         FRIEND_TEST(MRFParameterizer_ObjectiveFunction_Test, test_logsumexp);
@@ -132,7 +132,7 @@ class MRFParameterizer {
     const MSAAnalyzer& msa_analyzer;
 
     void update_model(MRF& model, Parameter& param);
-    Float2dArray calc_profile(const TraceVector& traces);
+    MatrixXf calc_profile(const TraceVector& traces);
 
     FRIEND_TEST(MRFParameterizer_Test, test_update_model);
 };

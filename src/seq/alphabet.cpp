@@ -118,7 +118,7 @@ std::string Alphabet::get_valid_symbol() const {
     return s;
 }
 
-std::string Alphabet::get_degeneracy(const char& x, FloatType* w) const {
+std::string Alphabet::get_degeneracy(const char& x, float* w) const {
     std::string s;
     if (is_canonical(x)) s += x;
     else if (is_degenerate(x)) {
@@ -127,20 +127,20 @@ std::string Alphabet::get_degeneracy(const char& x, FloatType* w) const {
     }
     if (w != NULL) {
         if (s.empty()) *w = 0.;
-        else *w = 1. / (FloatType) s.size();
+        else *w = 1. / (float) s.size();
     }
     return s;
 }
 
-Float1dArray Alphabet::get_count(const char& x) const {
-    Float1dArray v = zeros(get_canonical_size());
+VectorXf Alphabet::get_count(const char& x) const {
+    VectorXf v = VectorXf::Zero(get_canonical_size());
     if (is_canonical(x)) {
         v(get_idx(x)) = 1;
     } else if (is_degenerate(x)) {
         std::string s = get_degeneracy(x);
         for (std::string::iterator pos = s.begin(); pos != s.end(); ++pos)
             v(get_idx(*pos)) = 1;
-        scale(v);
+        v /= v.sum();
     }
     return v;
 }

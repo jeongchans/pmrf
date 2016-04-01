@@ -23,9 +23,9 @@ class SeqWeightEstimatorTest : public testing::Test {
 
 TEST_F(SeqWeightEstimatorTest, test_pb_seq_weight_estimator) {
     PBSeqWeightEstimator estimator;
-    Float1dArray wt(4);
+    VectorXf wt(4);
     wt << 0.267, 0.267, 0.200, 0.267;
-    Float1dArray v = estimator.estimate(msa1);
+    VectorXf v = estimator.estimate(msa1);
     ASSERT_EQ(wt.size(), v.size());
     EXPECT_TRUE(allclose(wt, v, 0.01)) << v;
 

@@ -53,13 +53,13 @@ class MRF {
         virtual void accept(Visitor* visitor, const size_t& idx1, const size_t& idx2=(size_t) NULL);
 
         // weight getter and setter
-        const Float1dArray& get_weight() const;
-        void set_weight(const Float1dArray& w);
+        const VectorXf& get_weight() const;
+        void set_weight(const VectorXf& w);
         void set_weight(const double& w);
 
       protected:
         size_t num_weight;
-        Float1dArray weight;
+        VectorXf weight;
     };
 
     class EdgeElement : public Element {
@@ -72,13 +72,13 @@ class MRF {
         virtual void accept(Visitor* visitor, const size_t& idx1, const size_t& idx2);
 
         // weight getter and setter
-        const Float2dArray& get_weight() const;
-        void set_weight(const Float2dArray& w);
+        const MatrixXf& get_weight() const;
+        void set_weight(const MatrixXf& w);
         void set_weight(const double& w);
 
       protected:
         size_t num_weight1, num_weight2;
-        Float2dArray weight;
+        MatrixXf weight;
     };
 
   public:
@@ -96,9 +96,9 @@ class MRF {
     const Alphabet& get_alphabet() const { return abc; }
 
     // Profile setter and getter
-    void set_psfm(const Float2dArray& m) { psfm = m; }
-    Float2dArray get_psfm() const { return psfm; }
-    const Float1dArray get_psfm(const size_t& idx) const { return psfm.row(idx); }
+    void set_psfm(const MatrixXf& m) { psfm = m; }
+    MatrixXf get_psfm() const { return psfm; }
+    const VectorXf get_psfm(const size_t& idx) const { return psfm.row(idx); }
 
     // element getter
     NodeElement& get_node(const size_t& idx) { return nodes[idx]; }
@@ -119,7 +119,7 @@ class MRF {
     size_t length;
     vector<NodeElement> nodes;
     map<EdgeIndex, EdgeElement> edges;
-    Float2dArray psfm;  // Position-specific frequency matrix
+    MatrixXf psfm;  // Position-specific frequency matrix
 
     void init(const EdgeIndexVector* eidxs);
 };

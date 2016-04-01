@@ -11,8 +11,6 @@
 
 #include "core.h"
 
-#define pow2(x) ((x) * (x))
-
 /**
    @class MRFParameterizer::Parameter
  */
@@ -61,7 +59,7 @@ void MRFParameterizer::L2Regularization::regularize_node(const lbfgsfloatval_t *
     for (int i = 0; i < param.length; ++i) {
         for (int t = 0; t < param.num_var; ++t) {
             int k = param.get_nidx(i, letters[t]);
-            fx += lambda * pow2(x[k]);
+            fx += lambda * square(x[k]);
             g[k] += 2. * lambda * x[k];
         }
     }
@@ -77,7 +75,7 @@ void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *
         for (int p = 0; p < param.num_var; ++p) {
             for (int q = 0; q < param.num_var; ++q) {
                 int k = param.get_eidx(i, j, letters[p], letters[q]);
-                fx += lambda * pow2(x[k]);
+                fx += lambda * square(x[k]);
                 g[k] += 2. * lambda * x[k];
             }
         }
@@ -98,7 +96,7 @@ MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces
     msa = msa_analyzer.termi_gap_remover->filter(msa);
     seq_weight.resize(traces.size());
     seq_weight = msa_analyzer.seq_weight_estimator->estimate(msa);
-    scale(seq_weight);
+    seq_weight /= seq_weight.sum();
     seq_weight *= (double)msa_analyzer.eff_seq_num_estimator->estimate(msa);
 }
 
@@ -108,8 +106,8 @@ lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatva
     for (size_t i = 0; i < traces.size(); ++i) {
         string seq = traces[i].get_matched_aseq();
         double sw = seq_weight(i);
-        Float2dArray logpot = calc_logpot(x, seq);
-        Float1dArray logz = calc_logz(logpot);
+        MatrixXf logpot = calc_logpot(x, seq);
+        VectorXf logz = calc_logz(logpot);
         update_obj_score(fx, logpot, logz, seq, sw);
         update_gradient(x, g, logpot, logz, seq, sw);
     }
@@ -117,8 +115,8 @@ lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatva
     return fx;
 }
 
-Float2dArray MRFParameterizer::ObjectiveFunction::calc_logpot(const lbfgsfloatval_t *x, const string& seq) {
-    Float2dArray logpot = zeros(param.num_var, param.length);
+MatrixXf MRFParameterizer::ObjectiveFunction::calc_logpot(const lbfgsfloatval_t *x, const string& seq) {
+    MatrixXf logpot = MatrixXf::Zero(param.num_var, param.length);
     string letters = param.abc.get_canonical();
     FloatType wi, wj;
     for (int i = 0; i < param.length; ++i)
@@ -139,21 +137,19 @@ Float2dArray MRFParameterizer::ObjectiveFunction::calc_logpot(const lbfgsfloatva
     return logpot;
 }
 
-Float1dArray MRFParameterizer::ObjectiveFunction::logsumexp(const Float2dArray& b) {
-    Float1dArray B = row_max(b);
-    Float1dArray r = zeros(b.rows());
+VectorXf MRFParameterizer::ObjectiveFunction::logsumexp(const MatrixXf& b) {
+    VectorXf B = b.rowwise().maxCoeff();
+    VectorXf r = VectorXf::Zero(b.rows());
     for (int j = 0; j < b.cols(); ++j)
-        r += exp(b.col(j) - B);
-    r = log(r) + B;
-    return r;
+        r += (b.col(j) - B).unaryExpr(&exp);
+    return r.unaryExpr(&log) + B;
 }
 
-Float1dArray MRFParameterizer::ObjectiveFunction::calc_logz(const Float2dArray& logpot) {
-    Float1dArray logz = logsumexp(transpose(logpot));
-    return logz;
+VectorXf MRFParameterizer::ObjectiveFunction::calc_logz(const MatrixXf& logpot) {
+    return logsumexp(logpot.transpose());
 }
 
-void MRFParameterizer::ObjectiveFunction::update_obj_score(lbfgsfloatval_t& fx, const Float2dArray& logpot, const Float1dArray& logz, const string& seq, const double& sw) {
+void MRFParameterizer::ObjectiveFunction::update_obj_score(lbfgsfloatval_t& fx, const MatrixXf& logpot, const VectorXf& logz, const string& seq, const double& sw) {
     for (int i = 0; i < param.length; ++i) {
         FloatType w;
         string s = param.abc.get_degeneracy(seq[i], &w);
@@ -162,12 +158,12 @@ void MRFParameterizer::ObjectiveFunction::update_obj_score(lbfgsfloatval_t& fx, 
     }
 }
 
-void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const Float2dArray& logpot, const Float1dArray& logz, const string& seq, const double& sw) {
+void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXf& logpot, const VectorXf& logz, const string& seq, const double& sw) {
     string letters = param.abc.get_canonical();
     FloatType w, wi, wj;
-    Float2dArray nodebel = zeros(param.num_var, param.length);
+    MatrixXf nodebel = MatrixXf::Zero(param.num_var, param.length);
     for (int t = 0; t < param.num_var; ++t)
-        nodebel.row(t) = exp(logpot.row(t) - logz.transpose());
+        nodebel.row(t) = (logpot.row(t) - logz.transpose()).unaryExpr(&exp);
     for (int i = 0; i < param.length; ++i) {
         string s = param.abc.get_degeneracy(seq[i], &w);
         for (string::iterator c = s.begin(); c != s.end(); ++c)
@@ -199,7 +195,7 @@ void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t 
 
 int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     Parameter param(model, optim_opt);
-    Float2dArray psfm = zeros(param.length, param.num_var);
+    MatrixXf psfm = MatrixXf::Zero(param.length, param.num_var);
     FloatType gap_prob = 0.;
     psfm.leftCols<20>() = calc_profile(traces) * (1. - gap_prob);
     psfm.rightCols<1>().setConstant(gap_prob);
@@ -211,7 +207,7 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     return ret;
 }
 
-Float2dArray MRFParameterizer::calc_profile(const TraceVector& traces) {
+MatrixXf MRFParameterizer::calc_profile(const TraceVector& traces) {
     AminoAcid aa;
     ProfileBuilder profile_builder(aa);
     SMMEmitProbEstimator emit_prob_estimator(ROBINSON_BGFREQ.get_array(aa), 
@@ -228,14 +224,14 @@ Float2dArray MRFParameterizer::calc_profile(const TraceVector& traces) {
 void MRFParameterizer::update_model(MRF& model, Parameter& param) {
     string letters = param.abc.get_canonical();
     for (size_t i = 0; i < model.get_length(); ++i) {
-        Float1dArray w = zeros(param.num_var);
+        VectorXf w = VectorXf::Zero(param.num_var);
         for (int t = 0; t < param.num_var; ++t) w(t) = (FloatType)param.x[param.get_nidx(i, letters[t])];
         model.get_node(i).set_weight(w);
     }
     for (map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
         int i = pos->first.idx1;
         int j = pos->first.idx2;
-        Float2dArray w = zeros(param.num_var, param.num_var);
+        MatrixXf w = MatrixXf::Zero(param.num_var, param.num_var);
         for (int p = 0; p < param.num_var; ++p)
             for (int q = 0; q < param.num_var; ++q) w(p, q) = (FloatType)param.x[param.get_eidx(i, j, letters[p], letters[q])];
         model.get_edge(i, j).set_weight(w);

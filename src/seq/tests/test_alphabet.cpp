@@ -187,7 +187,7 @@ TEST_F(AlphabetTest, test_get_degeneracy) {
 
 TEST_F(AlphabetTest, test_get_count) {
     ASSERT_EQ(canonical_sym.size(), (size_t)abc.get_count('A').size());
-    Float1dArray cnt(3);
+    VectorXf cnt(3);
     cnt << 1, 0, 0;
     EXPECT_TRUE(cnt.matrix() == abc.get_count('A').matrix());
     cnt << 0.5, 0.5, 0;
@@ -260,9 +260,9 @@ TEST_F(AminoAcidTest, test_get_idx) {
 
 TEST_F(AminoAcidTest, test_get_count) {
     ASSERT_EQ(20, amino.get_count('C').size());
-    EXPECT_EQ(1, sum(amino.get_count('C')));
+    EXPECT_EQ(1, amino.get_count('C').sum());
     EXPECT_EQ(1, amino.get_count('C')(1));
-    EXPECT_EQ(1, sum(amino.get_count('B')));
+    EXPECT_EQ(1, amino.get_count('B').sum());
     EXPECT_EQ(0.5, amino.get_count('B')(2));
     EXPECT_EQ(0.5, amino.get_count('B')(11));
 }

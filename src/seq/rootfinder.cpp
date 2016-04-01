@@ -20,7 +20,7 @@ double NewtonRaphsonRootFinder::find_root(const TargetFunction& target, const do
         fx = p.first;
         dfx = p.second;
         if (fx == 0) break;     // exact solution
-        if (allclose(x, old_x, atol + rtol * x)) break;
+        if (fabs(x - old_x) < atol + rtol * x) break;
     }
     return x;
 }
