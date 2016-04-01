@@ -41,7 +41,6 @@ class TargetProbEstimatorGivenBG {
         TargetProbFunction(const Float1dArray& bgfreq, const Float2dArray& scoremat) {
             this->mfreq.resize(bgfreq.size(), bgfreq.size());
             this->mfreq = outer(bgfreq, bgfreq);
-            this->scoremat.resize(scoremat.shape());
             this->scoremat = scoremat;
         }
 
@@ -59,7 +58,6 @@ class TargetProbEstimatorGivenBG {
 
   public:
     TargetProbEstimatorGivenBG(const Float1dArray& bgfreq) {
-        this->bgfreq.resize(bgfreq.shape());
         this->bgfreq = bgfreq;
     }
 

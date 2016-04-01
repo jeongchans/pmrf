@@ -1,13 +1,11 @@
 #include "mrf.h"
 
 inline void resize_and_fill(Float1dArray& v, const size_t& size, const double& value) {
-    v.resize(size);
-    v = value;
+    v = Float1dArray::Constant(size, value);
 }
 
 inline void resize_and_fill(Float2dArray& m, const size_t& row_size, const size_t& col_size, const double& value) {
-    m.resize(row_size, col_size);
-    m = value;
+    m = Float2dArray::Constant(row_size, col_size, value);
 }
 
 /* NodeElement */
@@ -51,7 +49,6 @@ const Float2dArray& MRF::EdgeElement::get_weight() const {
 }
 
 void MRF::EdgeElement::set_weight(const Float2dArray& w) {
-    weight.resize(w.shape());
     weight = w;
 }
 

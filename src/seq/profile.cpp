@@ -53,7 +53,7 @@ Profile ProfileBuilder::build(const TraceVector& traces) const {
         double eff_num = eff_seq_num_estimator->estimate(msa);
         Float1dArray f(abc.get_canonical_size());  // frequency
         f = calc_freq(trs, i, wt, eff_num);
-        if (blitz::sum(f) > 0) profile.set_prob(i, emit_prob_estimator->estimate(f));
+        if (sum(f) > 0) profile.set_prob(i, emit_prob_estimator->estimate(f));
         else profile.set_prob(i, ROBINSON_BGFREQ.get_array(abc));
         profile.set_eff_num(i, eff_num);
         profile.set_bgfreq(ROBINSON_BGFREQ.get_array(abc));
@@ -70,8 +70,7 @@ void ProfileBuilder::collect_trace(const TraceVector& traces, const size_t& idx,
 
 Float1dArray ProfileBuilder::calc_freq(const TraceVector& trs, const size_t& idx, const Float1dArray& wt, const double& eff_num) const {
     size_t n = trs.size();
-    Float1dArray v(abc.get_canonical_size());
-    v = 0;
+    Float1dArray v = zeros(abc.get_canonical_size());
     for (size_t i = 0; i < n; ++i)
         v += abc.get_count(trs[i].get_symbol_at(idx)) * wt(i);
     scale(v, eff_num);

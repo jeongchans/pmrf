@@ -11,10 +11,7 @@
 
 #include "core.h"
 
-using blitz::pow2;
-using blitz::sum;
-using blitz::mean;
-using blitz::pow;
+#define pow2(x) ((x) * (x))
 
 /**
    @class MRFParameterizer::Parameter
@@ -146,7 +143,7 @@ Float1dArray MRFParameterizer::ObjectiveFunction::logsumexp(const Float2dArray& 
     Float1dArray B = row_max(b);
     Float1dArray r = zeros(b.rows());
     for (int j = 0; j < b.cols(); ++j)
-        r += exp(b(ALL, j) - B);
+        r += exp(b.col(j) - B);
     r = log(r) + B;
     return r;
 }
@@ -170,7 +167,7 @@ void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t 
     FloatType w, wi, wj;
     Float2dArray nodebel = zeros(param.num_var, param.length);
     for (int t = 0; t < param.num_var; ++t)
-        nodebel(t, ALL) = exp(logpot(t, ALL) - logz);
+        nodebel.row(t) = exp(logpot.row(t) - logz.transpose());
     for (int i = 0; i < param.length; ++i) {
         string s = param.abc.get_degeneracy(seq[i], &w);
         for (string::iterator c = s.begin(); c != s.end(); ++c)
@@ -204,8 +201,8 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     Parameter param(model, optim_opt);
     Float2dArray psfm = zeros(param.length, param.num_var);
     FloatType gap_prob = 0.;
-    psfm(ALL, Range(blitz::fromStart, 19)) = calc_profile(traces) * (1. - gap_prob);
-    psfm(ALL, param.num_var - 1) = gap_prob;
+    psfm.leftCols<20>() = calc_profile(traces) * (1. - gap_prob);
+    psfm.rightCols<1>().setConstant(gap_prob);
     ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
     LBFGS::Optimizer optimizer;
     int ret = optimizer.optimize(&param, &obj_func);

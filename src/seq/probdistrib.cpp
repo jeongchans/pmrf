@@ -3,7 +3,7 @@
 #include "subsmat.h"
 
 Float1dArray MLEmitProbEstimator::estimate(const Float1dArray& c) const {
-    Float1dArray p(c.shape());
+    Float1dArray p(c.size());
     p = c;
     scale(p);
     return p;
@@ -27,9 +27,9 @@ Float1dArray SMMEmitProbEstimator::estimate(const Float1dArray& c) const {
     scale(f);
     Float1dArray psc(n);   // pseudocount
     for (int i = 0; i < n; ++i)
-        psc(i) = blitz::sum(f * cond_prob(i, ALL));
+        psc(i) = sum(f * cond_prob.row(i).transpose());
     Float1dArray p(n);     // probability
-    double alpha = blitz::sum(c) - 1.;
+    double alpha = sum(c) - 1.;
     if (alpha < 0) alpha = 0.;
     p = alpha * f + admix * psc;
     scale(p);

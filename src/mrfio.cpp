@@ -1,5 +1,7 @@
 #include "mrfio.h"
 
+#include <iomanip>
+
 #include "command.h"
 
 using std::endl;
@@ -229,7 +231,7 @@ void MRFImporter::import_body(istream& is, MRF& model) {
                 for (size_t i = 0; i < n; ++i) {
                     is >> dummy;
                     is >> dummy;
-                    psfm(i, ALL) = import_psfm(is, num_var);
+                    psfm.row(i) = import_psfm(is, num_var);
                 }
                 model.set_psfm(psfm);
             }

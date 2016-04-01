@@ -133,15 +133,14 @@ std::string Alphabet::get_degeneracy(const char& x, FloatType* w) const {
 }
 
 Float1dArray Alphabet::get_count(const char& x) const {
-    Float1dArray v(get_canonical_size());
-    v = 0;
+    Float1dArray v = zeros(get_canonical_size());
     if (is_canonical(x)) {
         v(get_idx(x)) = 1;
     } else if (is_degenerate(x)) {
         std::string s = get_degeneracy(x);
         for (std::string::iterator pos = s.begin(); pos != s.end(); ++pos)
             v(get_idx(*pos)) = 1;
-        v /= blitz::sum(v);
+        scale(v);
     }
     return v;
 }

@@ -16,8 +16,7 @@ class NullSeqWeightEstimator : public SeqWeightEstimator {
     NullSeqWeightEstimator() {};
 
     virtual Float1dArray estimate(const vector<string>& msa) const {
-        Float1dArray v(msa.size());
-        v = 1;
+        Float1dArray v = Float1dArray::Ones(msa.size());
         scale(v);
         return v;
     }

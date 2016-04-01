@@ -187,18 +187,18 @@ TEST_F(AlphabetTest, test_get_degeneracy) {
 
 TEST_F(AlphabetTest, test_get_count) {
     ASSERT_EQ(canonical_sym.size(), (size_t)abc.get_count('A').size());
-    blitz::Array<double, 1> cnt(3);
-    cnt = 1, 0, 0;
-    EXPECT_TRUE(all(cnt == abc.get_count('A')));
-    cnt = 0.5, 0.5, 0;
-    EXPECT_TRUE(all(cnt == abc.get_count('P')));
-    cnt = 0, 0, 1;
-    EXPECT_TRUE(all(cnt == abc.get_count('R')));
-    cnt = 0, 0, 0;
-    EXPECT_TRUE(all(cnt == abc.get_count('X')));
-    EXPECT_TRUE(all(cnt == abc.get_count('-')));
-    EXPECT_TRUE(all(cnt == abc.get_count('*')));
-    EXPECT_TRUE(all(cnt == abc.get_count('~')));
+    Float1dArray cnt(3);
+    cnt << 1, 0, 0;
+    EXPECT_TRUE(cnt.matrix() == abc.get_count('A').matrix());
+    cnt << 0.5, 0.5, 0;
+    EXPECT_TRUE(cnt.matrix() == abc.get_count('P').matrix());
+    cnt << 0, 0, 1;
+    EXPECT_TRUE(cnt.matrix() == abc.get_count('R').matrix());
+    cnt << 0, 0, 0;
+    EXPECT_TRUE(cnt.matrix() == abc.get_count('X').matrix());
+    EXPECT_TRUE(cnt.matrix() == abc.get_count('-').matrix());
+    EXPECT_TRUE(cnt.matrix() == abc.get_count('*').matrix());
+    EXPECT_TRUE(cnt.matrix() == abc.get_count('~').matrix());
 }
 
 class AminoAcidTest : public testing::Test {

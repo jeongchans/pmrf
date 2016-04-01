@@ -16,12 +16,10 @@ double RTEffSeqNumEstimator::estimate(const vector<string>& msa) const {
 }
 
 size_t RTEffSeqNumEstimator::calc_num_res_type(const string& column) const {
-    using blitz::count;
-    Float1dArray n(abc.get_canonical_size(false));
-    n = 0;
+    Float1dArray n = zeros(abc.get_canonical_size(false));
     for (string::const_iterator pos = column.begin(); pos != column.end(); ++pos)
         n(abc.get_idx(*pos)) += 1;
-    return count(n != 0);
+    return (n != zeros(n.size())).count();
 }
 
 double ExpEntropyEffSeqNumEstimator::estimate(const vector<string>& msa) const {
@@ -33,7 +31,7 @@ double ExpEntropyEffSeqNumEstimator::estimate(const vector<string>& msa) const {
     int n = abc.get_canonical_size(false);
     Float1dArray p(n);
     for (int i = 0; i < cols; ++i) {
-        p = 0;
+        p.setZero();
         for (int j = 0; j < rows; ++j)
             p += abc.get_count(msa[j][i]) * wt(j);
         scale(p);

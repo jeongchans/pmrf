@@ -98,7 +98,7 @@ class MRF {
     // Profile setter and getter
     void set_psfm(const Float2dArray& m) { psfm = m; }
     Float2dArray get_psfm() const { return psfm; }
-    const Float1dArray get_psfm(const size_t& idx) const { return psfm(idx, ALL); }
+    const Float1dArray get_psfm(const size_t& idx) const { return psfm.row(idx); }
 
     // element getter
     NodeElement& get_node(const size_t& idx) { return nodes[idx]; }

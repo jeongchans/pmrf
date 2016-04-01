@@ -3,6 +3,7 @@
 #include <fstream>
 #include <map>
 #include <numeric>
+#include <iomanip>
 
 #include "mrfio.h"
 #include "core.h"
@@ -116,12 +117,11 @@ double MRFModelAnalyzer::calc_pll(const MRF& model, const string& aseq) {
 MRFModelAnalyzer::PairScoreVector MRFModelAnalyzer::calc_pair_score(const MRF& model) {
     PairScoreVector scores;
     size_t n = model.get_length();
-    Range r(blitz::fromStart, 19);
     for (size_t i = 0; i < n; ++i) {
         for (size_t j = i + 1; j < n; ++j) {
             if (model.has_edge(i, j)) {
                 const Float2dArray& w = model.get_edge(i, j).get_weight();
-                scores.push_back(PairScore(EdgeIndex(i, j), norm(w(r, r))));
+                scores.push_back(PairScore(EdgeIndex(i, j), norm(w.topLeftCorner<20, 20>())));
             }
         }
     }
@@ -206,12 +206,11 @@ MRFModelAnalyzer::PosScoreVector MRFModelAnalyzer::calc_pos_score(const MRF& mod
     PosScoreVector scores;
     size_t n = model.get_length();
     const Float2dArray psfm = model.get_psfm();
-    Range r(blitz::fromStart, 19);
     for (size_t i = 0; i < n; ++i) {
-        const Float1dArray& w = model.get_node(i).get_weight()(r);
+        const Float1dArray& w = model.get_node(i).get_weight().head<20>();
         Float1dArray p = exp(w);
-        p /= blitz::sum(p);
-        Float1dArray f = psfm(i, r);
+        p /= p.sum();
+        Float1dArray f = psfm.row(i).head<20>();
         scores.push_back(PosScore(i, calc_kld(f, p)));
     }
     return scores;

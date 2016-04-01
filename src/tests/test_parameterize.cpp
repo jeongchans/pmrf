@@ -104,7 +104,7 @@ class MRFParameterizer_ObjectiveFunction_Test : public testing::Test {
 //        traces.push_back(Trace("UUMMOEEMMIIIMMMMUUUU", "DQHGNRIVHLQ"));
         traces.push_back(Trace("DDMMDDDMMIIIMMMMDDDD", "DQHGNRIVHLQ"));
         seq_weight.resize(2);
-        seq_weight = 0.5, 0.5;
+        seq_weight << 0.5, 0.5;
 
         g = lbfgs_malloc(param.n);
         for (int i = 0; i < param.n; ++i) {
