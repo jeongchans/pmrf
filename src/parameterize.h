@@ -34,7 +34,10 @@ class MRFParameterizer {
         Parameter(const MRF& model, const Option& opt);
 
         int get_nidx(const int& i, const char& p) const;
-        int get_eidx(const int& i, const int& j, const char& p, const char& q) const;
+        inline int get_eidx(const int& i, const int& j, const char& p, const char& q) const;
+        inline int get_eidx(const int& i, const int& j, const int& xi, const char& q) const;
+        inline int get_eidx(const int& i, const int& j, const char& p, const int& xj) const;
+        inline int get_eidx(const int& i, const int& j, const int& xi, const int& xj) const;
 
         const Alphabet& abc;
         int num_var;

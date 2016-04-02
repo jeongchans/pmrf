@@ -36,11 +36,23 @@ int MRFParameterizer::Parameter::get_nidx(const int& i, const char& p) const {
     return i * num_var + abc.get_idx(p);
 }
 
-int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char& p, const char& q) const {
+inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char& p, const char& q) const {
+    return get_eidx(i, j, abc.get_idx(p), abc.get_idx(q));
+}
+
+inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const int& xi, const char& q) const {
+    return get_eidx(i, j, xi, abc.get_idx(q));
+}
+
+inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char& p, const int& xj) const {
+    return get_eidx(i, j, abc.get_idx(p), xj);
+}
+
+inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const int& xi, const int& xj) const {
     int k = length * num_var;
     k += eidx.at(EdgeIndex(i, j)) * num_var * num_var;
-    k += abc.get_idx(p) * num_var;
-    k += abc.get_idx(q);
+    k += xi * num_var;
+    k += xj;
     return k;
 }
 
@@ -74,7 +86,7 @@ void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *
         int j = pos->first.idx2;
         for (int p = 0; p < param.num_var; ++p) {
             for (int q = 0; q < param.num_var; ++q) {
-                int k = param.get_eidx(i, j, letters[p], letters[q]);
+                int k = param.get_eidx(i, j, p, q);
                 fx += lambda * square(x[k]);
                 g[k] += 2. * lambda * x[k];
             }
@@ -129,9 +141,9 @@ MatrixXf MRFParameterizer::ObjectiveFunction::calc_logpot(const lbfgsfloatval_t 
         string sj = param.abc.get_degeneracy(seq[j], &wj);
         for (int t = 0; t < param.num_var; ++t) {
             for (string::iterator c = sj.begin(); c != sj.end(); ++c)
-                logpot(t, i) += wj * x[param.get_eidx(i, j, letters[t], *c)];
+                logpot(t, i) += wj * x[param.get_eidx(i, j, t, *c)];
             for (string::iterator c = si.begin(); c != si.end(); ++c)
-                logpot(t, j) += wi * x[param.get_eidx(i, j, *c, letters[t])];
+                logpot(t, j) += wi * x[param.get_eidx(i, j, *c, t)];
         }
     }
     return logpot;
@@ -181,8 +193,8 @@ void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t 
             for (string::iterator cj = sj.begin(); cj != sj.end(); ++cj) {
                 g[param.get_eidx(i, j, *ci, *cj)] -= w * sw * 2.;
                 for (int t = 0; t < param.num_var; ++t) {
-                    g[param.get_eidx(i, j, letters[t], *cj)] += w * sw * nodebel(t, i);
-                    g[param.get_eidx(i, j, *ci, letters[t])] += w * sw * nodebel(t, j);
+                    g[param.get_eidx(i, j, t, *cj)] += w * sw * nodebel(t, i);
+                    g[param.get_eidx(i, j, *ci, t)] += w * sw * nodebel(t, j);
                 }
             }
         }
