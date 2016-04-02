@@ -78,7 +78,7 @@ void MRFParameterizer::L2Regularization::regularize_node(const lbfgsfloatval_t *
 void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
     double lambda = opt.lambda2;
     if (opt.sc) lambda *= 2. * ((double)(param.eidx.size())) / ((double)(param.length));
-    for (int k = param.n_node; k < param.n_edge; ++k) {
+    for (int k = param.n_node; k < param.n; ++k) {
         fx += lambda * square(x[k]);
         g[k] += 2. * lambda * x[k];
     }
