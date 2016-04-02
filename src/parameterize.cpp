@@ -24,7 +24,9 @@ MRFParameterizer::Parameter::Parameter(const MRF& model, const Option& opt) : ab
         i++;
     }
     num_var = model.get_num_var();
-    n = length * num_var + eidx.size() * num_var * num_var;
+    n_node = length * num_var;
+    n_edge = eidx.size() * num_var * num_var;
+    n = n_node + n_edge;
     init();
     opt_param.linesearch = opt.linesearch;
     opt_param.delta = (lbfgsfloatval_t)(opt.delta);
@@ -49,7 +51,7 @@ inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, con
 }
 
 inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const int& xi, const int& xj) const {
-    int k = length * num_var;
+    int k = n_node;
     k += eidx.at(EdgeIndex(i, j)) * num_var * num_var;
     k += xi * num_var;
     k += xj;
@@ -67,30 +69,18 @@ void MRFParameterizer::L2Regularization::regularize(const lbfgsfloatval_t *x, lb
 
 void MRFParameterizer::L2Regularization::regularize_node(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
     const double& lambda = opt.lambda1;
-    string letters = param.abc.get_canonical();
-    for (int i = 0; i < param.length; ++i) {
-        for (int t = 0; t < param.num_var; ++t) {
-            int k = param.get_nidx(i, letters[t]);
-            fx += lambda * square(x[k]);
-            g[k] += 2. * lambda * x[k];
-        }
+    for (int k = 0; k < param.n_node; ++k) {
+        fx += lambda * square(x[k]);
+        g[k] += 2. * lambda * x[k];
     }
 }
 
 void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
     double lambda = opt.lambda2;
     if (opt.sc) lambda *= 2. * ((double)(param.eidx.size())) / ((double)(param.length));
-    string letters = param.abc.get_canonical();
-    for (unordered_map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
-        int i = pos->first.idx1;
-        int j = pos->first.idx2;
-        for (int p = 0; p < param.num_var; ++p) {
-            for (int q = 0; q < param.num_var; ++q) {
-                int k = param.get_eidx(i, j, p, q);
-                fx += lambda * square(x[k]);
-                g[k] += 2. * lambda * x[k];
-            }
-        }
+    for (int k = param.n_node; k < param.n_edge; ++k) {
+        fx += lambda * square(x[k]);
+        g[k] += 2. * lambda * x[k];
     }
 }
 

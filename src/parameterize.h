@@ -43,6 +43,8 @@ class MRFParameterizer {
         int num_var;
         int length;
         std::unordered_map<EdgeIndex, int> eidx;
+        int n_node;
+        int n_edge;
     };
 
     // Regularization

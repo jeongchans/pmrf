@@ -133,7 +133,7 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_calc_logpot) {
 
     string seq = traces[0].get_matched_aseq();
 
-    MatrixXf logpot = obj_func.calc_logpot(param.x, seq);
+    MatrixXf logpot = obj_func.calc_logpot(param.x, 0, seq);
     EXPECT_EQ(param.num_var, logpot.rows());
     EXPECT_EQ(param.length, logpot.cols());
 }
@@ -170,7 +170,7 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_update_obj_score) {
     VectorXf logz = obj_func.calc_logz(logpot);
     lbfgsfloatval_t fx = 0.;
 
-    obj_func.update_obj_score(fx, logpot, logz, seq, sw);
+    obj_func.update_obj_score(fx, logpot, logz, 0, seq, sw);
     EXPECT_NE(0., fx);
 }
 
@@ -182,7 +182,7 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_update_gradient) {
     MatrixXf logpot = randn_matrix(param.num_var, param.length).unaryExpr(&exp);
     VectorXf logz = obj_func.calc_logz(logpot);
 
-    obj_func.update_gradient(param.x, g, logpot, logz, seq, sw);
+    obj_func.update_gradient(param.x, g, logpot, logz, 0, seq, sw);
     double s = 0.;
     for (int i = 0; i < param.n; ++i) s+= fabs(g[i]);
     EXPECT_NE(0., s);
