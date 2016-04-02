@@ -262,7 +262,7 @@ TEST_F(AminoAcidTest, test_get_count) {
     ASSERT_EQ(20, amino.get_count('C').size());
     EXPECT_EQ(1, amino.get_count('C').sum());
     EXPECT_EQ(1, amino.get_count('C')(1));
-    EXPECT_EQ(1, amino.get_count('B').sum());
-    EXPECT_EQ(0.5, amino.get_count('B')(2));
-    EXPECT_EQ(0.5, amino.get_count('B')(11));
+    EXPECT_FLOAT_EQ(1, amino.get_count('B').sum());
+    EXPECT_FLOAT_EQ(0.5, amino.get_count('B')(2));
+    EXPECT_FLOAT_EQ(0.5, amino.get_count('B')(11));
 }

@@ -20,7 +20,7 @@ TEST_F(BgFreqTest, test_bgfreq) {
     f /= f.sum();
 
     BgFreq bgfreq(freq);
-    EXPECT_TRUE(f.matrix() == bgfreq.get_array(abc).matrix());
+    EXPECT_TRUE(allclose(f, bgfreq.get_array(abc)));
 
     for (int i = 0; i < (int)s.size(); ++i) {
         EXPECT_FLOAT_EQ(f(i), bgfreq.get_value(s[i]));

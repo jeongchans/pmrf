@@ -1,5 +1,5 @@
 export CXX          = g++
-export CXXFLAGS     = -Wno-write-strings -W -Wall -std=c++0x
+export CXXFLAGS     = -Wno-write-strings -W -Wall -std=c++0x -ffast-math -DNDEBUG
 
 LBFGS_MODULE 	    = lbfgs
 LBFGS_SRC_DIR 	    = $(LBFGS_MODULE)
@@ -15,7 +15,7 @@ PROG_OBJECTS		= $(PROG_MRFMAIN_OBJECT)
 SRCS   				= $(foreach dir,. $(DIRS), $(wildcard $(dir)/*.cpp))
 OBJECTS				= $(filter-out $(PROG_OBJECTS), $(SRCS:.cpp=.o))
 
-all : CXXFLAGS += -O3 -DNDEBUG
+all : CXXFLAGS += -O3
 all : prog
 
 prog : objs
@@ -48,7 +48,7 @@ TEST_DIRS 			= $(addsuffix /tests, $(SRC_DIR)) $(TESTRUNNER_DIR)
 TEST_SRCS			= $(foreach dir,. $(TEST_DIRS), $(wildcard $(dir)/*.cpp))
 TEST_OBJECTS		= $(filter-out $(TESTRUNNER_OBJECT), $(TEST_SRCS:.cpp=.o))
 
-test : CXXFLAGS += -O3 -DNDEBUG
+test : CXXFLAGS += -O3
 test : objs test_objs
 	$(CXX) $(CXXFLAGS) -o $(TESTRUNNER) $(TESTRUNNER_OBJECT) $(TEST_OBJECTS) $(OBJECTS) $(TESTFLAGS)
 	./$(TESTRUNNER) --gtest_throw_on_failure
