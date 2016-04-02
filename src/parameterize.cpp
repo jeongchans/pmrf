@@ -25,7 +25,9 @@ MRFParameterizer::Parameter::Parameter(const MRF& model, const Option& opt) : ab
     }
     num_var = model.get_num_var();
     n_node = length * num_var;
-    n_edge = eidx.size() * num_var * num_var;
+    num_edge = eidx.size();
+    num_var2 = num_var * num_var;
+    n_edge = num_edge * num_var2;
     n = n_node + n_edge;
     init();
     opt_param.linesearch = opt.linesearch;
@@ -69,7 +71,7 @@ void MRFParameterizer::L2Regularization::regularize(const lbfgsfloatval_t *x, lb
 
 void MRFParameterizer::L2Regularization::regularize_node(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
     const double& lambda = opt.lambda1;
-    for (int k = 0; k < param.n_node; ++k) {
+    for (int k = param.nidx_beg(); k < param.nidx_end(); ++k) {
         fx += lambda * square(x[k]);
         g[k] += 2. * lambda * x[k];
     }
@@ -78,7 +80,7 @@ void MRFParameterizer::L2Regularization::regularize_node(const lbfgsfloatval_t *
 void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
     double lambda = opt.lambda2;
     if (opt.sc) lambda *= 2. * ((double)(param.eidx.size())) / ((double)(param.length));
-    for (int k = param.n_node; k < param.n; ++k) {
+    for (int k = param.eidx_beg(); k < param.eidx_end(); ++k) {
         fx += lambda * square(x[k]);
         g[k] += 2. * lambda * x[k];
     }
