@@ -101,10 +101,6 @@ bool Alphabet::is_valid(const char& x) const {
     return false;
 }
 
-int Alphabet::get_idx(const char& x) const {
-    return sym_idx.find(x)->second;
-}
-
 void Alphabet::update_sym_idx() {
     std::string str = get_valid_symbol();
     for (size_t i = 0; i < str.size(); ++i) {

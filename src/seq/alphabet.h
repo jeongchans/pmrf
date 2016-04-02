@@ -42,7 +42,7 @@ class Alphabet {
     bool is_none(const char& x) const;
     bool is_missing(const char& x) const;
     bool is_valid(const char& x) const;
-    int get_idx(const char& x) const;
+    inline int get_idx(const char& x) const { return sym_idx.at(x); }
     size_t get_canonical_size() const { return get_canonical_size(gapres); }
     size_t get_canonical_size(const bool& gapres) const;
     size_t get_gap_size() const { return sym_grp[GAP].get_uniq_size(); }

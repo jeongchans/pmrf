@@ -38,7 +38,7 @@ int MRFParameterizer::Parameter::get_nidx(const int& i, const char& p) const {
 
 int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char& p, const char& q) const {
     int k = length * num_var;
-    k += eidx.find(EdgeIndex(i, j))->second * num_var * num_var;
+    k += eidx.at(EdgeIndex(i, j)) * num_var * num_var;
     k += abc.get_idx(p) * num_var;
     k += abc.get_idx(q);
     return k;
@@ -69,7 +69,7 @@ void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *
     double lambda = opt.lambda2;
     if (opt.sc) lambda *= 2. * ((double)(param.eidx.size())) / ((double)(param.length));
     string letters = param.abc.get_canonical();
-    for (map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
+    for (unordered_map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
         int i = pos->first.idx1;
         int j = pos->first.idx2;
         for (int p = 0; p < param.num_var; ++p) {
@@ -122,7 +122,7 @@ MatrixXf MRFParameterizer::ObjectiveFunction::calc_logpot(const lbfgsfloatval_t 
     for (int i = 0; i < param.length; ++i)
         for (int t = 0; t < param.num_var; ++t)
             logpot(t, i) += x[param.get_nidx(i, letters[t])];
-    for (map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
+    for (unordered_map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
         int i = pos->first.idx1;
         int j = pos->first.idx2;
         string si = param.abc.get_degeneracy(seq[i], &wi);
@@ -171,7 +171,7 @@ void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t 
         for (int t = 0; t < param.num_var; ++t)
             g[param.get_nidx(i, letters[t])] += sw * nodebel(t, i);
     }
-    for (map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
+    for (unordered_map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
         int i = pos->first.idx1;
         int j = pos->first.idx2;
         string si = param.abc.get_degeneracy(seq[i], &wi);
@@ -228,7 +228,7 @@ void MRFParameterizer::update_model(MRF& model, Parameter& param) {
         for (int t = 0; t < param.num_var; ++t) w(t) = (FloatType)param.x[param.get_nidx(i, letters[t])];
         model.get_node(i).set_weight(w);
     }
-    for (map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
+    for (unordered_map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
         int i = pos->first.idx1;
         int j = pos->first.idx2;
         MatrixXf w = MatrixXf::Zero(param.num_var, param.num_var);

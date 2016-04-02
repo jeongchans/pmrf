@@ -39,7 +39,7 @@ class MRFParameterizer {
         const Alphabet& abc;
         int num_var;
         int length;
-        map<EdgeIndex, int> eidx;
+        std::unordered_map<EdgeIndex, int> eidx;
     };
 
     // Regularization
