@@ -34,10 +34,15 @@ class MRFParameterizer {
         Parameter(const MRF& model, const Option& opt);
 
         int get_nidx(const int& i, const char& p) const;
+
         inline int get_eidx(const int& i, const int& j, const char& p, const char& q) const;
         inline int get_eidx(const int& i, const int& j, const int& xi, const char& q) const;
         inline int get_eidx(const int& i, const int& j, const char& p, const int& xj) const;
         inline int get_eidx(const int& i, const int& j, const int& xi, const int& xj) const;
+        inline int get_eidx_edge(const int& ei, const char& p, const char& q) const;
+        inline int get_eidx_edge(const int& ei, const int& xi, const char& q) const;
+        inline int get_eidx_edge(const int& ei, const char& p, const int& xj) const;
+        inline int get_eidx_edge(const int& ei, const int& xi, const int& xj) const;
 
         inline size_t nidx_beg() const { return 0; }
         inline size_t nidx_end() const { return n_node; }
@@ -51,7 +56,10 @@ class MRFParameterizer {
         int num_edge;
         int num_var2;
         int n_edge;
+
         std::unordered_map<EdgeIndex, int> eidx;
+        EdgeIndexVector edge_idxs;
+
     };
 
     // Regularization

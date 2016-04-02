@@ -31,7 +31,6 @@ namespace std {
     };
 }
 
-
 typedef vector<EdgeIndex> EdgeIndexVector;
 
 class MRF {
