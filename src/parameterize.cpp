@@ -119,7 +119,7 @@ MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces
     seq_weight.resize(traces.size());
     seq_weight = msa_analyzer.seq_weight_estimator->estimate(msa);
     seq_weight /= seq_weight.sum();
-    seq_weight *= (double)msa_analyzer.eff_seq_num_estimator->estimate(msa);
+    seq_weight *= msa_analyzer.eff_seq_num_estimator->estimate(msa);
 }
 
 lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step) {
@@ -127,7 +127,7 @@ lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatva
     for (int i = 0; i < param.n; ++i) g[i] = 0.;
     for (size_t i = 0; i < traces.size(); ++i) {
         string seq = traces[i].get_matched_aseq();
-        double sw = seq_weight(i);
+        const float sw = seq_weight(i);
         MatrixXf logpot = calc_logpot(x, i, seq);
         VectorXf logz = calc_logz(logpot);
         update_obj_score(fx, logpot, logz, i, seq, sw);
@@ -149,10 +149,9 @@ MatrixXf MRFParameterizer::ObjectiveFunction::calc_logpot(const lbfgsfloatval_t 
         const int xi = data(m, i);
         const int xj = data(m, j);
         if (xi < param.num_var && xj < param.num_var) {
-            for (int t = 0; t < param.num_var; ++t) {
-                logpot(t, i) += x[param.get_eidx_edge(ei, t, xj)];
-                logpot(t, j) += x[param.get_eidx_edge(ei, xi, t)];
-            }
+            const Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > wt(x + param.get_eidx_edge(ei, 0, 0), param.num_var, param.num_var);
+            logpot.col(i) += wt.col(xj);
+            logpot.col(j) += wt.row(xi);
         } else {
             FloatType wi, wj;
             string si = param.abc.get_degeneracy(seq[i], &wi);
@@ -180,11 +179,11 @@ VectorXf MRFParameterizer::ObjectiveFunction::calc_logz(const MatrixXf& logpot) 
     return logsumexp(logpot.transpose());
 }
 
-void MRFParameterizer::ObjectiveFunction::update_obj_score(lbfgsfloatval_t& fx, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const double& sw) {
+void MRFParameterizer::ObjectiveFunction::update_obj_score(lbfgsfloatval_t& fx, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw) {
     for (int i = 0; i < param.length; ++i) {
         const int xi = data(m, i);
         if (xi < param.num_var) {
-            fx += -sw * logpot(xi, i) + sw * logz(i);
+            fx += sw * (logz(i) -logpot(xi, i));
         } else {
             FloatType w;
             string s = param.abc.get_degeneracy(seq[i], &w);
@@ -194,18 +193,19 @@ void MRFParameterizer::ObjectiveFunction::update_obj_score(lbfgsfloatval_t& fx, 
     }
 }
 
-void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const double& sw) {
+void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw) {
     string letters = param.abc.get_canonical();
     FloatType w;
     MatrixXf nodebel = MatrixXf::Zero(param.num_var, param.length);
     for (int t = 0; t < param.num_var; ++t)
         nodebel.row(t) = (logpot.row(t) - logz.transpose()).unaryExpr(&exp);
+    nodebel *= sw;
     for (int i = 0; i < param.length; ++i) {
         string s = param.abc.get_degeneracy(seq[i], &w);
         for (string::iterator c = s.begin(); c != s.end(); ++c)
             g[param.get_nidx(i, *c)] -= w * sw;
         for (int t = 0; t < param.num_var; ++t)
-            g[param.get_nidx(i, letters[t])] += sw * nodebel(t, i);
+            g[param.get_nidx(i, letters[t])] += nodebel(t, i);
     }
     for (int ei = 0; ei < param.num_edge; ++ei) {
         const int i = param.edge_idxs[ei].idx1;
@@ -213,11 +213,10 @@ void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t 
         const int xi = data(m, i);
         const int xj = data(m, j);
         if (xi < param.num_var && xj < param.num_var) {
-            g[param.get_eidx_edge(ei, xi, xj)] -= sw * 2.;
-            for (int t = 0; t < param.num_var; ++t) {
-                g[param.get_eidx_edge(ei, t, xj)] += sw * nodebel(t, i);
-                g[param.get_eidx_edge(ei, xi, t)] += sw * nodebel(t, j);
-            }
+            Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > dw(g + param.get_eidx_edge(ei, 0, 0), param.num_var, param.num_var);
+            dw(xi, xj) -= sw * 2.;
+            dw.col(xj) += nodebel.col(i);
+            dw.row(xi) += nodebel.col(j);
         } else {
             FloatType wi, wj;
             string si = param.abc.get_degeneracy(seq[i], &wi);
@@ -227,8 +226,8 @@ void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t 
                 for (string::iterator cj = sj.begin(); cj != sj.end(); ++cj) {
                     g[param.get_eidx_edge(ei, *ci, *cj)] -= w * sw * 2.;
                     for (int t = 0; t < param.num_var; ++t) {
-                        g[param.get_eidx_edge(ei, t, *cj)] += w * sw * nodebel(t, i);
-                        g[param.get_eidx_edge(ei, *ci, t)] += w * sw * nodebel(t, j);
+                        g[param.get_eidx_edge(ei, t, *cj)] += w * nodebel(t, i);
+                        g[param.get_eidx_edge(ei, *ci, t)] += w * nodebel(t, j);
                     }
                 }
             }

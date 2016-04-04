@@ -130,8 +130,8 @@ class MRFParameterizer {
         MatrixXf calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq);
         VectorXf logsumexp(const MatrixXf& b);
         VectorXf calc_logz(const MatrixXf& logpot);
-        void update_obj_score(lbfgsfloatval_t& fx, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const double& sw);
-        void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const double& sw);
+        void update_obj_score(lbfgsfloatval_t& fx, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw);
+        void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw);
 
         FRIEND_TEST(MRFParameterizer_ObjectiveFunction_Test, test_calc_logpot);
         FRIEND_TEST(MRFParameterizer_ObjectiveFunction_Test, test_logsumexp);
