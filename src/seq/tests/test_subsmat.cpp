@@ -14,7 +14,7 @@ class SubstitutionMatrixTest : public testing::Test {
 TEST_F(SubstitutionMatrixTest, test_substitution_matrix) {
     std::string s = abc.get_canonical();
     std::map<SymbolPair, double> score;
-    Float2dArray m(s.size(), s.size());
+    MatrixXf m(s.size(), s.size());
     for (int i = 0; i < (int)s.size(); ++i) {
         for (int j = i; j < (int)s.size(); ++j) {
             double val = i + j;
@@ -23,7 +23,7 @@ TEST_F(SubstitutionMatrixTest, test_substitution_matrix) {
         }
     }
     SubstitutionMatrix subs_mat(score);
-    EXPECT_TRUE(all(m == subs_mat.get_array(abc)));
+    EXPECT_TRUE(m.matrix() == subs_mat.get_array(abc).matrix());
     for (int i = 0; i < (int)s.size(); ++i) {
         for (int j = i; j < (int)s.size(); ++j) {
             double val = i + j;
@@ -35,9 +35,9 @@ TEST_F(SubstitutionMatrixTest, test_substitution_matrix) {
 
 TEST_F(SubstitutionMatrixTest, test_blosum62) {
     BLOSUM62Matrix blosum62;
-    Float2dArray m(20, 20);
+    MatrixXf m(20, 20);
     //    A  C  D  E  F  G  H  I  K  L  M  N  P  Q  R  S  T  V  W  Y
-    m =   4, 0,-2,-1,-2, 0,-2,-1,-1,-1,-1,-2,-1,-1,-1, 1, 0, 0,-3,-2,  // A
+    m <<  4, 0,-2,-1,-2, 0,-2,-1,-1,-1,-1,-2,-1,-1,-1, 1, 0, 0,-3,-2,  // A
           0, 9,-3,-4,-2,-3,-3,-1,-3,-1,-1,-3,-3,-3,-3,-1,-1,-1,-2,-2,  // C
          -2,-3, 6, 2,-3,-1,-1,-3,-1,-4,-3, 1,-1, 0,-2, 0,-1,-3,-4,-3,  // D
          -1,-4, 2, 5,-3,-2, 0,-3, 1,-3,-2, 0,-1, 2, 0, 0,-1,-2,-3,-2,  // E
@@ -57,7 +57,7 @@ TEST_F(SubstitutionMatrixTest, test_blosum62) {
           0,-1,-3,-2,-1,-3,-3, 3,-2, 1, 1,-3,-2,-2,-3,-2, 0, 4,-3,-1,  // V
          -3,-2,-4,-3, 1,-2,-2,-3,-3,-2,-1,-4,-4,-2,-3,-3,-2,-3,11, 2,  // W
          -2,-2,-3,-2, 3,-3, 2,-1,-2,-1,-1,-2,-3,-1,-2,-2,-2,-1, 2, 7;  // Y
-    EXPECT_TRUE(all(m == blosum62.get_array(abc)));
+    EXPECT_TRUE(m.matrix() == blosum62.get_array(abc).matrix());
     EXPECT_EQ(4, blosum62.get_value('A', 'A'));
     EXPECT_EQ(-3, blosum62.get_value('C', 'D'));
     EXPECT_EQ(-3, blosum62.get_value('D', 'C'));
@@ -77,24 +77,24 @@ class TargetProbEstimatorTest : public testing::Test {
             for (int j = i + 1; j < 20; ++j)
                 prob(i, j) = prob(j, i) = rng.random();
         }
-        prob /= sum(prob);
+        prob /= prob.sum();
         bgfreq.resize(20);
         for (int i = 0; i < 20; ++i) bgfreq(i) = rng.random();
-        bgfreq /= sum(bgfreq);
-        subsmat.resize(prob.shape());
-        subsmat = 1. / lamb * log(prob / outer(bgfreq, bgfreq));
+        bgfreq /= bgfreq.sum();
+        subsmat.resize(prob.rows(), prob.cols());
+        subsmat = 1. / lamb * prob.cwiseQuotient(bgfreq * bgfreq.transpose()).unaryExpr(&log);
     }
 
     Uniform<double> rng;
-    Float1dArray bgfreq;
+    VectorXf bgfreq;
     double lamb;
-    Float2dArray prob;
-    Float2dArray subsmat;
+    MatrixXf prob;
+    MatrixXf subsmat;
 };
 
 TEST_F(TargetProbEstimatorTest, test_target_prob_estimator_given_bg) {
     TargetProbEstimatorGivenBG estimator(bgfreq);
-    pair<double, Float2dArray> p = estimator.probify(subsmat);
+    pair<double, MatrixXf> p = estimator.probify(subsmat);
     EXPECT_TRUE(allclose(lamb, p.first)) << p.first;
     ASSERT_EQ(prob.rows(), p.second.rows());
     ASSERT_EQ(prob.cols(), p.second.cols());

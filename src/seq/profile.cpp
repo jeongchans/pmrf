@@ -25,10 +25,10 @@ void Profile::init() {
     bgfreq.resize(abc.get_canonical_size());
 }
 
-Float2dArray Profile::get_ll() const {
+MatrixXf Profile::get_ll() const {
     int n = prob.rows();
     int m = prob.cols();
-    Float2dArray s(n, m);
+    MatrixXf s(n, m);
     for (int i = 0; i < n; ++i)
         for (int j = 0; j < m; ++j)
             s(i, j) = log(prob(i, j) / bgfreq(j));
@@ -49,11 +49,10 @@ Profile ProfileBuilder::build(const TraceVector& traces) const {
         TraceVector trs;
         vector<string> msa;
         collect_trace(traces, i, trs, msa);
-        Float1dArray wt = seq_weight_estimator->estimate(msa);
+        VectorXf wt = seq_weight_estimator->estimate(msa);
         double eff_num = eff_seq_num_estimator->estimate(msa);
-        Float1dArray f(abc.get_canonical_size());  // frequency
-        f = calc_freq(trs, i, wt, eff_num);
-        if (blitz::sum(f) > 0) profile.set_prob(i, emit_prob_estimator->estimate(f));
+        VectorXf f = calc_freq(trs, i, wt, eff_num);    // frequency
+        if (f.sum() > 0) profile.set_prob(i, emit_prob_estimator->estimate(f));
         else profile.set_prob(i, ROBINSON_BGFREQ.get_array(abc));
         profile.set_eff_num(i, eff_num);
         profile.set_bgfreq(ROBINSON_BGFREQ.get_array(abc));
@@ -68,12 +67,11 @@ void ProfileBuilder::collect_trace(const TraceVector& traces, const size_t& idx,
     r_msa = msa_filter->filter(r_msa);
 }
 
-Float1dArray ProfileBuilder::calc_freq(const TraceVector& trs, const size_t& idx, const Float1dArray& wt, const double& eff_num) const {
+VectorXf ProfileBuilder::calc_freq(const TraceVector& trs, const size_t& idx, const VectorXf& wt, const double& eff_num) const {
     size_t n = trs.size();
-    Float1dArray v(abc.get_canonical_size());
-    v = 0;
+    VectorXf v = VectorXf::Zero(abc.get_canonical_size());
     for (size_t i = 0; i < n; ++i)
         v += abc.get_count(trs[i].get_symbol_at(idx)) * wt(i);
-    scale(v, eff_num);
-    return v;
+    v /= v.sum();
+    return v * eff_num;
 }

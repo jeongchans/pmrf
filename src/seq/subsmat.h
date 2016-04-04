@@ -11,7 +11,7 @@ class SubstitutionMatrix {
     SubstitutionMatrix() {};
     SubstitutionMatrix(const std::map<SymbolPair, double>& score) : score(score) {};
 
-    Float2dArray get_array(const Alphabet& abc) const;
+    MatrixXf get_array(const Alphabet& abc) const;
     double get_value(const char& x, const char& y) const {
         std::map<SymbolPair, double>::const_iterator pos;
         pos = score.find(SymbolPair(x, y));
@@ -38,35 +38,33 @@ class TargetProbEstimatorGivenBG {
   private:
     class TargetProbFunction : public TargetFunction {
       public:
-        TargetProbFunction(const Float1dArray& bgfreq, const Float2dArray& scoremat) {
-            this->mfreq.resize(bgfreq.size(), bgfreq.size());
-            this->mfreq = outer(bgfreq, bgfreq);
-            this->scoremat.resize(scoremat.shape());
-            this->scoremat = scoremat;
+        TargetProbFunction(const VectorXf& bgfreq, const MatrixXf& scoremat) {
+            this->mfreq = (bgfreq * bgfreq.transpose()).cast<double>();
+            this->scoremat = scoremat.cast<double>();
         }
 
         virtual double fx(const double& x) const {
-            return sum(mfreq * exp(x * scoremat)) - 1.;
+            return mfreq.cwiseProduct((x * scoremat).unaryExpr(&exp)).sum() - 1.;
         }
+
         virtual pair<double, double> fx_dfx(const double& x) const {
-            return make_pair(fx(x), sum(mfreq * exp(x * scoremat) * scoremat));
+            return make_pair(fx(x), mfreq.cwiseProduct((x * scoremat).unaryExpr(&exp)).cwiseProduct(scoremat).sum());
         }
 
       private:
-        Float2dArray mfreq;        // marginal frequency
-        Float2dArray scoremat;     // substitution score
+        MatrixXd mfreq;        // marginal frequency
+        MatrixXd scoremat;     // substitution score
     };
 
   public:
-    TargetProbEstimatorGivenBG(const Float1dArray& bgfreq) {
-        this->bgfreq.resize(bgfreq.shape());
+    TargetProbEstimatorGivenBG(const VectorXf& bgfreq) {
         this->bgfreq = bgfreq;
     }
 
-    pair<double, Float2dArray> probify(const Float2dArray& scoremat);
+    pair<double, MatrixXf> probify(const MatrixXf& scoremat);
 
   private:
-    Float1dArray bgfreq;
+    VectorXf bgfreq;
 };
 
 static const BLOSUM62Matrix BLOSUM62_MATRIX;

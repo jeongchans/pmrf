@@ -53,8 +53,8 @@ TEST_F(MRFExporter_Test, test_export_node_symbol) {
 }
 
 TEST_F(MRFExporter_Test, test_export_node_weight) {
-    Float1dArray w(3);
-    w = 0.1, 0.0, 0.9;
+    VectorXf w(3);
+    w << 0.1, 0.0, 0.9;
     s = "0.1\t*\t0.9";
     exporter.export_node_weight(w, oss);
     EXPECT_EQ(s, oss.str());
@@ -68,8 +68,8 @@ TEST_F(MRFExporter_Test, test_export_edge_symbol) {
 }
 
 TEST_F(MRFExporter_Test, test_export_edge_weight) {
-    Float2dArray w(3, 3);
-    w = 0.0;
+    MatrixXf w(3, 3);
+    w.setZero();
     w(0, 1) = 0.1;
     w(1, 0) = 0.5;
     w(2, 2) = 0.4;
@@ -98,8 +98,8 @@ TEST_F(MRFImporter_Test, test_import_node_weight) {
     buf = "1.222\t-0.611\t-0.611";
     std::istringstream is(buf);
     size_t num_var = 3;
-    Float1dArray w(3);
-    w = 1.222, -0.611, -0.611;
+    VectorXf w(3);
+    w << 1.222, -0.611, -0.611;
     MRFImporter importer;
     EXPECT_TRUE(allclose(w, importer.import_node_weight(is, num_var)));
 }
@@ -108,10 +108,10 @@ TEST_F(MRFImporter_Test, test_import_edge_weight) {
     buf = "-0.111\t0.444\t-0.111\t*\t-0.111\t*\t*\t-0.111\t*";
     std::istringstream is(buf);
     size_t num_var = 3;
-    Float2dArray w(num_var, num_var);
-    w(0, ALL) = -0.111, 0.444, -0.111;
-    w(1, ALL) = 0., -0.111, 0.;
-    w(2, ALL) = 0., -0.111, 0.;
+    MatrixXf w(num_var, num_var);
+    w.row(0) << -0.111, 0.444, -0.111;
+    w.row(1) << 0., -0.111, 0.;
+    w.row(2) << 0., -0.111, 0.;
     MRFImporter importer;
     EXPECT_TRUE(allclose(w, importer.import_edge_weight(is, num_var)));
 }
@@ -120,8 +120,8 @@ TEST_F(MRFImporter_Test, test_import_psfm) {
     buf = "0.102\t0.005\t*";
     std::istringstream is(buf);
     size_t num_var = 3;
-    Float1dArray w(3);
-    w = 0.102, 0.005, 0.;
+    VectorXf w(3);
+    w << 0.102, 0.005, 0.;
     MRFImporter importer;
     EXPECT_TRUE(allclose(w, importer.import_psfm(is, num_var)));
 }

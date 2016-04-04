@@ -43,14 +43,14 @@ TEST_F(ProfileBuilderTest, test_build) {
     Profile profile = builder.build(traces);
     ASSERT_EQ(length, profile.get_length());
 
-    Float1dArray col(abc.get_canonical_size());
-    col = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
-    EXPECT_TRUE(all(col == profile.get_prob(0))) << profile.get_prob(0);
+    VectorXf col(abc.get_canonical_size());
+    col << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+           0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0;
+    EXPECT_TRUE(col.matrix() == profile.get_prob(0).matrix()) << profile.get_prob(0);
     EXPECT_EQ(1, profile.get_eff_num(0));
 
-    col = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0,
-          0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0;
-    EXPECT_TRUE(all(col == profile.get_prob(7)));
+    col << 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0,
+           0.0, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0;
+    EXPECT_TRUE(col.matrix() == profile.get_prob(7).matrix());
     EXPECT_EQ(2, profile.get_eff_num(7));
 }

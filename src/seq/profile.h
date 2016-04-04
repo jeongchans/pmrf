@@ -14,16 +14,16 @@ class Profile {
     Profile(const size_t& length, const Alphabet& abc);
     Profile(const string& seq, const Alphabet& abc);
 
-    Float2dArray get_prob() const { return prob; }
-    const Float1dArray get_prob(const size_t& idx) const { return prob(idx, ALL); }
-    void set_prob(const size_t& idx, const Float1dArray& v) { prob(idx, ALL) = v; }
+    MatrixXf get_prob() const { return prob; }
+    const VectorXf get_prob(const size_t& idx) const { return prob.row(idx); }
+    void set_prob(const size_t& idx, const VectorXf& v) { prob.row(idx) = v; }
 
-    Float2dArray get_ll() const;
+    MatrixXf get_ll() const;
 
     double get_eff_num(const size_t& idx) const { return eff_num(idx); }
     void set_eff_num(const size_t& idx, const double& neff) { eff_num(idx) = neff; }
 
-    void set_bgfreq(const Float1dArray& v) { bgfreq = v; }
+    void set_bgfreq(const VectorXf& v) { bgfreq = v; }
 
     size_t get_length() const { return length; }
     string get_seq() const { return seq; }
@@ -32,9 +32,9 @@ class Profile {
     size_t length;
     string seq;
     const Alphabet& abc;
-    Float2dArray prob;
-    Float1dArray eff_num;
-    Float1dArray bgfreq;
+    MatrixXf prob;
+    VectorXf eff_num;
+    VectorXf bgfreq;
 
     void init();
 };
@@ -62,7 +62,7 @@ class ProfileBuilder {
     const EmitProbEstimator *emit_prob_estimator;
 
     void collect_trace(const TraceVector& traces, const size_t& idx, TraceVector& r_trs, vector<string>& r_msa) const;
-    Float1dArray calc_freq(const TraceVector& trs, const size_t& idx, const Float1dArray& wt, const double& eff_num) const;
+    VectorXf calc_freq(const TraceVector& trs, const size_t& idx, const VectorXf& wt, const double& eff_num) const;
 };
 
 #endif

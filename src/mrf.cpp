@@ -1,13 +1,11 @@
 #include "mrf.h"
 
-inline void resize_and_fill(Float1dArray& v, const size_t& size, const double& value) {
-    v.resize(size);
-    v = value;
+inline void resize_and_fill(VectorXf& v, const size_t& size, const double& value) {
+    v = VectorXf::Constant(size, value);
 }
 
-inline void resize_and_fill(Float2dArray& m, const size_t& row_size, const size_t& col_size, const double& value) {
-    m.resize(row_size, col_size);
-    m = value;
+inline void resize_and_fill(MatrixXf& m, const size_t& row_size, const size_t& col_size, const double& value) {
+    m = MatrixXf::Constant(row_size, col_size, value);
 }
 
 /* NodeElement */
@@ -21,11 +19,11 @@ void MRF::NodeElement::accept(Visitor* visitor, const size_t& idx1, const size_t
     visitor->visit_node(this, idx1);
 }
 
-const Float1dArray& MRF::NodeElement::get_weight() const {
+const VectorXf& MRF::NodeElement::get_weight() const {
     return weight;
 }
 
-void MRF::NodeElement::set_weight(const Float1dArray& w) {
+void MRF::NodeElement::set_weight(const VectorXf& w) {
     weight.resize(w.size());
     weight = w;
 }
@@ -46,12 +44,11 @@ void MRF::EdgeElement::accept(Visitor* visitor, const size_t& idx1, const size_t
     visitor->visit_edge(this, idx1, idx2);
 }
 
-const Float2dArray& MRF::EdgeElement::get_weight() const {
+const MatrixXf& MRF::EdgeElement::get_weight() const {
     return weight;
 }
 
-void MRF::EdgeElement::set_weight(const Float2dArray& w) {
-    weight.resize(w.shape());
+void MRF::EdgeElement::set_weight(const MatrixXf& w) {
     weight = w;
 }
 

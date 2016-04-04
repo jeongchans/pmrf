@@ -34,12 +34,32 @@ class MRFParameterizer {
         Parameter(const MRF& model, const Option& opt);
 
         int get_nidx(const int& i, const char& p) const;
-        int get_eidx(const int& i, const int& j, const char& p, const char& q) const;
+
+        inline int get_eidx(const int& i, const int& j, const char& p, const char& q) const;
+        inline int get_eidx(const int& i, const int& j, const int& xi, const char& q) const;
+        inline int get_eidx(const int& i, const int& j, const char& p, const int& xj) const;
+        inline int get_eidx(const int& i, const int& j, const int& xi, const int& xj) const;
+        inline int get_eidx_edge(const int& ei, const char& p, const char& q) const;
+        inline int get_eidx_edge(const int& ei, const int& xi, const char& q) const;
+        inline int get_eidx_edge(const int& ei, const char& p, const int& xj) const;
+        inline int get_eidx_edge(const int& ei, const int& xi, const int& xj) const;
+
+        inline int nidx_beg() const { return 0; }
+        inline int nidx_end() const { return n_node; }
+        inline int eidx_beg() const { return n_node; }
+        inline int eidx_end() const { return n; }
 
         const Alphabet& abc;
-        int num_var;
         int length;
-        map<EdgeIndex, int> eidx;
+        int num_var;
+        int n_node;
+        int num_edge;
+        int num_var2;
+        int n_edge;
+
+        std::unordered_map<EdgeIndex, int> eidx;
+        EdgeIndexVector edge_idxs;
+
     };
 
     // Regularization
@@ -100,17 +120,18 @@ class MRFParameterizer {
         const Parameter& param;
         const Option& opt;
 
-        Float1dArray seq_weight;
+        MatrixXi data;
+        VectorXf seq_weight;
 
         const MSAAnalyzer msa_analyzer;
 
         L2Regularization l2_func;
 
-        Float2dArray calc_logpot(const lbfgsfloatval_t *x, const string& seq);
-        Float1dArray logsumexp(const Float2dArray& b);
-        Float1dArray calc_logz(const Float2dArray& logpot);
-        void update_obj_score(lbfgsfloatval_t& fx, const Float2dArray& logpot, const Float1dArray& logz, const string& seq, const double& sw);
-        void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const Float2dArray& logpot, const Float1dArray& logz, const string& seq, const double& sw);
+        MatrixXf calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq);
+        VectorXf logsumexp(const MatrixXf& b);
+        VectorXf calc_logz(const MatrixXf& logpot);
+        void update_obj_score(lbfgsfloatval_t& fx, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw);
+        void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw);
 
         FRIEND_TEST(MRFParameterizer_ObjectiveFunction_Test, test_calc_logpot);
         FRIEND_TEST(MRFParameterizer_ObjectiveFunction_Test, test_logsumexp);
@@ -132,7 +153,7 @@ class MRFParameterizer {
     const MSAAnalyzer& msa_analyzer;
 
     void update_model(MRF& model, Parameter& param);
-    Float2dArray calc_profile(const TraceVector& traces);
+    MatrixXf calc_profile(const TraceVector& traces);
 
     FRIEND_TEST(MRFParameterizer_Test, test_update_model);
 };

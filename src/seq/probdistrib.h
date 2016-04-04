@@ -5,7 +5,7 @@
 
 class EmitProbEstimator {
   public:
-    virtual Float1dArray estimate(const Float1dArray& c) const = 0;
+    virtual VectorXf estimate(const VectorXf& c) const = 0;
 };
 
 // Maximum likelihood estimation of emission probablities
@@ -13,19 +13,19 @@ class MLEmitProbEstimator : public EmitProbEstimator {
   public:
     MLEmitProbEstimator() {};
 
-    virtual Float1dArray estimate(const Float1dArray& c) const;
+    virtual VectorXf estimate(const VectorXf& c) const;
 };
 
 // Substitution matrix mixture estimation of emission probabilities
 // Biological sequence analysis, p117-119
 class SMMEmitProbEstimator : public EmitProbEstimator {
   public:
-    SMMEmitProbEstimator(const Float1dArray& bgfreq, const Float2dArray& scoremat, const double& admix=10.0);
+    SMMEmitProbEstimator(const VectorXf& bgfreq, const MatrixXf& scoremat, const double& admix=10.0);
 
-    virtual Float1dArray estimate(const Float1dArray& c) const;
+    virtual VectorXf estimate(const VectorXf& c) const;
 
   private:
-    Float2dArray cond_prob;    // conditional probability
+    MatrixXf cond_prob;    // conditional probability
     const double admix;
 };
 

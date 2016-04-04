@@ -104,7 +104,7 @@ class MRFParameterizer_ObjectiveFunction_Test : public testing::Test {
 //        traces.push_back(Trace("UUMMOEEMMIIIMMMMUUUU", "DQHGNRIVHLQ"));
         traces.push_back(Trace("DDMMDDDMMIIIMMMMDDDD", "DQHGNRIVHLQ"));
         seq_weight.resize(2);
-        seq_weight = 0.5, 0.5;
+        seq_weight << 0.5, 0.5;
 
         g = lbfgs_malloc(param.n);
         for (int i = 0; i < param.n; ++i) {
@@ -125,7 +125,7 @@ class MRFParameterizer_ObjectiveFunction_Test : public testing::Test {
     lbfgsfloatval_t *g;
 
     TraceVector traces;
-    Float1dArray seq_weight;
+    VectorXf seq_weight;
 };
 
 TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_calc_logpot) {
@@ -133,7 +133,7 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_calc_logpot) {
 
     string seq = traces[0].get_matched_aseq();
 
-    Float2dArray logpot = obj_func.calc_logpot(param.x, seq);
+    MatrixXf logpot = obj_func.calc_logpot(param.x, 0, seq);
     EXPECT_EQ(param.num_var, logpot.rows());
     EXPECT_EQ(param.length, logpot.cols());
 }
@@ -141,12 +141,12 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_calc_logpot) {
 TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_logsumexp) {
     MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
 
-    Float2dArray x = zeros(3, 4);
+    MatrixXf x = MatrixXf::Zero(3, 4);
     for (int i = 0; i < 3; ++i)
         for (int j = 0; j < 4; ++j)
             x(i, j) = 4 * i + j + 1;
 
-    Float1dArray y = obj_func.logsumexp(x);
+    VectorXf y = obj_func.logsumexp(x);
     ASSERT_TRUE(allclose(y(0), 4.4402));
     ASSERT_TRUE(allclose(y(1), 8.4402));
     ASSERT_TRUE(allclose(y(2), 12.4402));
@@ -155,9 +155,9 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_logsumexp) {
 TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_calc_logz) {
     MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
 
-    Float2dArray logpot = exp(randn(param.num_var, param.length));
+    MatrixXf logpot = randn_matrix(param.num_var, param.length).unaryExpr(&exp);
 
-    Float1dArray logz = obj_func.calc_logz(logpot);
+    VectorXf logz = obj_func.calc_logz(logpot);
     EXPECT_EQ(param.length, logz.size());
 }
 
@@ -166,11 +166,11 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_update_obj_score) {
 
     string seq = traces[0].get_matched_aseq();
     FloatType sw = seq_weight(0);
-    Float2dArray logpot = exp(randn(param.num_var, param.length));
-    Float1dArray logz = obj_func.calc_logz(logpot);
+    MatrixXf logpot = randn_matrix(param.num_var, param.length).unaryExpr(&exp);
+    VectorXf logz = obj_func.calc_logz(logpot);
     lbfgsfloatval_t fx = 0.;
 
-    obj_func.update_obj_score(fx, logpot, logz, seq, sw);
+    obj_func.update_obj_score(fx, logpot, logz, 0, seq, sw);
     EXPECT_NE(0., fx);
 }
 
@@ -179,10 +179,10 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_update_gradient) {
 
     string seq = traces[0].get_matched_aseq();
     FloatType sw = seq_weight(0);
-    Float2dArray logpot = exp(randn(param.num_var, param.length));
-    Float1dArray logz = obj_func.calc_logz(logpot);
+    MatrixXf logpot = randn_matrix(param.num_var, param.length).unaryExpr(&exp);
+    VectorXf logz = obj_func.calc_logz(logpot);
 
-    obj_func.update_gradient(param.x, g, logpot, logz, seq, sw);
+    obj_func.update_gradient(param.x, g, logpot, logz, 0, seq, sw);
     double s = 0.;
     for (int i = 0; i < param.n; ++i) s+= fabs(g[i]);
     EXPECT_NE(0., s);
@@ -231,12 +231,12 @@ TEST_F(MRFParameterizer_Test, test_update_model) {
     MRFParameterizer parameterizer(msa_analyzer);
     int i = 2;
 
-    mrf.get_node(i).set_weight(zeros(param.num_var));
-    ASSERT_EQ(0., sum(pow2(mrf.get_node(i).get_weight())));
+    mrf.get_node(i).set_weight(VectorXf::Zero(param.num_var));
+    ASSERT_EQ(0., mrf.get_node(i).get_weight().squaredNorm());
 
     for (int k = 0; k < param.n; ++k) param.x[k] = exp(randn());
     parameterizer.update_model(mrf, param);
-    EXPECT_NE(0., sum(pow2(mrf.get_node(i).get_weight())));
+    EXPECT_NE(0., mrf.get_node(i).get_weight().squaredNorm());
 }
 
 TEST_F(MRFParameterizer_Test, test_parameterize) {
@@ -244,8 +244,8 @@ TEST_F(MRFParameterizer_Test, test_parameterize) {
     MRFParameterizer parameterizer(msa_analyzer);
 
     parameterizer.parameterize(mrf, traces);
-    EXPECT_NE(0., sum(pow2(mrf.get_node(2).get_weight())));
-    EXPECT_NE(0., sum(pow2(mrf.get_edge(2, 5).get_weight())));
+    EXPECT_NE(0., mrf.get_node(2).get_weight().squaredNorm());
+    EXPECT_NE(0., mrf.get_edge(2, 5).get_weight().squaredNorm());
 }
 
 TEST_F(MRFParameterizer_Test, test_parameterize_ambiguous) {
@@ -253,6 +253,6 @@ TEST_F(MRFParameterizer_Test, test_parameterize_ambiguous) {
     MRFParameterizer parameterizer(msa_analyzer);
 
     parameterizer.parameterize(mrf, ambiguous_traces);
-    EXPECT_NE(0., sum(pow2(mrf.get_node(2).get_weight())));
-    EXPECT_NE(0., sum(pow2(mrf.get_edge(2, 5).get_weight())));
+    EXPECT_NE(0., mrf.get_node(2).get_weight().squaredNorm());
+    EXPECT_NE(0., mrf.get_edge(2, 5).get_weight().squaredNorm());
 }
