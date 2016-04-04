@@ -68,7 +68,7 @@ test_clean :
 # Profiler #
 ############
 
-PROFFLAGS           = -pg
+PROFFLAGS           = -pg -O3
 
 prof : CXXFLAGS += $(PROFFLAGS)
 prof : clean prof_objs

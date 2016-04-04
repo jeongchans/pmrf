@@ -44,10 +44,10 @@ class MRFParameterizer {
         inline int get_eidx_edge(const int& ei, const char& p, const int& xj) const;
         inline int get_eidx_edge(const int& ei, const int& xi, const int& xj) const;
 
-        inline size_t nidx_beg() const { return 0; }
-        inline size_t nidx_end() const { return n_node; }
-        inline size_t eidx_beg() const { return n_node; }
-        inline size_t eidx_end() const { return n; }
+        inline int nidx_beg() const { return 0; }
+        inline int nidx_end() const { return n_node; }
+        inline int eidx_beg() const { return n_node; }
+        inline int eidx_end() const { return n; }
 
         const Alphabet& abc;
         int length;
