@@ -59,7 +59,6 @@ class MRFModelAnalyzer {
     const Alphabet& abc;
 
     MRF read_mrf(const string& filename);
-    TraceVector read_traces(const string& filename);
     double calc_pll(const MRF& model, const string& aseq);
     PairScoreVector calc_pair_score(const MRF& model);
     PairScoreVector correct_apc_pair_score(const PairScoreVector& scores);

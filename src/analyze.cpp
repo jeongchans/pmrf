@@ -7,6 +7,7 @@
 
 #include "mrfio.h"
 #include "core.h"
+#include "seq/seqio.h"
 
 using std::setw;
 using std::setprecision;
@@ -18,7 +19,9 @@ using std::map;
 int MRFModelAnalyzer::infer(const string& mrf_filename, const string& seq_filename) {
     MRF model = read_mrf(mrf_filename);
     double wtscore = calc_pll(model, model.get_seq());
-    TraceVector traces = read_traces(seq_filename);
+    std::ifstream ifs(seq_filename.c_str());
+    assert_file_handle(ifs, seq_filename);
+    FastaParser parser(ifs);
     string delim = " ";
     std::cout << setw(4) << right << "#" << delim
               << setw(10) << "Score" << delim
@@ -29,12 +32,13 @@ int MRFModelAnalyzer::infer(const string& mrf_filename, const string& seq_filena
               << "----------" << delim
               << "--------------------" << std::endl;
     size_t idx = 0;
-    for (TraceVector::const_iterator pos = traces.begin(); pos != traces.end(); ++pos) {
-        double mtscore = calc_pll(model, pos->get_matched_aseq());
+    while (parser.has_next()) {
+        SeqRecord r = parser.next();
+        double mtscore = calc_pll(model, r.seq);
         std::cout << setw(4) << right << ++idx << delim
                   << setw(10) << fixed << setprecision(2) << mtscore << delim
                   << setw(10) << fixed << setprecision(2) << mtscore - wtscore << delim
-                  << setw(30) << left << pos->get_desc().substr(0, 30) << std::endl;
+                  << setw(30) << left << r.desc.substr(0, 30) << std::endl;
     }
     return 0;
 }
@@ -83,12 +87,6 @@ MRF MRFModelAnalyzer::read_mrf(const string& filename) {
     std::ifstream ifs(filename.c_str());
     assert_file_handle(ifs, filename);
     return MRFImporter().import_model(ifs, abc);
-}
-
-TraceVector MRFModelAnalyzer::read_traces(const string& filename) {
-    std::ifstream ifs(filename.c_str());
-    assert_file_handle(ifs, filename);
-    return TraceImporter(abc).import(ifs, AFASTA).second;
 }
 
 double MRFModelAnalyzer::calc_pll(const MRF& model, const string& aseq) {
