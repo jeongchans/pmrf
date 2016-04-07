@@ -4,8 +4,8 @@
 #include <string>
 #include <memory>
 
+#include "option.h"
 #include "seq/trace.h"
-#include "msaanalyze.h"
 #include "mrf.h"
 #include "parameterize.h"
 
@@ -18,13 +18,7 @@ class MRFModelBuilder {
 
     int build(const string& msa_filename, const string& out_filename);
 
-    struct Option {
-        MSAFormat msa_fmt;
-        MSAAnalyzer::Option msa_analyzer_opt;
-        string eidx_filename;
-        MRFParameterizer::ObjectiveFunction::Option parameterizer_opt;
-        MRFParameterizer::Parameter::Option optim_opt;
-    } opt;
+    Build::Option opt;
 
   private:
     const Alphabet& abc;

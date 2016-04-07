@@ -1,6 +1,52 @@
 #include <gtest/gtest.h>
 
-#include "mrfbuildcommand.h"
+#include "command.h"
+
+class MRFMainCommandLine_Test : public testing::Test {
+  protected:
+};
+
+TEST_F(MRFMainCommandLine_Test, test_invalid_subcmd) {
+    int argc = 2;
+    char* argv[2] = {"pmrf", "undetermined"};
+    MRFMainCommandLine cmd_line(argc, argv);
+    ASSERT_FALSE(cmd_line.is_valid());
+}
+
+TEST_F(MRFMainCommandLine_Test, test_parse_subcmd_help) {
+    int argc = 2;
+    char* argv[2] = {"pmrf", "help"};
+    MRFMainCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
+    EXPECT_EQ(HELP, cmd_line.subcmd);
+}
+
+TEST_F(MRFMainCommandLine_Test, test_parse_subcmd_build) {
+    int argc = 5;
+    char* argv[5] = {"pmrf", "build",
+                     "aaa.afa", "-o", "aaa.mrf"};
+    MRFMainCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
+    EXPECT_EQ(BUILD, cmd_line.subcmd);
+}
+
+TEST_F(MRFMainCommandLine_Test, test_parse_subcmd_infer) {
+    int argc = 4;
+    char* argv[4] = {"pmrf", "infer",
+                     "aaa.mrf", "aaa.fa"};
+    MRFMainCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
+    EXPECT_EQ(INFER, cmd_line.subcmd);
+}
+
+TEST_F(MRFMainCommandLine_Test, test_parse_subcmd_stat) {
+    int argc = 3;
+    char* argv[3] = {"pmrf", "stat",
+                     "aaa.mrf"};
+    MRFMainCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
+    EXPECT_EQ(STAT, cmd_line.subcmd);
+}
 
 class MRFBuildCommandLine_Test : public testing::Test {
   protected:
@@ -73,4 +119,48 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_preproc_param) {
 
     EXPECT_EQ(NO_WEIGHT, cmd_line.opt.build_opt.msa_analyzer_opt.seq_wt);
     EXPECT_EQ(EXP_ENTROPY, cmd_line.opt.build_opt.msa_analyzer_opt.eff_num);
+}
+
+class MRFStatCommandLine_Test : public testing::Test {
+  protected:
+};
+
+TEST_F(MRFStatCommandLine_Test, test_parse_param) {
+    int argc = 2;
+    char* argv[2] = {"stat",
+                     "aaa.mrf"};
+    MRFStatCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
+    EXPECT_EQ("aaa.mrf", cmd_line.opt.mrf_filename);
+
+    EXPECT_EQ(Stat::STATMODE_PAIR, cmd_line.opt.stat_opt.mode);
+    EXPECT_EQ(Stat::STATCORR_APC, cmd_line.opt.stat_opt.corr);
+}
+
+TEST_F(MRFStatCommandLine_Test, test_parse_opt_param) {
+    int argc = 6;
+    char* argv[6] = {"stat",
+                     "aaa.mrf",
+                     "--mode", "pos",
+                     "--corr", "2"};
+    MRFStatCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
+    EXPECT_EQ("aaa.mrf", cmd_line.opt.mrf_filename);
+
+    EXPECT_EQ(Stat::STATMODE_POS, cmd_line.opt.stat_opt.mode);
+    EXPECT_EQ(Stat::STATCORR_NCPS, cmd_line.opt.stat_opt.corr);
+}
+
+class MRFInferCommandLine_Test : public testing::Test {
+  protected:
+};
+
+TEST_F(MRFInferCommandLine_Test, test_parse_param) {
+    int argc = 3;
+    char* argv[3] = {"infer",
+                     "aaa.mrf", "aaa.fa"};
+    MRFInferCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
+    EXPECT_EQ("aaa.mrf", cmd_line.opt.mrf_filename);
+    EXPECT_EQ("aaa.fa", cmd_line.opt.seq_filename);
 }

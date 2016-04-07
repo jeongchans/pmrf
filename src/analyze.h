@@ -4,31 +4,15 @@
 #include <string>
 
 #include "core.h"
+#include "option.h"
 #include "mrf.h"
 #include "seq/trace.h"
 
 using std::string;
 
-enum StatMode { STATMODE_PAIR, STATMODE_POS };
-
-typedef int StatCorrect;
-const int STATCORR_NONE = 0;
-const int STATCORR_APC = 1;
-const int STATCORR_NCPS = 2;
-
 class MRFModelAnalyzer {
 
   public:
-    class StatOption {
-      public:
-        StatOption(const StatMode& mode=STATMODE_PAIR, const StatCorrect& corr=STATCORR_APC, const bool& zscore=true)
-        : mode(mode), corr(corr), zscore(zscore) {};
-        
-        StatMode mode;
-        StatCorrect corr;
-        bool zscore;
-    };
-
     struct PairScore {
         EdgeIndex idx;
         FloatType score;
@@ -53,7 +37,7 @@ class MRFModelAnalyzer {
     int infer(const string& mrf_filename, const string& seq_filename);
     int stat(const string& mrf_filename);
 
-    StatOption stat_opt;
+    Stat::Option stat_opt;
 
   protected:
     const Alphabet& abc;

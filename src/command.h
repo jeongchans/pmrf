@@ -5,6 +5,10 @@
 #include <iostream>
 #include <cstring>
 
+#include "option.h"
+#include "build.h"
+#include "analyze.h"
+
 #define QUOTE(name)     #name
 #define PROGNAME        QUOTE(pmrf)
 #define VERSION         QUOTE(0.2.0)
@@ -46,6 +50,75 @@ class MRFCommandLine {
     bool parse_int(char* optarg, int& arg);
     bool parse_float(char* optarg, double& arg);
     bool parse_str(char* optarg, string& arg);
+};
+
+class MRFMainCommandLine : public MRFCommandLine {
+  public:
+    MRFMainCommandLine(int argc, char** argv);
+
+    virtual int process_command(MRFCmdProcessor *processor);
+    virtual void show_help();
+
+    void show_version();
+
+    SubCommand subcmd;
+
+  protected:
+    virtual bool parse_command_line(int argc, char** argv);
+};
+
+class MRFBuildCommandLine : public MRFCommandLine {
+  public:
+    MRFBuildCommandLine(int argc, char** argv);
+
+    virtual int process_command(MRFCmdProcessor *processor);
+    virtual void show_help();
+
+    struct Option {
+        string msa_filename;
+        string out_filename;
+        Build::Option build_opt;
+    } opt;
+
+  protected:
+    virtual bool parse_command_line(int argc, char** argv);
+    bool parse_msa_fmt(char* optarg, MSAFormat& arg);
+    bool parse_regul(char* optarg, RegulMethod::RegulMethod& arg);
+    bool parse_double(char* optarg, double& arg);
+};
+
+class MRFStatCommandLine : public MRFCommandLine {
+  public:
+    MRFStatCommandLine(int argc, char** argv);
+
+    virtual int process_command(MRFCmdProcessor *processor);
+    virtual void show_help();
+
+    struct Option {
+        string mrf_filename;
+        Stat::Option stat_opt;
+    } opt;
+
+  protected:
+    virtual bool parse_command_line(int argc, char** argv);
+    bool parse_mode(char* optarg, Stat::StatMode& arg);
+    bool parse_corr(char* optarg, Stat::StatCorrect& arg);
+};
+
+class MRFInferCommandLine : public MRFCommandLine {
+  public:
+    MRFInferCommandLine(int argc, char** argv);
+
+    virtual int process_command(MRFCmdProcessor *processor);
+    virtual void show_help();
+
+    struct Option {
+        string mrf_filename;
+        string seq_filename;
+    } opt;
+
+  protected:
+    virtual bool parse_command_line(int argc, char** argv);
 };
 
 #endif
