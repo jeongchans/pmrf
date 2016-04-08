@@ -74,11 +74,7 @@ class MRFBuildCommandLine : public MRFCommandLine {
     virtual int process_command(MRFCmdProcessor *processor);
     virtual void show_help();
 
-    struct Option {
-        string msa_filename;
-        string out_filename;
-        Build::Option build_opt;
-    } opt;
+    Build::Option opt;
 
   protected:
     virtual bool parse_command_line(int argc, char** argv);
@@ -94,10 +90,7 @@ class MRFStatCommandLine : public MRFCommandLine {
     virtual int process_command(MRFCmdProcessor *processor);
     virtual void show_help();
 
-    struct Option {
-        string mrf_filename;
-        Stat::Option stat_opt;
-    } opt;
+    Stat::Option opt;
 
   protected:
     virtual bool parse_command_line(int argc, char** argv);
@@ -112,10 +105,7 @@ class MRFInferCommandLine : public MRFCommandLine {
     virtual int process_command(MRFCmdProcessor *processor);
     virtual void show_help();
 
-    struct Option {
-        string mrf_filename;
-        string seq_filename;
-    } opt;
+    Infer::Option opt;
 
   protected:
     virtual bool parse_command_line(int argc, char** argv);

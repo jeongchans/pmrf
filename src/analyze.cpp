@@ -46,10 +46,10 @@ int MRFModelAnalyzer::infer(const string& mrf_filename, const string& seq_filena
 int MRFModelAnalyzer::stat(const string& mrf_filename) {
     string delim = " ";
     MRF model = read_mrf(mrf_filename);
-    if (stat_opt.mode == Stat::MODE_PAIR) {
+    if (opt.mode == Stat::MODE_PAIR) {
         PairScoreVector scores = calc_pair_score(model);
-        if (stat_opt.corr == Stat::CORR_APC) scores = correct_apc_pair_score(scores);
-        else if (stat_opt.corr == Stat::CORR_NCPS) scores = correct_ncps_pair_score(scores);
+        if (opt.corr == Stat::CORR_APC) scores = correct_apc_pair_score(scores);
+        else if (opt.corr == Stat::CORR_NCPS) scores = correct_ncps_pair_score(scores);
         calc_zscore(scores);
         std::cout << setw(4) << right << "Pos1" << delim
                   << setw(4) << "Pos2" << delim
@@ -65,7 +65,7 @@ int MRFModelAnalyzer::stat(const string& mrf_filename) {
                       << setw(10) << fixed << pos->score << delim
                       << setw(10) << fixed << pos->zscore << std::endl;
         }
-    } else if (stat_opt.mode == Stat::MODE_POS) {
+    } else if (opt.mode == Stat::MODE_POS) {
         PosScoreVector scores = calc_pos_score(model);
         calc_zscore(scores);
         std::cout << setw(4) << right << "Pos" << delim

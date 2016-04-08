@@ -37,7 +37,7 @@ class MRFModelAnalyzer {
     int infer(const string& mrf_filename, const string& seq_filename);
     int stat(const string& mrf_filename);
 
-    Stat::Option stat_opt;
+    Stat::Option opt;
 
   protected:
     const Alphabet& abc;

@@ -78,7 +78,7 @@ MRFBuildProcessor::~MRFBuildProcessor() {
 
 int MRFBuildProcessor::build(const string& msa_filename, const string& out_filename) {
     MRFModelBuilder builder(AA);
-    builder.opt = ((MRFBuildCommandLine*)cmd_line)->opt.build_opt;
+    builder.opt = ((MRFBuildCommandLine*)cmd_line)->opt;
     int ret = builder.build(msa_filename, out_filename);
     return ret;
 }
@@ -97,7 +97,7 @@ MRFStatProcessor::~MRFStatProcessor() {
 
 int MRFStatProcessor::stat(const string& mrf_filename) {
     MRFModelAnalyzer analyzer(AA);
-    analyzer.stat_opt = ((MRFStatCommandLine*)cmd_line)->opt.stat_opt;
+    analyzer.opt = ((MRFStatCommandLine*)cmd_line)->opt;
     int ret = analyzer.stat(mrf_filename);
     return ret;
 }

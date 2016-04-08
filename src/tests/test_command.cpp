@@ -61,15 +61,15 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_param_default) {
     EXPECT_EQ("aaa.afa", cmd_line.opt.msa_filename);
     EXPECT_EQ("aaa.mrf", cmd_line.opt.out_filename);
 
-    EXPECT_EQ(AFASTA, cmd_line.opt.build_opt.msa_fmt);
+    EXPECT_EQ(AFASTA, cmd_line.opt.msa_fmt);
 
-    EXPECT_EQ(POSITION_BASED, cmd_line.opt.build_opt.msa_analyzer_opt.seq_wt);
-    EXPECT_EQ(NO_EFFNUM, cmd_line.opt.build_opt.msa_analyzer_opt.eff_num);
+    EXPECT_EQ(POSITION_BASED, cmd_line.opt.msa_analyzer_opt.seq_wt);
+    EXPECT_EQ(NO_EFFNUM, cmd_line.opt.msa_analyzer_opt.eff_num);
 
-    EXPECT_EQ(RegulMethod::RegulMethod::L2, cmd_line.opt.build_opt.parameterizer_opt.regul);
-    EXPECT_EQ(0.01, cmd_line.opt.build_opt.parameterizer_opt.l2_opt.lambda1);
-    EXPECT_EQ(0.2, cmd_line.opt.build_opt.parameterizer_opt.l2_opt.lambda2);
-    EXPECT_EQ(true, cmd_line.opt.build_opt.parameterizer_opt.l2_opt.sc);
+    EXPECT_EQ(RegulMethod::RegulMethod::L2, cmd_line.opt.parameterizer_opt.regul);
+    EXPECT_EQ(0.01, cmd_line.opt.parameterizer_opt.l2_opt.lambda1);
+    EXPECT_EQ(0.2, cmd_line.opt.parameterizer_opt.l2_opt.lambda2);
+    EXPECT_EQ(true, cmd_line.opt.parameterizer_opt.l2_opt.sc);
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_l2_regul_param) {
@@ -86,10 +86,10 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_l2_regul_param) {
     EXPECT_EQ("aaa.afa", cmd_line.opt.msa_filename);
     EXPECT_EQ("aaa.mrf", cmd_line.opt.out_filename);
 
-    EXPECT_EQ(RegulMethod::RegulMethod::L2, cmd_line.opt.build_opt.parameterizer_opt.regul);
-    EXPECT_EQ(15.0, cmd_line.opt.build_opt.parameterizer_opt.l2_opt.lambda1);
-    EXPECT_EQ(3.0, cmd_line.opt.build_opt.parameterizer_opt.l2_opt.lambda2);
-    EXPECT_EQ(false, cmd_line.opt.build_opt.parameterizer_opt.l2_opt.sc);
+    EXPECT_EQ(RegulMethod::RegulMethod::L2, cmd_line.opt.parameterizer_opt.regul);
+    EXPECT_EQ(15.0, cmd_line.opt.parameterizer_opt.l2_opt.lambda1);
+    EXPECT_EQ(3.0, cmd_line.opt.parameterizer_opt.l2_opt.lambda2);
+    EXPECT_EQ(false, cmd_line.opt.parameterizer_opt.l2_opt.sc);
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_input_param) {
@@ -104,9 +104,9 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_input_param) {
     EXPECT_EQ("aaa.afa", cmd_line.opt.msa_filename);
     EXPECT_EQ("aaa.mrf", cmd_line.opt.out_filename);
 
-    EXPECT_EQ(A3M, cmd_line.opt.build_opt.msa_fmt);
+    EXPECT_EQ(A3M, cmd_line.opt.msa_fmt);
 
-    EXPECT_EQ("edges.txt", cmd_line.opt.build_opt.eidx_filename);
+    EXPECT_EQ("edges.txt", cmd_line.opt.eidx_filename);
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_preproc_param) {
@@ -117,8 +117,8 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_preproc_param) {
                       "--effnum", "1"};
     MRFBuildCommandLine cmd_line(argc, argv);
 
-    EXPECT_EQ(NO_WEIGHT, cmd_line.opt.build_opt.msa_analyzer_opt.seq_wt);
-    EXPECT_EQ(EXP_ENTROPY, cmd_line.opt.build_opt.msa_analyzer_opt.eff_num);
+    EXPECT_EQ(NO_WEIGHT, cmd_line.opt.msa_analyzer_opt.seq_wt);
+    EXPECT_EQ(EXP_ENTROPY, cmd_line.opt.msa_analyzer_opt.eff_num);
 }
 
 class MRFStatCommandLine_Test : public testing::Test {
@@ -133,8 +133,8 @@ TEST_F(MRFStatCommandLine_Test, test_parse_param) {
     ASSERT_TRUE(cmd_line.is_valid());
     EXPECT_EQ("aaa.mrf", cmd_line.opt.mrf_filename);
 
-    EXPECT_EQ(Stat::MODE_PAIR, cmd_line.opt.stat_opt.mode);
-    EXPECT_EQ(Stat::CORR_APC, cmd_line.opt.stat_opt.corr);
+    EXPECT_EQ(Stat::MODE_PAIR, cmd_line.opt.mode);
+    EXPECT_EQ(Stat::CORR_APC, cmd_line.opt.corr);
 }
 
 TEST_F(MRFStatCommandLine_Test, test_parse_opt_param) {
@@ -147,8 +147,8 @@ TEST_F(MRFStatCommandLine_Test, test_parse_opt_param) {
     ASSERT_TRUE(cmd_line.is_valid());
     EXPECT_EQ("aaa.mrf", cmd_line.opt.mrf_filename);
 
-    EXPECT_EQ(Stat::MODE_POS, cmd_line.opt.stat_opt.mode);
-    EXPECT_EQ(Stat::CORR_NCPS, cmd_line.opt.stat_opt.corr);
+    EXPECT_EQ(Stat::MODE_POS, cmd_line.opt.mode);
+    EXPECT_EQ(Stat::CORR_NCPS, cmd_line.opt.corr);
 }
 
 class MRFInferCommandLine_Test : public testing::Test {
