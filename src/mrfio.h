@@ -63,4 +63,6 @@ class MRFImporter {
     double import_elem(istream& is);
 };
 
+ostream& operator<<(ostream& os, const MRF& model);
+
 #endif

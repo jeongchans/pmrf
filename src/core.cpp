@@ -102,9 +102,8 @@ int MRFBuildProcessor::build() {
 }
 
 TraceVector MRFBuildProcessor::read_traces() {
-    const string& filename = opt->msa_filename;
-    std::ifstream ifs(filename.c_str());
-    assert_file_handle(ifs, filename);
+    std::ifstream ifs(opt->msa_filename.c_str());
+    assert_file_handle(ifs, opt->msa_filename);
     return TraceImporter(abc).import(ifs, opt->msa_fmt).second;
 }
 
@@ -127,13 +126,11 @@ MRF MRFBuildProcessor::build_mrf(const TraceVector& traces) {
 }
 
 void MRFBuildProcessor::export_mrf(const MRF& model) {
-    const string& out_filename = opt->out_filename;
-    MRFExporter mrf_exporter;
-    if (out_filename.empty()) {
-        mrf_exporter.export_model(model, std::cout);
-    } else {
-        std::ofstream ofs(out_filename.c_str());
-        assert_file_handle(ofs, out_filename);
+    if (opt->out_filename.empty()) cout << model;
+    else {
+        MRFExporter mrf_exporter;
+        std::ofstream ofs(opt->out_filename.c_str());
+        assert_file_handle(ofs, opt->out_filename);
         mrf_exporter.export_model(model, ofs);
     }
 }
