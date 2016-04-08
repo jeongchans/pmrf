@@ -101,8 +101,8 @@ class MRFStatCommandLine : public MRFCommandLine {
 
   protected:
     virtual bool parse_command_line(int argc, char** argv);
-    bool parse_mode(char* optarg, Stat::StatMode& arg);
-    bool parse_corr(char* optarg, Stat::StatCorrect& arg);
+    bool parse_mode(char* optarg, Stat::Mode& arg);
+    bool parse_corr(char* optarg, Stat::Correct& arg);
 };
 
 class MRFInferCommandLine : public MRFCommandLine {

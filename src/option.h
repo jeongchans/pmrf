@@ -14,28 +14,25 @@ enum SubCommand { NONE, HELP, BUILD, INFER, STAT };
 namespace Build {
     struct Option {
         MSAFormat msa_fmt;
-        MSAAnalyzer::Option msa_analyzer_opt;
         string eidx_filename;
+        MSAAnalyzer::Option msa_analyzer_opt;
         MRFParameterizer::ObjectiveFunction::Option parameterizer_opt;
         MRFParameterizer::Parameter::Option optim_opt;
     };
 }
 
 namespace Stat {
-    enum StatMode { STATMODE_PAIR, STATMODE_POS };
+    enum Mode { MODE_PAIR, MODE_POS };
 
-    typedef int StatCorrect;
-    const int STATCORR_NONE = 0;
-    const int STATCORR_APC = 1;
-    const int STATCORR_NCPS = 2;
+    enum Correct { CORR_NONE = 0, CORR_APC = 1, CORR_NCPS = 2 };
 
     class Option {
       public:
-        Option(const StatMode& mode=STATMODE_PAIR, const StatCorrect& corr=STATCORR_APC, const bool& zscore=true)
+        Option(const Mode& mode=MODE_PAIR, const Correct& corr=CORR_APC, const bool& zscore=true)
         : mode(mode), corr(corr), zscore(zscore) {};
-        
-        StatMode mode;
-        StatCorrect corr;
+
+        Mode mode;
+        Correct corr;
         bool zscore;
     };
 

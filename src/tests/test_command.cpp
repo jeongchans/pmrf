@@ -133,8 +133,8 @@ TEST_F(MRFStatCommandLine_Test, test_parse_param) {
     ASSERT_TRUE(cmd_line.is_valid());
     EXPECT_EQ("aaa.mrf", cmd_line.opt.mrf_filename);
 
-    EXPECT_EQ(Stat::STATMODE_PAIR, cmd_line.opt.stat_opt.mode);
-    EXPECT_EQ(Stat::STATCORR_APC, cmd_line.opt.stat_opt.corr);
+    EXPECT_EQ(Stat::MODE_PAIR, cmd_line.opt.stat_opt.mode);
+    EXPECT_EQ(Stat::CORR_APC, cmd_line.opt.stat_opt.corr);
 }
 
 TEST_F(MRFStatCommandLine_Test, test_parse_opt_param) {
@@ -147,8 +147,8 @@ TEST_F(MRFStatCommandLine_Test, test_parse_opt_param) {
     ASSERT_TRUE(cmd_line.is_valid());
     EXPECT_EQ("aaa.mrf", cmd_line.opt.mrf_filename);
 
-    EXPECT_EQ(Stat::STATMODE_POS, cmd_line.opt.stat_opt.mode);
-    EXPECT_EQ(Stat::STATCORR_NCPS, cmd_line.opt.stat_opt.corr);
+    EXPECT_EQ(Stat::MODE_POS, cmd_line.opt.stat_opt.mode);
+    EXPECT_EQ(Stat::CORR_NCPS, cmd_line.opt.stat_opt.corr);
 }
 
 class MRFInferCommandLine_Test : public testing::Test {

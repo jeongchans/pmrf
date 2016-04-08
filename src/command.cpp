@@ -343,10 +343,10 @@ bool MRFStatCommandLine::parse_command_line(int argc, char** argv) {
     return true;
 }
 
-bool MRFStatCommandLine::parse_mode(char* optarg, Stat::StatMode& arg) {
+bool MRFStatCommandLine::parse_mode(char* optarg, Stat::Mode& arg) {
     string mode = string(optarg);
-    if (mode == "pair") arg = Stat::STATMODE_PAIR;
-    else if (mode == "pos") arg = Stat::STATMODE_POS;
+    if (mode == "pair") arg = Stat::MODE_PAIR;
+    else if (mode == "pos") arg = Stat::MODE_POS;
     else {
         error_message = "Unsupported mode: " + mode;
         return false;
@@ -354,8 +354,17 @@ bool MRFStatCommandLine::parse_mode(char* optarg, Stat::StatMode& arg) {
     return true;
 }
 
-bool MRFStatCommandLine::parse_corr(char* optarg, Stat::StatCorrect& arg) {
-    return parse_int(optarg, arg) && arg >= 0 && arg <= 2;
+bool MRFStatCommandLine::parse_corr(char* optarg, Stat::Correct& arg) {
+    int d;
+    if (!parse_int(optarg, d)) return false;
+    if (d == 0) arg = Stat::CORR_NONE;
+    else if (d == 1) arg = Stat::CORR_APC;
+    else if (d == 2) arg = Stat::CORR_NCPS;
+    else {
+        error_message = "Unsupported correction: " + string(optarg);
+        return false;
+    }
+    return true;
 }
 
 /**
