@@ -118,7 +118,7 @@ MRFBuildCommandLine::MRFBuildCommandLine(int argc, char** argv) : MRFCommandLine
 }
 
 int MRFBuildCommandLine::process_command(MRFCmdProcessor *processor) {
-    return ((MRFBuildProcessor*)processor)->build(opt.msa_filename, opt.out_filename);
+    return ((MRFBuildProcessor*)processor)->build();
 }
 
 void MRFBuildCommandLine::show_help() {
@@ -246,7 +246,7 @@ MRFStatCommandLine::MRFStatCommandLine(int argc, char** argv) : MRFCommandLine(a
 }
 
 int MRFStatCommandLine::process_command(MRFCmdProcessor *processor) {
-    return ((MRFStatProcessor*)processor)->stat(opt.mrf_filename);
+    return ((MRFStatProcessor*)processor)->stat();
 }
 
 void MRFStatCommandLine::show_help() {
@@ -332,7 +332,7 @@ MRFInferCommandLine::MRFInferCommandLine(int argc, char** argv) : MRFCommandLine
 }
 
 int MRFInferCommandLine::process_command(MRFCmdProcessor *processor) {
-    return ((MRFInferProcessor*)processor)->infer(opt.mrf_filename, opt.seq_filename);
+    return ((MRFInferProcessor*)processor)->infer();
 }
 
 void MRFInferCommandLine::show_help() {

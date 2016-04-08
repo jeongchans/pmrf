@@ -3,12 +3,17 @@
 
 #include <fstream>
 #include <string>
+#include <memory>
 
 #include "seq/alphabet.h"
-
+#include "seq/trace.h"
 #include "command.h"
+#include "option.h"
+#include "mrf.h"
+#include "parameterize.h"
 
 using std::string;
+using std::shared_ptr;
 
 const AminoAcid AA("-", false, true);
 //const AminoAcid AA("=-^", false, true);
@@ -46,17 +51,56 @@ class MRFBuildProcessor : public MRFCmdProcessor {
     MRFBuildProcessor(int argc, char** argv);
     ~MRFBuildProcessor();
 
-    int build(const string& msa_filename, const string& out_filename);
+    int build();
 
+  private:
+    const Alphabet& abc;
+    Build::Option* opt;
+
+    shared_ptr<MRFParameterizer> mrf_parameterizer;
+
+    TraceVector read_traces();
+    MRF build_mrf(const TraceVector& traces);
+    void export_mrf(const MRF& model);
 };
 
 class MRFStatProcessor : public MRFCmdProcessor {
   public:
+    struct PairScore {
+        EdgeIndex idx;
+        FloatType score;
+        FloatType zscore;
+
+        PairScore(const EdgeIndex& idx, const FloatType& score) : idx(idx), score(score) {}
+    };
+    typedef vector<PairScore> PairScoreVector;
+
+    struct PosScore {
+        size_t idx;
+        FloatType score;
+        FloatType zscore;
+
+        PosScore(const size_t& idx, const FloatType& score) : idx(idx), score(score) {}
+    };
+    typedef vector<PosScore> PosScoreVector;
+
+  public:
     MRFStatProcessor(int argc, char** argv);
     ~MRFStatProcessor();
 
-    int stat(const string& mrf_filename);
+    int stat();
 
+  private:
+    const Alphabet& abc;
+    Stat::Option* opt;
+
+    PairScoreVector calc_pair_score(const MRF& model);
+    PairScoreVector correct_apc_pair_score(const PairScoreVector& scores);
+    PairScoreVector correct_ncps_pair_score(const PairScoreVector& scores);
+    void calc_zscore(PairScoreVector& scores);
+    vector<FloatType> calc_zscore(const vector<FloatType> scores);
+    PosScoreVector calc_pos_score(const MRF& model);
+    void calc_zscore(PosScoreVector& scores);
 };
 
 class MRFInferProcessor : public MRFCmdProcessor {
@@ -64,8 +108,13 @@ class MRFInferProcessor : public MRFCmdProcessor {
     MRFInferProcessor(int argc, char** argv);
     ~MRFInferProcessor();
 
-    int infer(const string& mrf_filename, const string& seq_filename);
+    int infer();
 
+  private:
+    const Alphabet& abc;
+    Infer::Option* opt;
+
+    double calc_pll(const MRF& model, const string& aseq);
 };
 
 #endif

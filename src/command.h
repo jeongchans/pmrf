@@ -6,8 +6,6 @@
 #include <cstring>
 
 #include "option.h"
-#include "build.h"
-#include "analyze.h"
 
 #define QUOTE(name)     #name
 #define PROGNAME        QUOTE(pmrf)
