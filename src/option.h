@@ -19,6 +19,7 @@ namespace Main {
         "examine evolutionary information\n"
         "  infer        Estimate sequence distribution with MRF model\n"
         "  stat         Estimate evolutionary constraints for MRF model\n"
+        "  show         Show MRF model parameters\n"
         "\n"
         "Use `pmrf --version' to print the PMRF version\n"
         "Use `pmrf -h' or `pmrf --help' to print this help message\n"
