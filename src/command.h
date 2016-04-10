@@ -109,4 +109,17 @@ class MRFInferCommandLine : public MRFCommandLine {
     virtual bool parse_command_line(int argc, char** argv);
 };
 
+class MRFShowCommandLine : public MRFCommandLine {
+  public:
+    MRFShowCommandLine(int argc, char** argv);
+
+    virtual int process_command(MRFCmdProcessor *processor);
+    virtual void show_help();
+
+    Show::Option opt;
+
+  protected:
+    virtual bool parse_command_line(int argc, char** argv);
+};
+
 #endif

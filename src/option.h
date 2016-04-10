@@ -9,7 +9,7 @@
 
 using std::string;
 
-enum SubCommand { NONE, HELP, BUILD, INFER, STAT };
+enum SubCommand { NONE, HELP, BUILD, INFER, STAT, SHOW };
 
 namespace Main {
     static const string command_list_message =
@@ -103,6 +103,16 @@ namespace Infer {
     struct Option {
         string mrf_filename;
         string seq_filename;
+    };
+
+    static const string option_message =
+        "Options:\n"
+        " -h, --help                show this help message\n";
+}
+
+namespace Show {
+    struct Option {
+        string mrf_filename;
     };
 
     static const string option_message =

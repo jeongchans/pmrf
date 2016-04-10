@@ -70,6 +70,7 @@ bool MRFMainCommandLine::parse_command_line(int argc, char** argv) {
         else if (cmd == "build") subcmd = BUILD;
         else if (cmd == "infer") subcmd = INFER;
         else if (cmd == "stat") subcmd = STAT;
+        else if (cmd == "show") subcmd = SHOW;
         else {
             error_message = string("Unknown command: ") + cmd + "\n";
             return false;
@@ -371,6 +372,60 @@ bool MRFInferCommandLine::parse_command_line(int argc, char** argv) {
     if (optind < argc) {
         opt.mrf_filename = argv[optind++];
         opt.seq_filename = argv[optind];
+    } else {
+        error_message = "Not enough arguments\n";
+        return false;
+    }
+    return true;
+}
+
+/**
+   @class MRFShowCommandLine
+ */
+
+MRFShowCommandLine::MRFShowCommandLine(int argc, char** argv) : MRFCommandLine(argc, argv) {
+    validity = parse_command_line(this->argc, (char**)(this->argv));
+}
+
+int MRFShowCommandLine::process_command(MRFCmdProcessor *processor) {
+    return ((MRFShowProcessor*)processor)->show();
+}
+
+void MRFShowCommandLine::show_help() {
+    cout << "Usage: " << PROGNAME << " show <mrf_file> [options]" << endl
+         << endl
+         << Show::option_message
+         << endl;
+}
+
+bool MRFShowCommandLine::parse_command_line(int argc, char** argv) {
+    optind = 0;     // initialize getopt_long()
+    static struct option opts[] = {
+        {"help", 0, 0, 0},
+        {0, 0, 0, 0}
+    };
+    int opt_idx = 0;
+    int c;
+    while (true) {
+        c = getopt_long(argc, argv, "h", opts, &opt_idx);
+        if (c == -1) break;
+        switch (c) {
+        case 0:
+            switch (opt_idx) {
+            case 0:
+                show_help();
+                exit(0);
+            }
+            break;
+        case 'h':
+            show_help();
+            exit(0);
+        default:
+            return false;
+        }
+    }
+    if (optind < argc) {
+        opt.mrf_filename = argv[optind++];
     } else {
         error_message = "Not enough arguments\n";
         return false;

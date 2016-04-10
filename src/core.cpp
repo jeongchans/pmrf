@@ -77,6 +77,8 @@ int MRFMainProcessor::run_mrf_cmd(const SubCommand& cmd) {
         return MRFInferProcessor(argc, argv).run();
     case STAT:
         return MRFStatProcessor(argc, argv).run();
+    case SHOW:
+        return MRFShowProcessor(argc, argv).run();
     }
     return 1;
 }
@@ -359,4 +361,23 @@ double MRFInferProcessor::calc_pll(const MRF& model, const string& aseq) {
         }
     }
     return pll;
+}
+
+/**
+   @class MRFShowProcessor
+ */
+
+MRFShowProcessor::MRFShowProcessor(int argc, char** argv) : abc(AA) {
+    cmd_line = new MRFShowCommandLine(argc, argv);
+    opt = &(((MRFShowCommandLine*)cmd_line)->opt);
+}
+
+MRFShowProcessor::~MRFShowProcessor() {
+    delete cmd_line;
+}
+
+int MRFShowProcessor::show() {
+    MRF model = read_mrf(opt->mrf_filename, abc);
+    cout << model;
+    return 0;
 }

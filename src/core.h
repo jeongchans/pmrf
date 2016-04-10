@@ -117,4 +117,16 @@ class MRFInferProcessor : public MRFCmdProcessor {
     double calc_pll(const MRF& model, const string& aseq);
 };
 
+class MRFShowProcessor : public MRFCmdProcessor {
+  public:
+    MRFShowProcessor(int argc, char** argv);
+    ~MRFShowProcessor();
+
+    int show();
+
+  private:
+    const Alphabet& abc;
+    Show::Option* opt;
+};
+
 #endif
