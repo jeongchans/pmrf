@@ -7,6 +7,11 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Calculate pseudolikelihood value for an aligned sequence. Use `pmrf-infer` command.
 - Calculate coevolution scores for an MRF model. Use `pmrf-stat` command.
+- Show the MRF model parameters. Use `pmrf-show` command.
+
+### Changes
+- MRF model file is written to a binary file.
+- Use Eigen3 library replacing Blitz++ library. This significantly reduces the computation time.
 
 
 ## 0.2.0 - 2016-02-04
