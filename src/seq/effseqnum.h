@@ -37,6 +37,8 @@ class RTEffSeqNumEstimator : public EffSeqNumEstimator {
 // Biegert and Soding. Proc Natl Acad Sci USA (2009) vol. 106 (10) pp. 3770-5
 // Note: By changing the base of logarithm as e, the resulting Neff is bounded
 //       to [1, 20].
+//       That is, the Neff indicates the expected number of different amino acids
+//       observed at a position.
 class ExpEntropyEffSeqNumEstimator : public EffSeqNumEstimator {
   public:
     ExpEntropyEffSeqNumEstimator(const Alphabet& abc, SeqWeightEstimator* seq_weight_estimator) : abc(abc), seq_weight_estimator(seq_weight_estimator) {};
@@ -46,6 +48,21 @@ class ExpEntropyEffSeqNumEstimator : public EffSeqNumEstimator {
   private:
     const Alphabet& abc;
     SeqWeightEstimator *seq_weight_estimator;
+};
+
+// Number of sequences in the clustered MSA by a given sequence identity
+// Note: The maxidt specifies the maximum sequence identity in the clustered MSA
+class ClstrEffSeqNumEstimator : public EffSeqNumEstimator {
+  public:
+    ClstrEffSeqNumEstimator(const Alphabet& abc, const float maxidt) : abc(abc), maxidt(maxidt) {};
+
+    virtual double estimate(const vector<string>& msa) const;
+
+  private:
+    const Alphabet& abc;
+    float maxidt;       // maximum sequence identity
+
+    float calc_identity(const string& seq1, const string& seq2) const;
 };
 
 #endif

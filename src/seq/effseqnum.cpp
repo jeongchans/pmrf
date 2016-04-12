@@ -40,3 +40,30 @@ double ExpEntropyEffSeqNumEstimator::estimate(const vector<string>& msa) const {
     }
     return exp(-s / (double) cols);
 }
+
+double ClstrEffSeqNumEstimator::estimate(const vector<string>& msa) const {
+    size_t rows = msa.size();
+    VectorXf memnum = VectorXf::Ones(rows);
+    for (size_t i = 0; i < rows; ++i) {
+        for (size_t j = i + 1; j < rows; ++j) {
+            if (calc_identity(msa[i], msa[j]) > maxidt) {
+                memnum(i) += 1;
+                memnum(j) += 1;
+            }
+        }
+    }
+    return VectorXf::Ones(rows).cwiseQuotient(memnum).sum();
+}
+
+float ClstrEffSeqNumEstimator::calc_identity(const string& seq1, const string& seq2) const {
+    size_t n = seq1.size();
+    size_t n1 = 0, n2 = 0;
+    float f = 0.;
+    for (size_t i = 0; i < n; ++i) {
+        if (abc.is_canonical(seq1[i], false) && seq1[i] == seq2[i]) ++f;
+        if (abc.is_canonical(seq1[i])) ++n1;
+        if (abc.is_canonical(seq2[i])) ++n2;
+    }
+    if (n1 < n2) return f / (float) n1;
+    else return f / (float) n2;
+}

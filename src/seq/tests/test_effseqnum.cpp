@@ -33,3 +33,9 @@ TEST_F(EffSeqNumEstimatorTest, test_exp_entropy_eff_seq_num_estimator) {
     //EXPECT_TRUE(allclose(2.1431, estimator.estimate(msa1))) << estimator.estimate(msa1);  // base=2, range=[1, 75.33]
     EXPECT_TRUE(allclose(1.6961, estimator.estimate(msa1))) << estimator.estimate(msa1);    // base=e, range=[1, 20]
 }
+
+TEST_F(EffSeqNumEstimatorTest, test_clstr_eff_seq_num_estimator) {
+    ClstrEffSeqNumEstimator estimator(abc, 0.5);
+    EXPECT_FLOAT_EQ(1.4166666, estimator.estimate(msa1));
+    EXPECT_FLOAT_EQ(2.3333333, estimator.estimate(msa2));
+}
