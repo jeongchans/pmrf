@@ -78,6 +78,8 @@ class MRFBuildCommandLine : public MRFCommandLine {
     virtual bool parse_command_line(int argc, char** argv);
     bool parse_msa_fmt(char* optarg, MSAFormat& arg);
     bool parse_regul(char* optarg, RegulMethod::RegulMethod& arg);
+    bool parse_seq_wt(char* optarg, MSAProcOption::SeqWeight& arg);
+    bool parse_eff_num(char* optarg, MSAProcOption::EffSeqNum& arg);
     bool parse_double(char* optarg, double& arg);
 };
 

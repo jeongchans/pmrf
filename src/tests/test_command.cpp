@@ -72,8 +72,8 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_param_default) {
 
     EXPECT_EQ(AFASTA, cmd_line.opt.msa_fmt);
 
-    EXPECT_EQ(POSITION_BASED, cmd_line.opt.msa_analyzer_opt.seq_wt);
-    EXPECT_EQ(NO_EFFNUM, cmd_line.opt.msa_analyzer_opt.eff_num);
+    EXPECT_EQ(MSAProcOption::SW_PB, cmd_line.opt.msa_analyzer_opt.seq_wt);
+    EXPECT_EQ(MSAProcOption::NEFF_CLSTR, cmd_line.opt.msa_analyzer_opt.eff_num);
 
     EXPECT_EQ(RegulMethod::RegulMethod::L2, cmd_line.opt.parameterizer_opt.regul);
     EXPECT_EQ(0.01, cmd_line.opt.parameterizer_opt.l2_opt.lambda1);
@@ -85,7 +85,7 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_l2_regul_param) {
     int argc = 12;
     char* argv[12] = {"build",
                       "aaa.afa", "-o", "aaa.mrf",
-                      "--regul", "1",
+                      "--regul", "l2",
                       "--regnode-lambda", "15.0",
                       "--regedge-lambda", "3.0",
                       "--regedge-scale", "0"};
@@ -122,12 +122,12 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_preproc_param) {
     int argc = 8;
     char* argv[8] = {"build",
                       "aaa.afa", "-o", "aaa.mrf",
-                      "--seqwt", "0",
-                      "--effnum", "1"};
+                      "--seqwt", "no",
+                      "--effnum", "no"};
     MRFBuildCommandLine cmd_line(argc, argv);
 
-    EXPECT_EQ(NO_WEIGHT, cmd_line.opt.msa_analyzer_opt.seq_wt);
-    EXPECT_EQ(EXP_ENTROPY, cmd_line.opt.msa_analyzer_opt.eff_num);
+    EXPECT_EQ(MSAProcOption::SW_NO, cmd_line.opt.msa_analyzer_opt.seq_wt);
+    EXPECT_EQ(MSAProcOption::NEFF_NO, cmd_line.opt.msa_analyzer_opt.eff_num);
 }
 
 class MRFStatCommandLine_Test : public testing::Test {

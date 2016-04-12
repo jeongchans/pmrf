@@ -9,25 +9,23 @@
 
 using std::shared_ptr;
 
-typedef int SeqWeightMethod;
-const int NO_WEIGHT = 0;
-const int POSITION_BASED = 1;
+namespace MSAProcOption {
+    enum SeqWeight { SW_NO = 0, SW_PB = 1 };
 
-typedef int EffSeqNumMethod;
-const int NO_EFFNUM = 0;
-const int EXP_ENTROPY = 1;
+    enum EffSeqNum { NEFF_NO = 0, NEFF_ENTROPY = 1, NEFF_CLSTR = 2 };
+}
 
 class MSAAnalyzer {
   public:
 
     class Option {
       public:
-        Option(const SeqWeightMethod& seq_wt=POSITION_BASED, const EffSeqNumMethod& eff_num=NO_EFFNUM)
+        Option(const MSAProcOption::SeqWeight& seq_wt=MSAProcOption::SW_PB, const MSAProcOption::EffSeqNum& eff_num=MSAProcOption::NEFF_CLSTR)
         : seq_wt(seq_wt),
           eff_num(eff_num) {};
 
-        int seq_wt;
-        int eff_num;
+        MSAProcOption::SeqWeight seq_wt;
+        MSAProcOption::EffSeqNum eff_num;
     };
 
     MSAAnalyzer(Option& opt, const Alphabet& abc);

@@ -180,10 +180,10 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
                 if (parse_float(optarg, opt.optim_opt.delta)) break;
                 else return false;
             case 8:
-                if (parse_int(optarg, opt.msa_analyzer_opt.seq_wt)) break;
+                if (parse_seq_wt(optarg, opt.msa_analyzer_opt.seq_wt)) break;
                 else return false;
             case 9:
-                if (parse_int(optarg, opt.msa_analyzer_opt.eff_num)) break;
+                if (parse_eff_num(optarg, opt.msa_analyzer_opt.eff_num)) break;
                 else return false;
             }
             break;
@@ -223,11 +223,33 @@ bool MRFBuildCommandLine::parse_msa_fmt(char* optarg, MSAFormat& arg) {
 }
 
 bool MRFBuildCommandLine::parse_regul(char* optarg, RegulMethod::RegulMethod& arg) {
-    int d = atoi(optarg);
-    if (d == 0) arg = RegulMethod::RegulMethod::NONE;
-    else if (d == 1) arg = RegulMethod::RegulMethod::L2;
+    string val = string(optarg);
+    if (val == "no") arg = RegulMethod::RegulMethod::NONE;
+    else if (val == "l2") arg = RegulMethod::RegulMethod::L2;
     else {
-        error_message = string("Unknown node regularization option: ") + *optarg;
+        error_message = "Unknown option for regularization: " + val;
+        return false;
+    }
+    return true;
+}
+
+bool MRFBuildCommandLine::parse_seq_wt(char* optarg, MSAProcOption::SeqWeight& arg) {
+    string val = string(optarg);
+    if (val == "no") arg = MSAProcOption::SW_NO;
+    else if (val == "pb") arg = MSAProcOption::SW_PB;
+    else {
+        error_message = "Unsupported option for sequence weighting: " + val;
+        return false;
+    }
+    return true;
+}
+
+bool MRFBuildCommandLine::parse_eff_num(char* optarg, MSAProcOption::EffSeqNum& arg) {
+    string val = string(optarg);
+    if (val == "no") arg = MSAProcOption::NEFF_NO;
+    else if (val == "clstr") arg = MSAProcOption::NEFF_CLSTR;
+    else {
+        error_message = "Unsupported option for effective number estimation: " + val;
         return false;
     }
     return true;

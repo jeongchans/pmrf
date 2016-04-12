@@ -3,7 +3,6 @@
 
 #include <string>
 
-#include "option.h"
 #include "msaanalyze.h"
 #include "parameterize.h"
 
@@ -49,16 +48,16 @@ namespace Build {
         "\n"
         "Preprocessing options:\n"
         " --seqwt <int>             sequence weighting\n"
-        "                           0: no sequence weighting\n"
-        "                           1: Henikoff's position-based weights (default)\n"
+        "                           no: no sequence weighting\n"
+        "                           pb: Henikoff's position-based weights (default)\n"
         " --effnum <int>            effective number of sequences\n"
-        "                           0: no effective number (default)\n"
-        "                           1: exponential of average entropy\n"
+        "                           no: no effective number\n"
+        "                           clstr: cluster size by sequence identity (default)\n"
         "\n"
         "Regularization options:\n"
         " --regul <int>             regularization of node and edge weights\n"
-        "                           0: no\n"
-        "                           1: L2 regularization (default)\n"
+        "                           no: no\n"
+        "                           l2: L2 regularization (default)\n"
         " --regnode-lambda <float>  weighting factor for node regularization (default: 0.01)\n"
         " --regedge-lambda <float>  weighting factor for edge regularization (default: 0.2)\n"
         " --regedge-scale <int>     scaling edge regularization term\n"
