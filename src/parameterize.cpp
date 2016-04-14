@@ -36,41 +36,6 @@ MRFParameterizer::Parameter::Parameter(const MRF& model, const Option& opt) : ab
     opt_param.max_iterations = opt.max_iterations;
 }
 
-int MRFParameterizer::Parameter::get_nidx(const int& i, const char& p) const {
-    return i * num_var + abc.get_idx(p);
-}
-
-inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char& p, const char& q) const {
-    return get_eidx(i, j, abc.get_idx(p), abc.get_idx(q));
-}
-
-inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const int& xi, const char& q) const {
-    return get_eidx(i, j, xi, abc.get_idx(q));
-}
-
-inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char& p, const int& xj) const {
-    return get_eidx(i, j, abc.get_idx(p), xj);
-}
-
-inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const int& xi, const int& xj) const {
-    return get_eidx_edge(eidx.at(EdgeIndex(i, j)), xi, xj);
-}
-
-inline int MRFParameterizer::Parameter::get_eidx_edge(const int& ei, const char& p, const char& q) const {
-    return get_eidx_edge(ei, abc.get_idx(p), abc.get_idx(q));
-}
-
-inline int MRFParameterizer::Parameter::get_eidx_edge(const int& ei, const int& xi, const char& q) const {
-    return get_eidx_edge(ei, xi, abc.get_idx(q));
-}
-
-inline int MRFParameterizer::Parameter::get_eidx_edge(const int& ei, const char& p, const int& xj) const {
-    return get_eidx_edge(ei, abc.get_idx(p), xj);
-}
-
-inline int MRFParameterizer::Parameter::get_eidx_edge(const int& ei, const int& xi, const int& xj) const {
-    return eidx_beg() + ei * num_var2 + xi * num_var + xj;
-}
 
 /**
    @class MRFParameterizer::L2Regularization
@@ -200,12 +165,19 @@ void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t 
     for (int t = 0; t < param.num_var; ++t)
         nodebel.row(t) = (logpot.row(t) - logz.transpose()).unaryExpr(&exp);
     nodebel *= sw;
+    Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > dv(g, param.length, param.num_var);
     for (int i = 0; i < param.length; ++i) {
-        string s = param.abc.get_degeneracy(seq[i], &w);
-        for (string::iterator c = s.begin(); c != s.end(); ++c)
-            g[param.get_nidx(i, *c)] -= w * sw;
-        for (int t = 0; t < param.num_var; ++t)
-            g[param.get_nidx(i, letters[t])] += nodebel(t, i);
+        int xi = data(m, i);
+        if (xi < param.num_var) {
+            dv(i, xi) -= sw;
+        } else {
+            string s = param.abc.get_degeneracy(seq[i], &w);
+            for (string::iterator c = s.begin(); c != s.end(); ++c) {
+                xi = param.abc.get_idx(*c);
+                dv(i, xi) -= w * sw;
+            }
+        }
+        dv.row(i) += nodebel.col(i);
     }
     for (int ei = 0; ei < param.num_edge; ++ei) {
         const int i = param.edge_idxs[ei].idx1;

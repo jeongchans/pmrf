@@ -35,19 +35,19 @@ class MRFParameterizer {
 
         int get_nidx(const int& i, const char& p) const;
 
-        inline int get_eidx(const int& i, const int& j, const char& p, const char& q) const;
-        inline int get_eidx(const int& i, const int& j, const int& xi, const char& q) const;
-        inline int get_eidx(const int& i, const int& j, const char& p, const int& xj) const;
-        inline int get_eidx(const int& i, const int& j, const int& xi, const int& xj) const;
-        inline int get_eidx_edge(const int& ei, const char& p, const char& q) const;
-        inline int get_eidx_edge(const int& ei, const int& xi, const char& q) const;
-        inline int get_eidx_edge(const int& ei, const char& p, const int& xj) const;
-        inline int get_eidx_edge(const int& ei, const int& xi, const int& xj) const;
+        int get_eidx(const int& i, const int& j, const char& p, const char& q) const;
+        int get_eidx(const int& i, const int& j, const int& xi, const char& q) const;
+        int get_eidx(const int& i, const int& j, const char& p, const int& xj) const;
+        int get_eidx(const int& i, const int& j, const int& xi, const int& xj) const;
+        int get_eidx_edge(const int& ei, const char& p, const char& q) const;
+        int get_eidx_edge(const int& ei, const int& xi, const char& q) const;
+        int get_eidx_edge(const int& ei, const char& p, const int& xj) const;
+        int get_eidx_edge(const int& ei, const int& xi, const int& xj) const;
 
-        inline int nidx_beg() const { return 0; }
-        inline int nidx_end() const { return n_node; }
-        inline int eidx_beg() const { return n_node; }
-        inline int eidx_end() const { return n; }
+        int nidx_beg() const { return 0; }
+        int nidx_end() const { return n_node; }
+        int eidx_beg() const { return n_node; }
+        int eidx_end() const { return n; }
 
         const Alphabet& abc;
         int length;
@@ -157,5 +157,26 @@ class MRFParameterizer {
 
     FRIEND_TEST(MRFParameterizer_Test, test_update_model);
 };
+
+inline int MRFParameterizer::Parameter::get_nidx(const int& i, const char& p) const 
+    { return i * num_var + abc.get_idx(p); }
+
+inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char& p, const char& q) const
+    { return get_eidx(i, j, abc.get_idx(p), abc.get_idx(q)); }
+inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const int& xi, const char& q) const
+    { return get_eidx(i, j, xi, abc.get_idx(q)); }
+inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char& p, const int& xj) const
+    { return get_eidx(i, j, abc.get_idx(p), xj); }
+inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const int& xi, const int& xj) const
+    { return get_eidx_edge(eidx.at(EdgeIndex(i, j)), xi, xj); }
+
+inline int MRFParameterizer::Parameter::get_eidx_edge(const int& ei, const char& p, const char& q) const
+    { return get_eidx_edge(ei, abc.get_idx(p), abc.get_idx(q)); }
+inline int MRFParameterizer::Parameter::get_eidx_edge(const int& ei, const int& xi, const char& q) const
+    { return get_eidx_edge(ei, xi, abc.get_idx(q)); }
+inline int MRFParameterizer::Parameter::get_eidx_edge(const int& ei, const char& p, const int& xj) const
+    { return get_eidx_edge(ei, abc.get_idx(p), xj); }
+inline int MRFParameterizer::Parameter::get_eidx_edge(const int& ei, const int& xi, const int& xj) const
+    { return eidx_beg() + ei * num_var2 + xi * num_var + xj; }
 
 #endif
