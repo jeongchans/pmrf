@@ -1,5 +1,5 @@
 export CXX          = g++
-export CXXFLAGS     = -Wno-write-strings -W -Wall -std=c++0x -ffast-math -DNDEBUG
+export CXXFLAGS     = -Wno-write-strings -W -Wall -std=c++11 -ffast-math -DNDEBUG
 
 LBFGS_MODULE 	    = lbfgs
 LBFGS_SRC_DIR 	    = $(LBFGS_MODULE)
@@ -23,12 +23,12 @@ prog : objs
 
 objs :
 	@for dir in $(DIRS); do\
-		make -C $$dir || exit $?;\
+		$(MAKE) -C $$dir || exit $?;\
 	done
 
 clean : test_clean prog_clean
 	@for dir in $(DIRS); do\
-		make -C $$dir clean;\
+		$(MAKE) -C $$dir clean;\
 	done
 
 prog_clean:
@@ -55,12 +55,12 @@ test : objs test_objs
 
 test_objs :
 	@for dir in $(TEST_DIRS); do\
-		make -C $$dir || exit $?;\
+		$(MAKE) -C $$dir || exit $?;\
 	done
 
 test_clean :
 	@for dir in $(TEST_DIRS); do\
-		make -C $$dir clean;\
+		$(MAKE) -C $$dir clean;\
 	done
 	rm -rf $(TESTRUNNER)
 
@@ -76,5 +76,5 @@ prof : clean prof_objs
 
 prof_objs :
 	@for dir in $(DIRS); do\
-		make -C $$dir || exit $?;\
+		$(MAKE) -C $$dir || exit $?;\
 	done
