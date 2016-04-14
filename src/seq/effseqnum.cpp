@@ -57,13 +57,8 @@ double ClstrEffSeqNumEstimator::estimate(const vector<string>& msa) const {
 
 float ClstrEffSeqNumEstimator::calc_identity(const string& seq1, const string& seq2) const {
     size_t n = seq1.size();
-    size_t n1 = 0, n2 = 0;
     float f = 0.;
-    for (size_t i = 0; i < n; ++i) {
-        if (abc.is_canonical(seq1[i], false) && seq1[i] == seq2[i]) ++f;
-        if (abc.is_canonical(seq1[i])) ++n1;
-        if (abc.is_canonical(seq2[i])) ++n2;
-    }
-    if (n1 < n2) return f / (float) n1;
-    else return f / (float) n2;
+    for (size_t i = 0; i < n; ++i)
+        if (seq1[i] == seq2[i]) ++f;
+    return f / (float) n;
 }
