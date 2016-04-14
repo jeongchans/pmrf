@@ -86,7 +86,7 @@ class MRFParameterizer_RegularizationFunction_Test : public testing::Test {
 };
 
 TEST_F(MRFParameterizer_RegularizationFunction_Test, test_l2_regularization) {
-    MRFParameterizer::L2Regularization::Option opt;
+    MRFParameterizer::L2Regularization::Option opt(0.01, 0.2);
     MRFParameterizer::L2Regularization regul_func(param, opt);
     lbfgsfloatval_t fx = 0.0;
 
@@ -129,7 +129,7 @@ class MRFParameterizer_ObjectiveFunction_Test : public testing::Test {
 };
 
 TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_calc_logpot) {
-    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
+    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, seq_weight, traces.size());
 
     string seq = traces[0].get_matched_aseq();
 
@@ -139,7 +139,7 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_calc_logpot) {
 }
 
 TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_logsumexp) {
-    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
+    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, seq_weight, traces.size());
 
     MatrixXf x = MatrixXf::Zero(3, 4);
     for (int i = 0; i < 3; ++i)
@@ -153,7 +153,7 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_logsumexp) {
 }
 
 TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_calc_logz) {
-    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
+    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, seq_weight, traces.size());
 
     MatrixXf logpot = randn_matrix(param.num_var, param.length).unaryExpr(&exp);
 
@@ -162,7 +162,7 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_calc_logz) {
 }
 
 TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_update_obj_score) {
-    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
+    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, seq_weight, traces.size());
 
     string seq = traces[0].get_matched_aseq();
     FloatType sw = seq_weight(0);
@@ -175,7 +175,7 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_update_obj_score) {
 }
 
 TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_update_gradient) {
-    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
+    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, seq_weight, traces.size());
 
     string seq = traces[0].get_matched_aseq();
     FloatType sw = seq_weight(0);
@@ -189,7 +189,7 @@ TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_update_gradient) {
 }
 
 TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_evaluate) {
-    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
+    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, seq_weight, traces.size());
 
     lbfgsfloatval_t fx = obj_func.evaluate(param.x, g, param.n, 0);
     EXPECT_NE(0.0, fx);

@@ -11,12 +11,12 @@ MSAAnalyzer::MSAAnalyzer(Option& opt, const Alphabet& abc) {
     if (opt.eff_num == MSAProcOption::NEFF_NO) {
         eff_seq_num_estimator = std::shared_ptr<NullEffSeqNumEstimator>(
             new NullEffSeqNumEstimator());
-    } else if (opt.eff_num == MSAProcOption::NEFF_ENTROPY) {
+    } else if (opt.eff_num == MSAProcOption::NEFF_SHANNON) {
         eff_seq_num_estimator = std::shared_ptr<ExpEntropyEffSeqNumEstimator>(
             new ExpEntropyEffSeqNumEstimator(abc, seq_weight_estimator.get()));
     } else if (opt.eff_num == MSAProcOption::NEFF_CLSTR) {
         eff_seq_num_estimator = std::shared_ptr<ClstrEffSeqNumEstimator>(
-            new ClstrEffSeqNumEstimator(abc, 0.6));
+            new ClstrEffSeqNumEstimator(abc, opt.clstr_maxidt));
     }
     termi_gap_remover = std::shared_ptr<TerminalGapRemover>(
         new TerminalGapRemover(abc, 0.1));

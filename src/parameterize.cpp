@@ -55,9 +55,9 @@ void MRFParameterizer::L2Regularization::regularize_node(const lbfgsfloatval_t *
 }
 
 void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
-    float lambda = opt.lambda2;
-    if (opt.sc) lambda *= 2. * ((float)(param.eidx.size())) / ((float)(param.length));
-    float twolambda = 2. * lambda;
+
+    const float& lambda = opt.lambda2;
+    const float twolambda = 2. * lambda;
     for (int k = param.eidx_beg(); k < param.eidx_end(); ++k) {
         fx += lambda * square(x[k]);
         g[k] += twolambda * x[k];
@@ -68,11 +68,12 @@ void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *
    @class MRFParameterizer::ObjectiveFunction
  */
 
-MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const MSAAnalyzer& msa_analyzer)
+MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const VectorXf& seq_weight, const float& neff)
 : traces(traces), 
   param(param), 
   opt(opt), 
-  msa_analyzer(msa_analyzer),
+  seq_weight(seq_weight),
+  neff(neff),
   l2_func(param, opt.l2_opt) {
     data.resize(traces.size(), param.length);
     for (size_t i = 0; i < traces.size(); ++i) {
@@ -80,12 +81,6 @@ MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces
         for (size_t j = 0; j < param.length; ++j)
             data(i, j) = param.abc.get_idx(seq[j]);
     }
-    vector<string> msa = traces.get_matched_aseq_vec();
-    msa = msa_analyzer.termi_gap_remover->filter(msa);
-    seq_weight.resize(traces.size());
-    seq_weight = msa_analyzer.seq_weight_estimator->estimate(msa);
-    seq_weight /= seq_weight.sum();
-    seq_weight *= msa_analyzer.eff_seq_num_estimator->estimate(msa);
 }
 
 lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step) {
@@ -99,7 +94,7 @@ lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatva
         update_obj_score(fx, logpot, logz, i, seq, sw);
         update_gradient(x, g, logpot, logz, i, seq, sw);
     }
-    if (opt.regul == RegulMethod::RegulMethod::L2) l2_func.regularize(x, g, fx);
+    if (opt.regul == RegulMethod::REGUL_L2) l2_func.regularize(x, g, fx);
     return fx;
 }
 
@@ -215,11 +210,27 @@ void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t 
 
 int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     Parameter param(model, optim_opt);
+    /* sequeing weights */
+    vector<string> msa = traces.get_matched_aseq_vec();
+    msa = msa_analyzer.termi_gap_remover->filter(msa);
+    VectorXf sw = msa_analyzer.seq_weight_estimator->estimate(msa);
+    sw /= sw.sum();
+    /* effective number of sequences */
+    float neff = msa_analyzer.eff_seq_num_estimator->estimate(msa);
+    sw *= neff;
+    /* sequence profile */
     MatrixXf psfm = MatrixXf::Zero(param.length, param.num_var);
     FloatType gap_prob = 0.;
     psfm.leftCols<20>() = calc_profile(traces) * (1. - gap_prob);
     psfm.rightCols<1>().setConstant(gap_prob);
-    ObjectiveFunction obj_func(traces, param, opt, msa_analyzer);
+    /* MRF */
+    if (opt.regedge_sc_deg) opt.regedge_lambda *= 2. * (float) param.eidx.size() / (float) param.length;
+    if (opt.regedge_sc_neff) opt.regedge_lambda *= neff;
+    if (opt.regul == RegulMethod::REGUL_L2) {
+        opt.l2_opt.lambda1 = opt.regnode_lambda;
+        opt.l2_opt.lambda2 = opt.regedge_lambda;
+    }
+    ObjectiveFunction obj_func(traces, param, opt, sw, neff);
     LBFGS::Optimizer optimizer;
     int ret = optimizer.optimize(&param, &obj_func);
     model.set_psfm(psfm);

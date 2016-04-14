@@ -12,7 +12,7 @@ using std::shared_ptr;
 namespace MSAProcOption {
     enum SeqWeight { SW_NO = 0, SW_PB = 1 };
 
-    enum EffSeqNum { NEFF_NO = 0, NEFF_ENTROPY = 1, NEFF_CLSTR = 2 };
+    enum EffSeqNum { NEFF_NO = 0, NEFF_SHANNON = 1, NEFF_CLSTR = 2 };
 }
 
 class MSAAnalyzer {
@@ -20,12 +20,15 @@ class MSAAnalyzer {
 
     class Option {
       public:
-        Option(const MSAProcOption::SeqWeight& seq_wt=MSAProcOption::SW_PB, const MSAProcOption::EffSeqNum& eff_num=MSAProcOption::NEFF_CLSTR)
-        : seq_wt(seq_wt),
-          eff_num(eff_num) {};
+        Option()
+        : seq_wt(MSAProcOption::SW_PB),
+          eff_num(MSAProcOption::NEFF_CLSTR),
+          clstr_maxidt(0.6) {};
 
         MSAProcOption::SeqWeight seq_wt;
         MSAProcOption::EffSeqNum eff_num;
+
+        float clstr_maxidt;
     };
 
     MSAAnalyzer(Option& opt, const Alphabet& abc);

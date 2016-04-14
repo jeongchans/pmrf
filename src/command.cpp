@@ -8,9 +8,9 @@ using std::cout;
 using std::endl;
 
 bool MRFCommandLine::parse_bool(char* optarg, bool& arg) {
-    int n = atoi(optarg);
-    if (n == 0) arg = false;
-    else if (n == 1) arg = true;
+    string val = string(optarg);
+    if (val == "yes") arg = true;
+    else if (val == "no") arg = false;
     else {
         error_message = "Not acceptable: " + string(optarg);
         return false;
@@ -23,8 +23,13 @@ bool MRFCommandLine::parse_int(char* optarg, int& arg) {
     return true;
 }
 
-bool MRFCommandLine::parse_float(char* optarg, double& arg) {
+bool MRFCommandLine::parse_float(char* optarg, float& arg, const float& minval, const float& maxval) {
     arg = atof(optarg);
+    if (arg < minval || arg > maxval) {
+        error_message = "Not acceptable: " + string(optarg) + "\n" +
+                        "The value should be in the range from " + std::to_string(minval) + " to " + std::to_string(maxval);
+        return false;
+    }
     return true;
 }
 
@@ -130,21 +135,20 @@ void MRFBuildCommandLine::show_help() {
 }
 
 bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
-    double regnode_lambda = 0.01;
-    double regedge_lambda = 0.2;
-    bool regedge_scale = true;
     optind = 0;     // initialize getopt_long()
     static struct option opts[] = {
         {"help", 0, 0, 0},
         {"regul", required_argument, 0, 0},
-        {"regnode-lambda", required_argument, 0, 0},
-        {"regedge-lambda", required_argument, 0, 0},
-        {"regedge-scale", required_argument, 0, 0},
+        {"regv-lambda", required_argument, 0, 0},
+        {"regw-lambda", required_argument, 0, 0},
+        {"regw-sc-deg", required_argument, 0, 0},
         {"msa", required_argument, 0, 0},
         {"edge", required_argument, 0, 0},
         {"delta", required_argument, 0, 0},
         {"seqwt", required_argument, 0, 0},
-        {"effnum", required_argument, 0, 0},
+        {"neff", required_argument, 0, 0},
+        {"regw-sc-neff", required_argument, 0, 0},
+        {"clstr-maxidt", required_argument, 0, 0},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -162,13 +166,13 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
                 if (parse_regul(optarg, opt.parameterizer_opt.regul)) break;
                 else return false;
             case 2:
-                if (parse_double(optarg, regnode_lambda)) break;
+                if (parse_float(optarg, opt.parameterizer_opt.regnode_lambda)) break;
                 else return false;
             case 3:
-                if (parse_double(optarg, regedge_lambda)) break;
+                if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda)) break;
                 else return false;
             case 4:
-                if (parse_bool(optarg, regedge_scale)) break;
+                if (parse_bool(optarg, opt.parameterizer_opt.regedge_sc_deg)) break;
                 else return false;
             case 5:
                 if (parse_msa_fmt(optarg, opt.msa_fmt)) break;
@@ -184,6 +188,12 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
                 else return false;
             case 9:
                 if (parse_eff_num(optarg, opt.msa_analyzer_opt.eff_num)) break;
+                else return false;
+            case 10:
+                if (parse_bool(optarg, opt.parameterizer_opt.regedge_sc_neff)) break;
+                else return false;
+            case 11:
+                if (parse_float(optarg, opt.msa_analyzer_opt.clstr_maxidt, 0., 1.)) break;
                 else return false;
             }
             break;
@@ -203,11 +213,6 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         error_message = "Not enough arguments\n";
         return false;
     }
-    if (opt.parameterizer_opt.regul == RegulMethod::RegulMethod::L2) {
-        opt.parameterizer_opt.l2_opt.lambda1 = regnode_lambda;
-        opt.parameterizer_opt.l2_opt.lambda2 = regedge_lambda;
-        opt.parameterizer_opt.l2_opt.sc = regedge_scale;
-    }
     return true;
 }
 
@@ -224,8 +229,8 @@ bool MRFBuildCommandLine::parse_msa_fmt(char* optarg, MSAFormat& arg) {
 
 bool MRFBuildCommandLine::parse_regul(char* optarg, RegulMethod::RegulMethod& arg) {
     string val = string(optarg);
-    if (val == "no") arg = RegulMethod::RegulMethod::NONE;
-    else if (val == "l2") arg = RegulMethod::RegulMethod::L2;
+    if (val == "no") arg = RegulMethod::REGUL_NONE;
+    else if (val == "l2") arg = RegulMethod::REGUL_L2;
     else {
         error_message = "Unknown option for regularization: " + val;
         return false;
@@ -252,11 +257,6 @@ bool MRFBuildCommandLine::parse_eff_num(char* optarg, MSAProcOption::EffSeqNum& 
         error_message = "Unsupported option for effective number estimation: " + val;
         return false;
     }
-    return true;
-}
-
-bool MRFBuildCommandLine::parse_double(char* optarg, double& arg) {
-    arg = atof(optarg);
     return true;
 }
 

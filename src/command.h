@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <cstring>
+#include <cfloat>
 
 #include "option.h"
 
@@ -46,7 +47,7 @@ class MRFCommandLine {
 
     bool parse_bool(char* optarg, bool& arg);
     bool parse_int(char* optarg, int& arg);
-    bool parse_float(char* optarg, double& arg);
+    bool parse_float(char* optarg, float& arg, const float& minval=FLT_MIN, const float& maxval=FLT_MAX);
     bool parse_str(char* optarg, string& arg);
 };
 
@@ -80,7 +81,6 @@ class MRFBuildCommandLine : public MRFCommandLine {
     bool parse_regul(char* optarg, RegulMethod::RegulMethod& arg);
     bool parse_seq_wt(char* optarg, MSAProcOption::SeqWeight& arg);
     bool parse_eff_num(char* optarg, MSAProcOption::EffSeqNum& arg);
-    bool parse_double(char* optarg, double& arg);
 };
 
 class MRFStatCommandLine : public MRFCommandLine {

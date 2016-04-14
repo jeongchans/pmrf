@@ -11,7 +11,7 @@
 using std::string;
 
 namespace RegulMethod {
-    enum RegulMethod { NONE, L2, PROFILE };
+    enum RegulMethod { REGUL_NONE, REGUL_L2, REGUL_PROFILE };
 }
 
 class MRFParameterizer {
@@ -22,11 +22,14 @@ class MRFParameterizer {
 
         class Option {
           public:
-            Option(const int& linesearch=LBFGS_LINESEARCH_BACKTRACKING, const double& delta=1e-4,const int& past=2, const int& max_iterations=500)
-            : linesearch(linesearch), delta(delta), past(past), max_iterations(max_iterations) {};
+            Option()
+            : linesearch(LBFGS_LINESEARCH_BACKTRACKING),
+              delta(1e-4), 
+              past(2), 
+              max_iterations(500) {};
 
             int linesearch;
-            double delta;
+            float delta;
             int past;
             int max_iterations;
         };
@@ -76,12 +79,11 @@ class MRFParameterizer {
 
         class Option {
           public:
-            Option(const double& lambda1=0.01, const double& lambda2=0.2, const bool& sc=true) 
-            : lambda1(lambda1), lambda2(lambda2), sc(sc) {};
+            Option(const float& lambda1, const float& lambda2)
+            : lambda1(lambda1), lambda2(lambda2) {};
 
-            double lambda1;
-            double lambda2;
-            bool sc;
+            float lambda1;
+            float lambda2;
         };
 
         L2Regularization(Parameter& param, Option& opt) : param(param), opt(opt) {};
@@ -103,15 +105,24 @@ class MRFParameterizer {
 
         class Option {
           public:
-            Option(const RegulMethod::RegulMethod& regul=RegulMethod::RegulMethod::L2, const double& gap_prob=0.14) : regul(regul), gap_prob(gap_prob) {};
+            Option()
+            : regul(RegulMethod::REGUL_L2), 
+              l2_opt(regnode_lambda, regedge_lambda),
+              regnode_lambda(0.01), 
+              regedge_lambda(0.2),
+              regedge_sc_deg(true),
+              regedge_sc_neff(true) {};
 
             RegulMethod::RegulMethod regul;
             L2Regularization::Option l2_opt;
 
-            double gap_prob;
+            float regnode_lambda;
+            float regedge_lambda;
+            bool regedge_sc_deg;
+            bool regedge_sc_neff;
         };
 
-        ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const MSAAnalyzer& msa_analyzer);
+        ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const VectorXf& seq_weight, const float& neff);
 
         virtual lbfgsfloatval_t evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step);
 
@@ -121,9 +132,8 @@ class MRFParameterizer {
         const Option& opt;
 
         MatrixXi data;
-        VectorXf seq_weight;
-
-        const MSAAnalyzer msa_analyzer;
+        const VectorXf& seq_weight;
+        const float& neff;
 
         L2Regularization l2_func;
 
