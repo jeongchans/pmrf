@@ -14,9 +14,9 @@ Download the latest release from [the git repository] (https://github.com/jeongc
 1. Uncompress the downloaded file in the directory where the PMRF software will be installed.
 
 2. Compile the source code.
-  ```sh
+  ``
   $ make
-  ```
+  ``
 
 3. The executable will be placed in the directory.
 
@@ -26,14 +26,14 @@ TBA
 
 ### Help messages
 Show the general help page.
-  ```sh
+  ``
   $ pmrf --help
-  ```
+  ``
 
 Show the help page for a specific command.
-  ```sh
+  ``
   $ pmrf <COMMAND> --help
-  ```
+  ``
 
 
 ## Examples
