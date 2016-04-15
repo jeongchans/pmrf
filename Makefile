@@ -68,13 +68,11 @@ test_clean :
 # Profiler #
 ############
 
-PROFFLAGS           = -pg -Wall -Wextra
-
-prof : CXXFLAGS += $(PROFFLAGS)
-prof : clean prof_objs
+prof : CXXFLAGS += -pg -Wall -Wextra
+prof : prof_objs
 	$(CXX) $(CXXFLAGS) -o $(PROG_MRFMAIN) $(PROG_MRFMAIN_OBJECT) $(OBJECTS)
 
-prof_objs :
+prof_objs : clean
 	@for dir in $(DIRS); do\
 		$(MAKE) -C $$dir || exit $?;\
 	done
