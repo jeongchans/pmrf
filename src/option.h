@@ -60,7 +60,7 @@ namespace Build {
         "                           no: no\n"
         "                           l2: L2 regularization (default)\n"
         " --regv-lambda <float>     weighting factor for node regularization (default: 0.01)\n"
-        " --regv-lambda <float>     weighting factor for edge regularization (default: 0.2)\n"
+        " --regw-lambda <float>     weighting factor for edge regularization (default: 0.2)\n"
         " --regw-sc-deg <yes|no>    scaling edge regularization w.r.t. average degree (default: yes)\n"
         " --regw-sc-neff <yes|no>   scaling edge regularization w.r.t. effective number of sequences\n"
         "                           (default: yes)\n"
