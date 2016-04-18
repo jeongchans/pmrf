@@ -88,16 +88,15 @@ class MRFParameterizer_RegularizationFunction_Test : public testing::Test {
 TEST_F(MRFParameterizer_RegularizationFunction_Test, test_l2_regularization) {
     MRFParameterizer::L2Regularization::Option opt(0.01, 0.2);
     MRFParameterizer::L2Regularization regul_func(param, opt);
-    lbfgsfloatval_t fx = 0.0;
 
-    regul_func.regularize(param.x, g, fx);
+    lbfgsfloatval_t fx = regul_func.evaluate(param.x, g, param.n, 0);
     EXPECT_TRUE(fx > 0);
     EXPECT_NE(0., abs_sum(g));
 }
 
-class MRFParameterizer_ObjectiveFunction_Test : public testing::Test {
+class MRFParameterizer_Pseudolikelihood_Test : public testing::Test {
   protected:
-    MRFParameterizer_ObjectiveFunction_Test() : length(16), mrf(length, abc), param(mrf, optim_opt), g(NULL) {};
+    MRFParameterizer_Pseudolikelihood_Test() : length(16), mrf(length, abc), param(mrf, optim_opt), g(NULL) {};
 
     virtual void SetUp() {
         traces.push_back(Trace("MMMMMMMMMMMMMMMMM", "PPDQEFLRGARVQLGDA"));
@@ -121,77 +120,76 @@ class MRFParameterizer_ObjectiveFunction_Test : public testing::Test {
     size_t length;
     MRF mrf;
     MRFParameterizer::Parameter param;
-    MRFParameterizer::ObjectiveFunction::Option opt;
     lbfgsfloatval_t *g;
 
     TraceVector traces;
     VectorXf seq_weight;
 };
 
-TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_calc_logpot) {
-    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, seq_weight, traces.size());
+TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_calc_logpot) {
+    MRFParameterizer::Pseudolikelihood pll(traces, param, seq_weight, traces.size());
 
     string seq = traces[0].get_matched_aseq();
 
-    MatrixXf logpot = obj_func.calc_logpot(param.x, 0, seq);
+    MatrixXf logpot = pll.calc_logpot(param.x, 0, seq);
     EXPECT_EQ(param.num_var, logpot.rows());
     EXPECT_EQ(param.length, logpot.cols());
 }
 
-TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_logsumexp) {
-    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, seq_weight, traces.size());
+TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_logsumexp) {
+    MRFParameterizer::Pseudolikelihood pll(traces, param, seq_weight, traces.size());
 
     MatrixXf x = MatrixXf::Zero(3, 4);
     for (int i = 0; i < 3; ++i)
         for (int j = 0; j < 4; ++j)
             x(i, j) = 4 * i + j + 1;
 
-    VectorXf y = obj_func.logsumexp(x);
+    VectorXf y = pll.logsumexp(x);
     ASSERT_TRUE(allclose(y(0), 4.4402));
     ASSERT_TRUE(allclose(y(1), 8.4402));
     ASSERT_TRUE(allclose(y(2), 12.4402));
 }
 
-TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_calc_logz) {
-    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, seq_weight, traces.size());
+TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_calc_logz) {
+    MRFParameterizer::Pseudolikelihood pll(traces, param, seq_weight, traces.size());
 
     MatrixXf logpot = randn_matrix(param.num_var, param.length).unaryExpr(&exp);
 
-    VectorXf logz = obj_func.calc_logz(logpot);
+    VectorXf logz = pll.calc_logz(logpot);
     EXPECT_EQ(param.length, logz.size());
 }
 
-TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_update_obj_score) {
-    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, seq_weight, traces.size());
+TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_update_obj_score) {
+    MRFParameterizer::Pseudolikelihood pll(traces, param, seq_weight, traces.size());
 
     string seq = traces[0].get_matched_aseq();
     FloatType sw = seq_weight(0);
     MatrixXf logpot = randn_matrix(param.num_var, param.length).unaryExpr(&exp);
-    VectorXf logz = obj_func.calc_logz(logpot);
+    VectorXf logz = pll.calc_logz(logpot);
     lbfgsfloatval_t fx = 0.;
 
-    obj_func.update_obj_score(fx, logpot, logz, 0, seq, sw);
+    pll.update_obj_score(fx, logpot, logz, 0, seq, sw);
     EXPECT_NE(0., fx);
 }
 
-TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_update_gradient) {
-    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, seq_weight, traces.size());
+TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_update_gradient) {
+    MRFParameterizer::Pseudolikelihood pll(traces, param, seq_weight, traces.size());
 
     string seq = traces[0].get_matched_aseq();
     FloatType sw = seq_weight(0);
     MatrixXf logpot = randn_matrix(param.num_var, param.length).unaryExpr(&exp);
-    VectorXf logz = obj_func.calc_logz(logpot);
+    VectorXf logz = pll.calc_logz(logpot);
 
-    obj_func.update_gradient(param.x, g, logpot, logz, 0, seq, sw);
+    pll.update_gradient(param.x, g, logpot, logz, 0, seq, sw);
     double s = 0.;
     for (int i = 0; i < param.n; ++i) s+= fabs(g[i]);
     EXPECT_NE(0., s);
 }
 
-TEST_F(MRFParameterizer_ObjectiveFunction_Test, test_evaluate) {
-    MRFParameterizer::ObjectiveFunction obj_func(traces, param, opt, seq_weight, traces.size());
+TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_evaluate) {
+    MRFParameterizer::Pseudolikelihood pll(traces, param, seq_weight, traces.size());
 
-    lbfgsfloatval_t fx = obj_func.evaluate(param.x, g, param.n, 0);
+    lbfgsfloatval_t fx = pll.evaluate(param.x, g, param.n, 0);
     EXPECT_NE(0.0, fx);
 }
 

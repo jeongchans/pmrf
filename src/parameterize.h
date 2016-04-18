@@ -65,16 +65,9 @@ class MRFParameterizer {
 
     };
 
-    // Regularization
-
-    class RegularizationFunction {
-      public:
-        virtual void regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) = 0;
-    };
-
     // L2 regularization (using zero-mean Gaussian prior)
 
-    class L2Regularization : public RegularizationFunction {
+    class L2Regularization : public LBFGS::ObjectiveFunction {
       public:
 
         class Option {
@@ -88,7 +81,7 @@ class MRFParameterizer {
 
         L2Regularization(Parameter& param, Option& opt) : param(param), opt(opt) {};
 
-        virtual void regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
+        virtual lbfgsfloatval_t evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step);
 
       private:
         const Parameter& param;
@@ -98,44 +91,21 @@ class MRFParameterizer {
         void regularize_edge(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
     };
 
-    // Objective function
+    // Pseudolikelihood function
 
-    class ObjectiveFunction : public LBFGS::ObjectiveFunction {
+    class Pseudolikelihood : public LBFGS::ObjectiveFunction {
       public:
-
-        class Option {
-          public:
-            Option()
-            : regul(RegulMethod::REGUL_L2), 
-              l2_opt(regnode_lambda, regedge_lambda),
-              regnode_lambda(0.01), 
-              regedge_lambda(0.2),
-              regedge_sc_deg(true),
-              regedge_sc_neff(true) {};
-
-            RegulMethod::RegulMethod regul;
-            L2Regularization::Option l2_opt;
-
-            float regnode_lambda;
-            float regedge_lambda;
-            bool regedge_sc_deg;
-            bool regedge_sc_neff;
-        };
-
-        ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const VectorXf& seq_weight, const float& neff);
+        Pseudolikelihood(const TraceVector& traces, const Parameter& param, const VectorXf& seq_weight, const float& neff);
 
         virtual lbfgsfloatval_t evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step);
 
       private:
         const TraceVector& traces;
         const Parameter& param;
-        const Option& opt;
 
         MatrixXi data;
         const VectorXf& seq_weight;
         const float& neff;
-
-        L2Regularization l2_func;
 
         MatrixXf calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq);
         VectorXf logsumexp(const MatrixXf& b);
@@ -143,20 +113,54 @@ class MRFParameterizer {
         void update_obj_score(lbfgsfloatval_t& fx, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw);
         void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw);
 
-        FRIEND_TEST(MRFParameterizer_ObjectiveFunction_Test, test_calc_logpot);
-        FRIEND_TEST(MRFParameterizer_ObjectiveFunction_Test, test_logsumexp);
-        FRIEND_TEST(MRFParameterizer_ObjectiveFunction_Test, test_calc_logz);
-        FRIEND_TEST(MRFParameterizer_ObjectiveFunction_Test, test_update_obj_score);
-        FRIEND_TEST(MRFParameterizer_ObjectiveFunction_Test, test_update_gradient);
+        FRIEND_TEST(MRFParameterizer_Pseudolikelihood_Test, test_calc_logpot);
+        FRIEND_TEST(MRFParameterizer_Pseudolikelihood_Test, test_logsumexp);
+        FRIEND_TEST(MRFParameterizer_Pseudolikelihood_Test, test_calc_logz);
+        FRIEND_TEST(MRFParameterizer_Pseudolikelihood_Test, test_update_obj_score);
+        FRIEND_TEST(MRFParameterizer_Pseudolikelihood_Test, test_update_gradient);
+    };
+
+    // Objective function
+
+    class ObjectiveFunction : public LBFGS::ObjectiveFunction {
+      public:
+        ObjectiveFunction(const vector<LBFGS::ObjectiveFunction*>& funcs, const Parameter& param) 
+        : funcs(funcs), param(param) {};
+
+        virtual lbfgsfloatval_t evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step);
+
+      private:
+        const vector<LBFGS::ObjectiveFunction*>& funcs;
+        const Parameter& param;
     };
 
   public:
+
+    class Option {
+      public:
+        Option()
+        : regul(RegulMethod::REGUL_L2), 
+          l2_opt(regnode_lambda, regedge_lambda),
+          regnode_lambda(0.01), 
+          regedge_lambda(0.2),
+          regedge_sc_deg(true),
+          regedge_sc_neff(true) {};
+
+        RegulMethod::RegulMethod regul;
+        float regnode_lambda;
+        float regedge_lambda;
+        bool regedge_sc_deg;
+        bool regedge_sc_neff;
+
+        L2Regularization::Option l2_opt;
+    };
+
     MRFParameterizer(const MSAAnalyzer& msa_analyzer) 
     : msa_analyzer(msa_analyzer) {};
 
     int parameterize(MRF& model, const TraceVector& traces);
 
-    ObjectiveFunction::Option opt;
+    Option opt;
     Parameter::Option optim_opt;
 
   private:

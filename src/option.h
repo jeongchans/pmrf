@@ -32,7 +32,8 @@ namespace Build {
         string eidx_filename;
         MSAFormat msa_fmt;
         MSAAnalyzer::Option msa_analyzer_opt;
-        MRFParameterizer::ObjectiveFunction::Option parameterizer_opt;
+        //MRFParameterizer::ObjectiveFunction::Option parameterizer_opt;
+        MRFParameterizer::Option parameterizer_opt;
         MRFParameterizer::Parameter::Option optim_opt;
     };
 
@@ -40,7 +41,10 @@ namespace Build {
         "Input options:\n"
         " --msa <fmt>               choose format of MSA file\n"
         "                           fasta: aligned FASTA (default)\n"
+//        "                           flat: list of aligned sequences\n"
         "                           a3m: HHsearch A3M format\n"
+//        " --ref <int>               index of reference sequence (default: 1)\n"
+//        "                           0 or less number will consider all the MSA columns\n"
         " --edge <edge_file>        specify list of edges to determine MRF architecture\n"
         "\n"
         "Output options:\n"
@@ -53,9 +57,11 @@ namespace Build {
         " --neff <method>           effective number of sequences\n"
         "                           no: no effective number\n"
         "                           clstr: number of sequences clustered by sequence identity (default)\n"
+//        "                           shan: exponential of average shannon entropy of amino acid pair\n"
         " --clstr-maxidt <float>    maximum sequence identity between sequence clusters (default: 0.6)\n"
         "\n"
-        "Regularization options:\n"
+        "Parameterization options:\n"
+//        " --symmetric               symmetry constraint for edge weights\n"
         " --regul <method>          regularization of node and edge weights\n"
         "                           no: no\n"
         "                           l2: L2 regularization (default)\n"
@@ -64,6 +70,8 @@ namespace Build {
         " --regw-sc-deg <yes|no>    scaling edge regularization w.r.t. average degree (default: yes)\n"
         " --regw-sc-neff <yes|no>   scaling edge regularization w.r.t. effective number of sequences\n"
         "                           (default: yes)\n"
+//        " --no-regw-sc-deg          disable edge regularization scaling w.r.t. average degree\n"
+//        " --no-regw-sc-neff         disable edge regularization scaling w.r.t. effective number of sequences\n"
         "\n"
         "Optimization options:\n"
         " --delta <float>           minimum rate of decrease for objective function (default: 1e-4)\n"
@@ -108,6 +116,9 @@ namespace Infer {
 
     static const string option_message =
         "Options:\n"
+//        " --ref <seq_file>          calculate the score difference for <seq_file> (FASTA)\n"
+//        " --offset <float>          score offset (default: 0.0)\n"
+        "\n"
         " -h, --help                show this help message\n";
 }
 
@@ -118,6 +129,10 @@ namespace Show {
 
     static const string option_message =
         "Options:\n"
+//        " --brief                   show only the brief information\n"
+//        " --list-prof               list profile parameters\n"
+//        " --list-mrf                list MRF parameters\n"
+        "\n"
         " -h, --help                show this help message\n";
 }
 

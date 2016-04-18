@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
+#include <memory>
 
 #include "util/common.h"
 #include "seq/profile.h"
@@ -41,9 +42,11 @@ MRFParameterizer::Parameter::Parameter(const MRF& model, const Option& opt) : ab
    @class MRFParameterizer::L2Regularization
  */
 
-void MRFParameterizer::L2Regularization::regularize(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
+lbfgsfloatval_t MRFParameterizer::L2Regularization::evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step) {
+    lbfgsfloatval_t fx = 0.;
     regularize_node(x, g, fx);
     regularize_edge(x, g, fx);
+    return fx;
 }
 
 void MRFParameterizer::L2Regularization::regularize_node(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
@@ -65,16 +68,14 @@ void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *
 }
 
 /**
-   @class MRFParameterizer::ObjectiveFunction
+   @class MRFParameterizer::Pseudolikelihood
  */
 
-MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces, Parameter& param, Option& opt, const VectorXf& seq_weight, const float& neff)
+MRFParameterizer::Pseudolikelihood::Pseudolikelihood(const TraceVector& traces, const Parameter& param, const VectorXf& seq_weight, const float& neff)
 : traces(traces), 
   param(param), 
-  opt(opt), 
   seq_weight(seq_weight),
-  neff(neff),
-  l2_func(param, opt.l2_opt) {
+  neff(neff) {
     data.resize(traces.size(), param.length);
     for (size_t i = 0; i < traces.size(); ++i) {
         string seq = traces[i].get_matched_aseq();
@@ -83,9 +84,8 @@ MRFParameterizer::ObjectiveFunction::ObjectiveFunction(const TraceVector& traces
     }
 }
 
-lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step) {
+lbfgsfloatval_t MRFParameterizer::Pseudolikelihood::evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step) {
     lbfgsfloatval_t fx = 0.;
-    for (int i = 0; i < param.n; ++i) g[i] = 0.;
     for (size_t i = 0; i < traces.size(); ++i) {
         string seq = traces[i].get_matched_aseq();
         const float sw = seq_weight(i);
@@ -94,11 +94,10 @@ lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatva
         update_obj_score(fx, logpot, logz, i, seq, sw);
         update_gradient(x, g, logpot, logz, i, seq, sw);
     }
-    if (opt.regul == RegulMethod::REGUL_L2) l2_func.regularize(x, g, fx);
     return fx;
 }
 
-MatrixXf MRFParameterizer::ObjectiveFunction::calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq) {
+MatrixXf MRFParameterizer::Pseudolikelihood::calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq) {
     const Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > nw(x + param.nidx_beg(), param.length, param.num_var);
     MatrixXf logpot(nw.transpose());
     for (int ei = 0; ei < param.num_edge; ++ei) {
@@ -127,7 +126,7 @@ MatrixXf MRFParameterizer::ObjectiveFunction::calc_logpot(const lbfgsfloatval_t 
     return logpot;
 }
 
-VectorXf MRFParameterizer::ObjectiveFunction::logsumexp(const MatrixXf& b) {
+VectorXf MRFParameterizer::Pseudolikelihood::logsumexp(const MatrixXf& b) {
     VectorXf B = b.rowwise().maxCoeff();
     VectorXf r = VectorXf::Zero(b.rows());
     for (int j = 0; j < b.cols(); ++j)
@@ -135,11 +134,11 @@ VectorXf MRFParameterizer::ObjectiveFunction::logsumexp(const MatrixXf& b) {
     return r.unaryExpr(&log) + B;
 }
 
-VectorXf MRFParameterizer::ObjectiveFunction::calc_logz(const MatrixXf& logpot) {
+VectorXf MRFParameterizer::Pseudolikelihood::calc_logz(const MatrixXf& logpot) {
     return logsumexp(logpot.transpose());
 }
 
-void MRFParameterizer::ObjectiveFunction::update_obj_score(lbfgsfloatval_t& fx, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw) {
+void MRFParameterizer::Pseudolikelihood::update_obj_score(lbfgsfloatval_t& fx, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw) {
     for (int i = 0; i < param.length; ++i) {
         const int xi = data(m, i);
         if (xi < param.num_var) {
@@ -153,7 +152,7 @@ void MRFParameterizer::ObjectiveFunction::update_obj_score(lbfgsfloatval_t& fx, 
     }
 }
 
-void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw) {
+void MRFParameterizer::Pseudolikelihood::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw) {
     string letters = param.abc.get_canonical();
     float w;
     MatrixXf nodebel(param.num_var, param.length);
@@ -205,6 +204,18 @@ void MRFParameterizer::ObjectiveFunction::update_gradient(const lbfgsfloatval_t 
 }
 
 /**
+   @class MRFParameterizer::ObjectiveFunction
+ */
+
+lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step) {
+    lbfgsfloatval_t fx = 0.;
+    for (int i = 0; i < param.n; ++i) g[i] = 0.;
+    for (vector<LBFGS::ObjectiveFunction*>::const_iterator pos = funcs.begin(); pos != funcs.end(); ++pos)
+        fx += (*pos)->evaluate(x, g, n, step);
+    return fx;
+}
+
+/**
    @class MRFParameterizer
  */
 
@@ -230,9 +241,16 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
         opt.l2_opt.lambda1 = opt.regnode_lambda;
         opt.l2_opt.lambda2 = opt.regedge_lambda;
     }
-    ObjectiveFunction obj_func(traces, param, opt, sw, neff);
+    vector<LBFGS::ObjectiveFunction*> funcs;
+    std::shared_ptr<LBFGS::ObjectiveFunction> pll(new Pseudolikelihood(traces, param, sw, neff));
+    funcs.push_back(pll.get());
+    std::shared_ptr<LBFGS::ObjectiveFunction> l2(new L2Regularization(param, opt.l2_opt));
+    funcs.push_back(l2.get());
+    ObjectiveFunction obj_func(funcs, param);
     LBFGS::Optimizer optimizer;
     int ret = optimizer.optimize(&param, &obj_func);
+
+    /* Setting parameteres */
     model.set_psfm(psfm);
     update_model(model, param);
     return ret;
