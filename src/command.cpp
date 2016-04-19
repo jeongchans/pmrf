@@ -149,6 +149,7 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         {"neff", required_argument, 0, 0},
         {"regw-sc-neff", required_argument, 0, 0},
         {"clstr-maxidt", required_argument, 0, 0},
+        {"symmetric", 0, 0, 0},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -195,6 +196,9 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
             case 11:
                 if (parse_float(optarg, opt.msa_analyzer_opt.clstr_maxidt, 0., 1.)) break;
                 else return false;
+            case 12:
+                opt.parameterizer_opt.asymmetric = !opt.parameterizer_opt.asymmetric;
+                break;
             }
             break;
         case 'h':

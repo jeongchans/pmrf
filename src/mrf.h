@@ -22,14 +22,8 @@ struct EdgeIndex {
 
     EdgeIndex(const size_t& idx1, const size_t& idx2) : idx1(idx1), idx2(idx2) {}
     bool operator<(const EdgeIndex& other) const { return (idx1 < other.idx1) || (idx1 == other.idx1 && idx2 < other.idx2); }
-    bool operator==(const EdgeIndex& other) const { return (idx1 == other.idx1 && idx2 == other.idx2) || (idx1 == other.idx2 && idx2 == other.idx1); }
+    bool operator==(const EdgeIndex& other) const { return (idx1 == other.idx1 && idx2 == other.idx2); }
 };
-
-namespace std {
-    template<> struct hash<EdgeIndex> {
-        size_t operator()(const EdgeIndex& eidx) const { return (eidx.idx1 << 16) ^ eidx.idx2; }
-    };
-}
 
 typedef vector<EdgeIndex> EdgeIndexVector;
 

@@ -61,7 +61,7 @@ namespace Build {
         " --clstr-maxidt <float>    maximum sequence identity between sequence clusters (default: 0.6)\n"
         "\n"
         "Parameterization options:\n"
-//        " --symmetric               symmetry constraint for edge weights\n"
+        " --symmetric               symmetry constraint for edge weights\n"
         " --regul <method>          regularization of node and edge weights\n"
         "                           no: no\n"
         "                           l2: L2 regularization (default)\n"

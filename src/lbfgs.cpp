@@ -2,13 +2,6 @@
 
 #include <iostream>
 
-// Parameter
-
-void LBFGS::Parameter::init() {
-    x = lbfgs_malloc(n);
-    lbfgs_parameter_init(&opt_param);
-}
-
 // ObjectiveFunction
 
 int LBFGS::ObjectiveFunction::progress(const lbfgsfloatval_t *x, const lbfgsfloatval_t *g, const lbfgsfloatval_t fx, const lbfgsfloatval_t xnorm, const lbfgsfloatval_t gnorm, const lbfgsfloatval_t step, int n, int k, int ls) {

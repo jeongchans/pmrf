@@ -9,24 +9,24 @@ AminoAcid abc("-", false, true);
 MSAAnalyzer::Option msa_analyzer_opt;
 MSAAnalyzer msa_analyzer(msa_analyzer_opt, abc);
 
-class MRFParameterizer_Parameter_Test : public testing::Test {
+class MRFParameterizer_SymmParameter_Test : public testing::Test {
   public:
-    MRFParameterizer_Parameter_Test() : length(16), mrf(length, abc) {};
+    MRFParameterizer_SymmParameter_Test() : length(16), mrf(length, abc) {};
 
     size_t length;
     MRF mrf;
     MRFParameterizer::Parameter::Option optim_opt;
 };
 
-TEST_F(MRFParameterizer_Parameter_Test, test_get_nidx) {
-    MRFParameterizer::Parameter param(mrf, optim_opt);
+TEST_F(MRFParameterizer_SymmParameter_Test, test_get_nidx) {
+    MRFParameterizer::SymmParameter param(mrf, optim_opt);
 
     int nidx = param.get_nidx(3, 'C');
     EXPECT_EQ(3 * 21 + 1, nidx);
 }
 
-TEST_F(MRFParameterizer_Parameter_Test, test_get_eidx) {
-    MRFParameterizer::Parameter param(mrf, optim_opt);
+TEST_F(MRFParameterizer_SymmParameter_Test, test_get_eidx) {
+    MRFParameterizer::SymmParameter param(mrf, optim_opt);
     int i = 2;
     int j = 3;
     char p = 'E';
@@ -50,6 +50,28 @@ TEST_F(MRFParameterizer_Parameter_Test, test_get_eidx) {
     }
 
     EXPECT_EQ(expected, eidx);
+}
+
+class MRFParameterizer_AsymParameter_Test : public testing::Test {
+  public:
+    MRFParameterizer_AsymParameter_Test() : length(16), mrf(length, abc) {};
+
+    size_t length;
+    MRF mrf;
+    MRFParameterizer::Parameter::Option optim_opt;
+};
+
+TEST_F(MRFParameterizer_AsymParameter_Test, test_get_eidx) {
+    MRFParameterizer::AsymParameter param(mrf, optim_opt);
+    int i = 2;
+    int j = 3;
+    char p = 'E';
+    char q = 'C';
+
+    int eidx1 = param.get_eidx(i, j, p, q);
+    int eidx2 = param.get_eidx(j, i, q, p);
+
+    EXPECT_NE(eidx1, eidx2);
 }
 
 class MRFParameterizer_RegularizationFunction_Test : public testing::Test {
@@ -80,7 +102,7 @@ class MRFParameterizer_RegularizationFunction_Test : public testing::Test {
     MRFParameterizer::Parameter::Option optim_opt;
     size_t length;
     MRF mrf;
-    MRFParameterizer::Parameter param;
+    MRFParameterizer::SymmParameter param;
     lbfgsfloatval_t *g;
     TraceVector traces;
 };
@@ -119,7 +141,7 @@ class MRFParameterizer_Pseudolikelihood_Test : public testing::Test {
     MRFParameterizer::Parameter::Option optim_opt;
     size_t length;
     MRF mrf;
-    MRFParameterizer::Parameter param;
+    MRFParameterizer::SymmParameter param;
     lbfgsfloatval_t *g;
 
     TraceVector traces;
@@ -225,7 +247,7 @@ class MRFParameterizer_Test : public testing::Test {
 
 TEST_F(MRFParameterizer_Test, test_update_model) {
     MRF mrf(length, abc);
-    MRFParameterizer::Parameter param(mrf, optim_opt);
+    MRFParameterizer::SymmParameter param(mrf, optim_opt);
     MRFParameterizer parameterizer(msa_analyzer);
     int i = 2;
 

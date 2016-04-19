@@ -48,7 +48,7 @@ TEST_DIRS 			= $(addsuffix /tests, $(SRC_DIR)) $(TESTRUNNER_DIR)
 TEST_SRCS			= $(foreach dir,. $(TEST_DIRS), $(wildcard $(dir)/*.cpp))
 TEST_OBJECTS		= $(filter-out $(TESTRUNNER_OBJECT), $(TEST_SRCS:.cpp=.o))
 
-test : CXXFLAGS += -Wall -Wextra -O3
+test : CXXFLAGS += -Wall -Wextra -O3 -ffast-math
 test : objs test_objs
 	$(CXX) $(CXXFLAGS) -o $(TESTRUNNER) $(TESTRUNNER_OBJECT) $(TEST_OBJECTS) $(OBJECTS) $(TESTFLAGS)
 	./$(TESTRUNNER) --gtest_throw_on_failure
