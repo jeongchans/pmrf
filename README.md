@@ -4,11 +4,11 @@ This is an evolutionary analysis tool using Markov random field.
 
 ## Installation
 
-### Prerequisites
-The [Blitz++] (http://blitz.sourceforge.net) library is essential for running this software.
+### Requirements
+The [Eigen] library is essential for building and running this software. We used the [Eigen], version 3.2.8.
 
 ### Download
-Download the latest release from [the git repository] (https://github.com/jeongchans/pmrf/releases).
+Download the latest release from the [PMRF repository].
 
 ### Building the software
 1. Uncompress the downloaded file in the directory where the PMRF software will be installed.
@@ -53,3 +53,8 @@ TBA
 
 ## Acknowledgements
 This software includes and uses [libLBFGS] (http://www.chokkan.org/software/liblbfgs/).
+
+
+[PMRF repository]: https://github.com/jeongchans/pmrf/releases
+[Eigen]: http://eigen.tuxfamily.org/
+[libLBFGS]: http://www.chokkan.org/software/liblbfgs/

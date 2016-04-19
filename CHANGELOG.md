@@ -10,10 +10,11 @@ All notable changes to this project will be documented in this file.
 - Show the MRF model parameters. Use `pmrf-show` command.
 - `pmrf-build` uses sequence weighting by sequence identity. Use `--seqwt clstr` option. Use `--clstr-maxidt` option to specify the maximum sequence identity between sequence clusters.
 
-### Changes
+### Changed
 - MRF model file is written to a binary file.
 - Use Eigen3 library replacing Blitz++ library. This significantly reduces the computation time.
 - The option names and argument values for `pmrf-build` are changed.
+- Use the Eigen3 library instead of the Blitz++ library.
 
 
 ## 0.2.0 - 2016-02-04
