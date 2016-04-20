@@ -51,6 +51,7 @@ class MRFParameterizer {
         Parameter(const MRF& model, const Option& opt) : abc(model.get_alphabet()), length(model.get_length()) {};
 
         int get_nidx(const int& i, const char& p) const;
+        int get_nidx(const int& i, const int& xi) const;
 
         int get_eidx(const int& i, const int& j, const char& p, const char& q) const;
         int get_eidx(const int& i, const int& j, const int& xi, const char& q) const;
@@ -78,6 +79,7 @@ class MRFParameterizer {
 
       protected:
         void init(const MRF& model, const Option& opt);
+        void set_opt(const Option& opt);
     };
 
     class SymmParameter : public Parameter {
@@ -87,9 +89,21 @@ class MRFParameterizer {
         EdgeIndexVector edge_idxs;
     };
 
+    class LocalParameter : public Parameter {
+      public:
+        LocalParameter(const MRF& model, const Option& opt, const Parameter& p, const int& obs_node);
+
+        int get_nidx(const int& i, const int& xi) const { return xi; }
+
+      private:
+        const int& obs_node;
+    };
+
     class AsymParameter : public Parameter {
       public:
         AsymParameter(const MRF& model, const Option& opt);
+
+        void set_x(const LocalParameter& p, const int& obs_node);
     };
 
     // L2 regularization (using zero-mean Gaussian prior)
@@ -104,17 +118,13 @@ class MRFParameterizer {
             Option(const float& lambda1, const float& lambda2) : lambda1(lambda1), lambda2(lambda2) {}
         };
 
-        L2Regularization(Parameter& param, Option& opt) : param(param), opt(opt), obs_node(-1) {};
+        L2Regularization(Parameter& param, Option& opt) : param(param), opt(opt) {};
 
         virtual lbfgsfloatval_t evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step);
-
-        void set_obs_node(const int& i) { obs_node = i; }
 
       private:
         const Parameter& param;
         const Option& opt;
-
-        int obs_node;
 
         void regularize_node(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
         void regularize_edge(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx);
@@ -157,11 +167,13 @@ class MRFParameterizer {
 
         virtual lbfgsfloatval_t evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step);
 
+        void set_local_param(const Parameter* p) { lp = p; }
         void set_obs_node(const size_t& i) { obs_node = i; }
 
       private:
         const TraceVector& traces;
         const Parameter& param;
+        const Parameter* lp;
 
         MatrixXi data;
         const VectorXf& seq_weight;
@@ -169,10 +181,10 @@ class MRFParameterizer {
 
         int obs_node;
 
-        VectorXf calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq);
+        VectorXf calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq, const Parameter& param);
         float calc_logz(const VectorXf& logpot);
         void update_obj_score(lbfgsfloatval_t& fx, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw);
-        void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw);
+        void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw, const Parameter& param);
     };
 
     // Objective function
@@ -233,7 +245,9 @@ class MRFParameterizer {
 };
 
 inline int MRFParameterizer::Parameter::get_nidx(const int& i, const char& p) const 
-    { return i * num_var + abc.get_idx(p); }
+    { return get_nidx(i, abc.get_idx(p)); }
+inline int MRFParameterizer::Parameter::get_nidx(const int& i, const int& xi) const 
+    { return i * num_var + xi; }
 
 inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char& p, const char& q) const
     { return get_eidx(i, j, abc.get_idx(p), abc.get_idx(q)); }

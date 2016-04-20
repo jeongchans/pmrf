@@ -26,6 +26,11 @@ void MRFParameterizer::Parameter::init(const MRF& model, const Option& opt) {
     num_var2 = num_var * num_var;
     n_edge = num_edge * num_var2;
     n = n_node + n_edge;
+    LBFGS::Parameter::malloc_x();       // This should be called after setting this->n
+    set_opt(opt);
+}
+
+void MRFParameterizer::Parameter::set_opt(const Option& opt) {
     /* L-BFGS options */
     LBFGS::Parameter::init_param();     // This should be called before setting parameters
     opt_param.m = opt.corr;                                 // number of correction
@@ -35,7 +40,6 @@ void MRFParameterizer::Parameter::init(const MRF& model, const Option& opt) {
     opt_param.max_iterations = opt.max_iterations;          // maximum iteration
     opt_param.linesearch = opt.linesearch;
     //opt_param.max_linesearch = 50;
-    LBFGS::Parameter::malloc_x();       // This should be called after setting this->n
 }
 
 
@@ -54,6 +58,33 @@ MRFParameterizer::SymmParameter::SymmParameter(const MRF& model, const Option& o
 
 
 /**
+   @class MRFParameterizer::LocalParameter
+ */
+
+MRFParameterizer::LocalParameter::LocalParameter(const MRF& model, const Option& opt, const Parameter& p, const int& obs_node) : Parameter(model, opt), obs_node(obs_node) {
+    eidx.clear();
+    int ei = -1;
+    for (std::unordered_map<EdgeIndex, int>::const_iterator pos = p.eidx.cbegin(); pos != p.eidx.cend(); ++pos)
+        if (pos->first.idx1 == obs_node) eidx[EdgeIndex(pos->first.idx1, pos->first.idx2)] = ++ei;
+    num_var = model.get_num_var();
+    n_node = 1 * num_var;
+    num_edge = eidx.size();
+    num_var2 = num_var * num_var;
+    n_edge = num_edge * num_var2;
+    n = n_node + n_edge;
+    LBFGS::Parameter::malloc_x();       // This should be called after setting this->n
+    set_opt(opt);
+    // set x values
+    int i = p.get_nidx(obs_node, 0);
+    for (int k = 0; k < num_var; ++k) x[k] = p.x[i + k];
+    for (std::unordered_map<EdgeIndex, int>::const_iterator pos = eidx.cbegin(); pos != eidx.cend(); ++pos) {
+        i = get_eidx_edge(pos->second, 0, 0);
+        int j = p.get_eidx(pos->first.idx1, pos->first.idx2, 0, 0);
+        for (int k = 0; k < num_var2; ++k) x[i + k] = p.x[j + k];
+    }
+}
+
+/**
    @class MRFParameterizer::AsymParameter
  */
 
@@ -66,6 +97,18 @@ MRFParameterizer::AsymParameter::AsymParameter(const MRF& model, const Option& o
         eidx[EdgeIndex(pos->idx2, pos->idx1)] = ++i;
     }
     init(model, opt);
+}
+
+void MRFParameterizer::AsymParameter::set_x(const LocalParameter& p, const int& obs_node) {
+    int i, j;
+    i = get_nidx(obs_node, 0);
+    j = p.get_nidx(obs_node, 0);
+    for (int k = 0; k < num_var; ++k) x[i + k] = p.x[j + k];
+    for (std::unordered_map<EdgeIndex, int>::const_iterator pos = p.eidx.cbegin(); pos != p.eidx.cend(); ++pos) {
+        i = get_eidx(pos->first.idx1, pos->first.idx2, 0, 0);
+        j = p.get_eidx(pos->first.idx1, pos->first.idx2, 0, 0);
+        for (int k = 0; k < num_var2; ++k) x[i + k] = p.x[j + k];
+    }
 }
 
 
@@ -82,36 +125,18 @@ lbfgsfloatval_t MRFParameterizer::L2Regularization::evaluate(const lbfgsfloatval
 
 void MRFParameterizer::L2Regularization::regularize_node(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
     const float& lambda = opt.lambda1;
-    if (obs_node >= 0) {
-        const int k = obs_node;
+    for (int k = param.nidx_beg(); k < param.nidx_end(); ++k) {
         fx += lambda * square(x[k]);
         g[k] += 2. * lambda * x[k];
-    } else {
-        for (int k = param.nidx_beg(); k < param.nidx_end(); ++k) {
-            fx += lambda * square(x[k]);
-            g[k] += 2. * lambda * x[k];
-        }
     }
 }
 
 void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
     const float& lambda = opt.lambda2;
     const float twolambda = 2. * lambda;
-    if (obs_node >= 0) {
-        for (std::unordered_map<EdgeIndex, int>::const_iterator pos = param.eidx.cbegin(); pos != param.eidx.cend(); ++pos) {
-            if (pos->first.idx1 != obs_node) continue;
-            const int i = pos->first.idx1;
-            const int j = pos->first.idx2;
-            const Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > w(x + param.get_eidx_edge(pos->second, 0, 0), param.num_var, param.num_var);
-            Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > dw(g + param.get_eidx_edge(pos->second, 0, 0), param.num_var, param.num_var);
-            fx += lambda * w.squaredNorm();
-            dw += twolambda * w;
-        }
-    } else {
-        for (int k = param.eidx_beg(); k < param.eidx_end(); ++k) {
-            fx += lambda * square(x[k]);
-            g[k] += twolambda * x[k];
-        }
+    for (int k = param.eidx_beg(); k < param.eidx_end(); ++k) {
+        fx += lambda * square(x[k]);
+        g[k] += twolambda * x[k];
     }
 }
 
@@ -262,6 +287,7 @@ void MRFParameterizer::Pseudolikelihood::update_gradient(const lbfgsfloatval_t *
 MRFParameterizer::AsymPseudolikelihood::AsymPseudolikelihood(const TraceVector& traces, const Parameter& param, const VectorXf& seq_weight, const float& neff)
 : traces(traces), 
   param(param), 
+  lp(NULL),
   seq_weight(seq_weight),
   neff(neff) {
     data.resize(traces.size(), param.length);
@@ -274,20 +300,23 @@ MRFParameterizer::AsymPseudolikelihood::AsymPseudolikelihood(const TraceVector& 
 
 lbfgsfloatval_t MRFParameterizer::AsymPseudolikelihood::evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step) {
     lbfgsfloatval_t fx = 0.;
+    const Parameter* p;
+    if (lp != NULL) p = lp;
+    else p = &param;
     for (size_t i = 0; i < traces.size(); ++i) {
         string seq = traces[i].get_matched_aseq();
         const float sw = seq_weight(i);
-        const VectorXf logpot = calc_logpot(x, i, seq);
+        const VectorXf logpot = calc_logpot(x, i, seq, *p);
         const float logz = calc_logz(logpot);
         update_obj_score(fx, logpot, logz, i, seq, sw);
-        update_gradient(x, g, logpot, logz, i, seq, sw);
+        update_gradient(x, g, logpot, logz, i, seq, sw, *p);
     }
     return fx;
 }
 
-VectorXf MRFParameterizer::AsymPseudolikelihood::calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq) {
-    const Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > nw(x + param.nidx_beg(), param.length, param.num_var);
-    VectorXf logpot(nw.row(obs_node));
+VectorXf MRFParameterizer::AsymPseudolikelihood::calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq, const Parameter& param) {
+    const Eigen::Map<const VectorXf> nw(x + param.get_nidx(obs_node, 0), param.num_var);
+    VectorXf logpot(nw);
     for (std::unordered_map<EdgeIndex, int>::const_iterator pos = param.eidx.cbegin(); pos != param.eidx.cend(); ++pos) {
         if (pos->first.idx1 != obs_node) continue;
         const int i = pos->first.idx1;
@@ -324,25 +353,25 @@ void MRFParameterizer::AsymPseudolikelihood::update_obj_score(lbfgsfloatval_t& f
     }
 }
 
-void MRFParameterizer::AsymPseudolikelihood::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw) {
+void MRFParameterizer::AsymPseudolikelihood::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw, const Parameter& param) {
     string letters = param.abc.get_canonical();
     float w;
     VectorXf nodebel(param.num_var);
     nodebel = (logpot - VectorXf::Constant(param.num_var, logz)).unaryExpr(&exp);
     nodebel *= sw;
-    Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > dv(g, param.length, param.num_var);
+    Eigen::Map<VectorXf> dv(g + param.get_nidx(obs_node, 0), param.num_var);
     int i = obs_node;
     int xi = data(m, i);
     if (xi < param.num_var) {
-        dv(i, xi) -= sw;
+        dv(xi) -= sw;
     } else {
         string s = param.abc.get_degeneracy(seq[i], &w);
         for (string::iterator c = s.begin(); c != s.end(); ++c) {
             xi = param.abc.get_idx(*c);
-            dv(i, xi) -= w * sw;
+            dv(xi) -= w * sw;
         }
     }
-    dv.row(i) += nodebel;
+    dv += nodebel;
     for (std::unordered_map<EdgeIndex, int>::const_iterator pos = param.eidx.cbegin(); pos != param.eidx.cend(); ++pos) {
         if (pos->first.idx1 != obs_node) continue;
         const int i = pos->first.idx1;
@@ -351,7 +380,6 @@ void MRFParameterizer::AsymPseudolikelihood::update_gradient(const lbfgsfloatval
         int xj = data(m, j);
         Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > dw(g + param.get_eidx_edge(pos->second, 0, 0), param.num_var, param.num_var);
         if (xi < param.num_var && xj < param.num_var) {
-            //dw(xi, xj) -= sw * 2.;
             dw(xi, xj) -= sw;
             dw.col(xj) += nodebel;
         } else {
@@ -363,7 +391,6 @@ void MRFParameterizer::AsymPseudolikelihood::update_gradient(const lbfgsfloatval
                 xi = param.abc.get_idx(*ci);
                 for (string::iterator cj = sj.begin(); cj != sj.end(); ++cj) {
                     xj = param.abc.get_idx(*cj);
-                    //dw(xi, xj) -= w * sw * 2.;
                     dw(xi, xj) -= w * sw;
                     for (int t = 0; t < param.num_var; ++t) {
                         dw.col(xj) += w * nodebel;
@@ -394,7 +421,7 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     size_t length = model.get_length();
     size_t num_var = model.get_num_var();
     size_t num_edge = model.get_num_edge();
-    int ret;
+    int ret = 0;
     /* sequeing weights */
     vector<string> msa = traces.get_matched_aseq_vec();
     msa = msa_analyzer.termi_gap_remover->filter(msa);
@@ -422,15 +449,19 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     if (opt.asymmetric) {
         AsymParameter param(model, optim_opt);
         AsymPseudolikelihood pll(traces, param, sw, neff);
-        funcs.push_back(&pll);
-        L2Regularization l2(param, opt.l2_opt);
-        if (opt.regul == RegulMethod::REGUL_L2) funcs.push_back(&l2);
         for (size_t i = 0; i < length; ++i) {
             //std::cout << "obs_node = " << i << std::endl;
+            LocalParameter local_param(model, optim_opt, param, i);
+            pll.set_local_param(&local_param);
             pll.set_obs_node(i);
-            if (opt.regul == RegulMethod::REGUL_L2) l2.set_obs_node(i);
-            ObjectiveFunction obj_func(funcs, param);
-            ret = optimizer.optimize(&param, &obj_func);
+            funcs.push_back(&pll);
+            L2Regularization l2(local_param, opt.l2_opt);
+            if (opt.regul == RegulMethod::REGUL_L2) funcs.push_back(&l2);
+            ObjectiveFunction obj_func(funcs, local_param);
+            int r = optimizer.optimize(&local_param, &obj_func);
+            funcs.clear();
+            if (r < ret) ret = r;
+            param.set_x(local_param, i);
         }
         adjust_gauge(param);
         update_model(model, param);
