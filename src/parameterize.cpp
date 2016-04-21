@@ -469,14 +469,17 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
 
 MatrixXf MRFParameterizer::calc_profile(const TraceVector& traces) {
     AminoAcid aa;
-    ProfileBuilder profile_builder(aa);
     SMMEmitProbEstimator emit_prob_estimator(ROBINSON_BGFREQ.get_array(aa), 
                                              BLOSUM62_MATRIX.get_array(aa), 
                                              3.2);
+    PBSeqWeightEstimator seq_weight_estimator;
+    ExpEntropyEffSeqNumEstimator eff_seq_num_estimator(aa, &seq_weight_estimator);
+    TerminalGapRemover termi_gap_remover(aa, 0.1);
+    ProfileBuilder profile_builder(aa);
     profile_builder.set_emit_prob_estimator(&emit_prob_estimator);
-    profile_builder.set_seq_weight_estimator(msa_analyzer.seq_weight_estimator.get());
-    profile_builder.set_eff_seq_num_estimator(msa_analyzer.eff_seq_num_estimator.get());
-    profile_builder.set_msa_filter(msa_analyzer.termi_gap_remover.get());
+    profile_builder.set_seq_weight_estimator(&seq_weight_estimator);
+    profile_builder.set_eff_seq_num_estimator(&eff_seq_num_estimator);
+    profile_builder.set_msa_filter(&termi_gap_remover);
     Profile profile = profile_builder.build(traces);
     return profile.get_prob();
 }

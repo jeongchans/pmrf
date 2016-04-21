@@ -211,7 +211,7 @@ class MRFParameterizer {
         bool regedge_sc_deg;
         bool regedge_sc_neff;
         bool asymmetric;
-        
+
         L2Regularization::Option l2_opt;
     };
 
