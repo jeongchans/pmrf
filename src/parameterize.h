@@ -11,12 +11,19 @@
 #include "msaanalyze.h"
 
 using std::string;
+using std::unordered_map;
 
 namespace RegulMethod {
     enum RegulMethod { REGUL_NONE, REGUL_L2, REGUL_PROFILE };
 }
 
 typedef LBFGS::ObjectiveFunction* PtrObjFunc;
+
+typedef Eigen::Map<VectorXf> MapVectorXf;
+typedef Eigen::Map<const VectorXf> MapKVectorXf;
+
+typedef Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > MapMatrixXf;
+typedef Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > MapKMatrixXf;
 
 namespace std {
     template<> struct hash<EdgeIndex> {
@@ -48,37 +55,27 @@ class MRFParameterizer {
             int max_iterations;
         };
 
-        Parameter(const MRF& model, const Option& opt) : abc(model.get_alphabet()), length(model.get_length()) {};
+        Parameter(const Alphabet& abc, const size_t& num_var) 
+        : LBFGS::Parameter(), abc(abc), num_var(num_var), num_var2(num_var * num_var) {};
 
-        int get_nidx(const int& i, const char& p) const;
-        int get_nidx(const int& i, const int& xi) const;
-
-        int get_eidx(const int& i, const int& j, const char& p, const char& q) const;
-        int get_eidx(const int& i, const int& j, const int& xi, const char& q) const;
-        int get_eidx(const int& i, const int& j, const char& p, const int& xj) const;
-        int get_eidx(const int& i, const int& j, const int& xi, const int& xj) const;
-        int get_eidx_edge(const int& ei, const char& p, const char& q) const;
-        int get_eidx_edge(const int& ei, const int& xi, const char& q) const;
-        int get_eidx_edge(const int& ei, const char& p, const int& xj) const;
-        int get_eidx_edge(const int& ei, const int& xi, const int& xj) const;
-
-        int nidx_beg() const { return 0; }
-        int nidx_end() const { return n_node; }
-        int eidx_beg() const { return n_node; }
-        int eidx_end() const { return n; }
+        size_t v_beg_pos() const { return 0; }
+        size_t v_end_pos() const { return n_v; }
+        size_t w_beg_pos() const { return n_v; }
+        size_t w_end_pos() const { return n; }
 
         const Alphabet& abc;
-        int length;
-        int num_var;
-        int n_node;
-        int num_edge;
-        int num_var2;
-        int n_edge;
+        const size_t num_var;
+        const size_t num_var2;
+        size_t num_node;
+        size_t num_edge;
+        size_t n_v;
+        size_t n_w;
 
-        std::unordered_map<EdgeIndex, int> eidx;
+        unordered_map<NodeIndex, size_t> v_offset;
+        unordered_map<EdgeIndex, size_t> w_offset;
 
       protected:
-        void init(const MRF& model, const Option& opt);
+        void init(const vector<NodeIndex>& vidxs, const vector<EdgeIndex>& widxs, const Option& opt);
         void set_opt(const Option& opt);
     };
 
@@ -91,19 +88,16 @@ class MRFParameterizer {
 
     class LocalParameter : public Parameter {
       public:
-        LocalParameter(const MRF& model, const Option& opt, const Parameter& p, const int& obs_node);
+        LocalParameter(const MRF& model, const Option& opt, const Parameter& p, const size_t& obs_node);
 
-        int get_nidx(const int& i, const int& xi) const { return xi; }
-
-      private:
-        const int& obs_node;
+        size_t get_obs_node() const { return v_offset.cbegin()->first; }
     };
 
     class AsymParameter : public Parameter {
       public:
         AsymParameter(const MRF& model, const Option& opt);
 
-        void set_x(const LocalParameter& p, const int& obs_node);
+        void set_x(const LocalParameter& p);
     };
 
     // L2 regularization (using zero-mean Gaussian prior)
@@ -167,24 +161,21 @@ class MRFParameterizer {
 
         virtual lbfgsfloatval_t evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step);
 
-        void set_local_param(const Parameter* p) { lp = p; }
-        void set_obs_node(const size_t& i) { obs_node = i; }
+        void set_local_param(const LocalParameter* p) { lp = p; }
 
       private:
         const TraceVector& traces;
         const Parameter& param;
-        const Parameter* lp;
+        const LocalParameter* lp;
 
         MatrixXi data;
         const VectorXf& seq_weight;
         const float& neff;
 
-        int obs_node;
-
-        VectorXf calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq, const Parameter& param);
+        VectorXf calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq);
         float calc_logz(const VectorXf& logpot);
         void update_obj_score(lbfgsfloatval_t& fx, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw);
-        void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw, const Parameter& param);
+        void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw);
     };
 
     // Objective function
@@ -243,28 +234,5 @@ class MRFParameterizer {
 
     FRIEND_TEST(MRFParameterizer_Test, test_update_model);
 };
-
-inline int MRFParameterizer::Parameter::get_nidx(const int& i, const char& p) const 
-    { return get_nidx(i, abc.get_idx(p)); }
-inline int MRFParameterizer::Parameter::get_nidx(const int& i, const int& xi) const 
-    { return i * num_var + xi; }
-
-inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char& p, const char& q) const
-    { return get_eidx(i, j, abc.get_idx(p), abc.get_idx(q)); }
-inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const int& xi, const char& q) const
-    { return get_eidx(i, j, xi, abc.get_idx(q)); }
-inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const char& p, const int& xj) const
-    { return get_eidx(i, j, abc.get_idx(p), xj); }
-inline int MRFParameterizer::Parameter::get_eidx(const int& i, const int& j, const int& xi, const int& xj) const
-    { return get_eidx_edge(eidx.at(EdgeIndex((size_t) i, (size_t) j)), xi, xj); }
-
-inline int MRFParameterizer::Parameter::get_eidx_edge(const int& ei, const char& p, const char& q) const
-    { return get_eidx_edge(ei, abc.get_idx(p), abc.get_idx(q)); }
-inline int MRFParameterizer::Parameter::get_eidx_edge(const int& ei, const int& xi, const char& q) const
-    { return get_eidx_edge(ei, xi, abc.get_idx(q)); }
-inline int MRFParameterizer::Parameter::get_eidx_edge(const int& ei, const char& p, const int& xj) const
-    { return get_eidx_edge(ei, abc.get_idx(p), xj); }
-inline int MRFParameterizer::Parameter::get_eidx_edge(const int& ei, const int& xi, const int& xj) const
-    { return eidx_beg() + ei * num_var2 + xi * num_var + xj; }
 
 #endif

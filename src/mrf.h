@@ -16,6 +16,8 @@ using std::string;
 using std::map;
 using std::unordered_map;
 
+typedef size_t NodeIndex;
+
 struct EdgeIndex {
     size_t idx1;
     size_t idx2;
@@ -25,6 +27,7 @@ struct EdgeIndex {
     bool operator==(const EdgeIndex& other) const { return (idx1 == other.idx1 && idx2 == other.idx2); }
 };
 
+typedef vector<NodeIndex> NodeIndexVector;
 typedef vector<EdgeIndex> EdgeIndexVector;
 
 class MRF {
@@ -104,12 +107,13 @@ class MRF {
 
     // element getter
     NodeElement& get_node(const size_t& idx) { return nodes[idx]; }
-    EdgeElement& get_edge(const size_t& idx1, const size_t& idx2) { return edges[EdgeIndex(idx1, idx2)]; }
+    EdgeElement& get_edge(const size_t& idx1, const size_t& idx2) { return get_edge(EdgeIndex(idx1, idx2)); }
+    EdgeElement& get_edge(const EdgeIndex& eidx) { return edges[eidx]; }
 
-    const NodeElement& get_node(const size_t& idx) const
-        { return nodes[idx]; }
-    const EdgeElement& get_edge(const size_t& idx1, const size_t& idx2) const
-        { return edges.find(EdgeIndex(idx1, idx2))->second; }
+    const NodeElement& get_node(const size_t& idx) const { return nodes[idx]; }
+    const EdgeElement& get_edge(const size_t& idx1, const size_t& idx2) const 
+        { return get_edge(EdgeIndex(idx1, idx2)); }
+    const EdgeElement& get_edge(const EdgeIndex& eidx) const { return edges.find(eidx)->second; }
     EdgeIndexVector get_edge_idxs() const;
 
     bool has_edge(const size_t& idx1, const size_t& idx2) const

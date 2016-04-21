@@ -15,17 +15,39 @@
 
 using std::make_shared;
 
+MatrixXi trace_to_var(const TraceVector& traces, const Alphabet& abc) {
+    const size_t row = traces.size();
+    const size_t col = traces[0].get_matched_aseq().size();
+    MatrixXi data(row, col);
+    for (size_t i = 0; i < row; ++i) {
+        string seq = traces[i].get_matched_aseq();
+        for (size_t j = 0; j < col; ++j)
+            data(i, j) = abc.get_idx(seq[j]);
+    }
+    return data;
+}
+
 /**
    @class MRFParameterizer::Parameter
  */
 
-void MRFParameterizer::Parameter::init(const MRF& model, const Option& opt) {
-    num_var = model.get_num_var();
-    n_node = length * num_var;
-    num_edge = eidx.size();
-    num_var2 = num_var * num_var;
-    n_edge = num_edge * num_var2;
-    n = n_node + n_edge;
+void MRFParameterizer::Parameter::init(const vector<NodeIndex>& v_idxs, const vector<EdgeIndex>& w_idxs, const Option& opt) {
+    num_node = v_idxs.size();
+    n_v = num_node * num_var;
+    num_edge = w_idxs.size();
+    n_w = num_edge * num_var2;
+    n = n_v + n_w;
+    size_t offset = 0;
+    v_offset.clear();
+    for (auto it = v_idxs.cbegin(); it != v_idxs.cend(); ++it) {
+        v_offset[*it] = offset;
+        offset += num_var;
+    }
+    w_offset.clear();
+    for (auto it = w_idxs.begin(); it != w_idxs.end(); ++it) {
+        w_offset[*it] = offset;
+        offset += num_var2;
+    }
     LBFGS::Parameter::malloc_x();       // This should be called after setting this->n
     set_opt(opt);
 }
@@ -47,13 +69,12 @@ void MRFParameterizer::Parameter::set_opt(const Option& opt) {
    @class MRFParameterizer::SymmParameter
  */
 
-MRFParameterizer::SymmParameter::SymmParameter(const MRF& model, const Option& opt) : Parameter(model, opt) {
-    edge_idxs = model.get_edge_idxs();
-    eidx.clear();
-    int i = -1;
-    for (EdgeIndexVector::const_iterator pos = edge_idxs.begin(); pos != edge_idxs.end(); ++pos)
-        eidx[EdgeIndex(pos->idx1, pos->idx2)] = ++i;
-    init(model, opt);
+MRFParameterizer::SymmParameter::SymmParameter(const MRF& model, const Option& opt) 
+: Parameter(model.get_alphabet(), model.get_num_var()) {
+    vector<NodeIndex> v_idxs;
+    for (size_t i = 0; i < model.get_length(); ++i) v_idxs.push_back(i);
+    vector<EdgeIndex> w_idxs = model.get_edge_idxs();
+    init(v_idxs, w_idxs, opt);
 }
 
 
@@ -61,53 +82,52 @@ MRFParameterizer::SymmParameter::SymmParameter(const MRF& model, const Option& o
    @class MRFParameterizer::LocalParameter
  */
 
-MRFParameterizer::LocalParameter::LocalParameter(const MRF& model, const Option& opt, const Parameter& p, const int& obs_node) : Parameter(model, opt), obs_node(obs_node) {
-    eidx.clear();
-    int ei = -1;
-    for (std::unordered_map<EdgeIndex, int>::const_iterator pos = p.eidx.cbegin(); pos != p.eidx.cend(); ++pos)
-        if (pos->first.idx1 == obs_node) eidx[EdgeIndex(pos->first.idx1, pos->first.idx2)] = ++ei;
-    num_var = model.get_num_var();
-    n_node = 1 * num_var;
-    num_edge = eidx.size();
-    num_var2 = num_var * num_var;
-    n_edge = num_edge * num_var2;
-    n = n_node + n_edge;
-    LBFGS::Parameter::malloc_x();       // This should be called after setting this->n
-    set_opt(opt);
+MRFParameterizer::LocalParameter::LocalParameter(const MRF& model, const Option& opt, const Parameter& p, const size_t& obs_node) 
+: Parameter(model.get_alphabet(), model.get_num_var()) {
+    vector<NodeIndex> v_idxs(1, obs_node);
+    vector<EdgeIndex> w_idxs;
+    for (auto it = p.w_offset.cbegin(); it != p.w_offset.cend(); ++it)
+        if (it->first.idx1 == obs_node) w_idxs.push_back(it->first);
+    init(v_idxs, w_idxs, opt);
     // set x values
-    int i = p.get_nidx(obs_node, 0);
-    for (int k = 0; k < num_var; ++k) x[k] = p.x[i + k];
-    for (std::unordered_map<EdgeIndex, int>::const_iterator pos = eidx.cbegin(); pos != eidx.cend(); ++pos) {
-        i = get_eidx_edge(pos->second, 0, 0);
-        int j = p.get_eidx(pos->first.idx1, pos->first.idx2, 0, 0);
-        for (int k = 0; k < num_var2; ++k) x[i + k] = p.x[j + k];
+    size_t offset1 = 0;
+    size_t offset2 = p.v_offset.at(obs_node);
+    for (size_t k = 0; k < num_var; ++k, ++offset1, ++offset2) x[offset1] = p.x[offset2];
+    for (auto it = w_offset.cbegin(); it != w_offset.cend(); ++it) {
+        offset1 = it->second;
+        offset2 = p.w_offset.at(it->first);
+        for (size_t k = 0; k < num_var2; ++k, ++offset1, ++offset2) x[offset1] = p.x[offset2];
     }
 }
+
 
 /**
    @class MRFParameterizer::AsymParameter
  */
 
-MRFParameterizer::AsymParameter::AsymParameter(const MRF& model, const Option& opt) : Parameter(model, opt) {
-    EdgeIndexVector edge_idxs = model.get_edge_idxs();
-    eidx.clear();
-    int i = -1;
-    for (EdgeIndexVector::const_iterator pos = edge_idxs.begin(); pos != edge_idxs.end(); ++pos) {
-        eidx[EdgeIndex(pos->idx1, pos->idx2)] = ++i;
-        eidx[EdgeIndex(pos->idx2, pos->idx1)] = ++i;
+MRFParameterizer::AsymParameter::AsymParameter(const MRF& model, const Option& opt)
+: Parameter(model.get_alphabet(), model.get_num_var()) {
+    vector<NodeIndex> v_idxs;
+    for (size_t i = 0; i < model.get_length(); ++i) v_idxs.push_back(i);
+    vector<EdgeIndex> w_idxs;
+    vector<EdgeIndex> sym_w_idxs = model.get_edge_idxs();
+    for (auto it = sym_w_idxs.cbegin(); it != sym_w_idxs.cend(); ++it) {
+        w_idxs.push_back(EdgeIndex(it->idx1, it->idx2));
+        w_idxs.push_back(EdgeIndex(it->idx2, it->idx1));
     }
-    init(model, opt);
+    init(v_idxs, w_idxs, opt);
 }
 
-void MRFParameterizer::AsymParameter::set_x(const LocalParameter& p, const int& obs_node) {
-    int i, j;
-    i = get_nidx(obs_node, 0);
-    j = p.get_nidx(obs_node, 0);
-    for (int k = 0; k < num_var; ++k) x[i + k] = p.x[j + k];
-    for (std::unordered_map<EdgeIndex, int>::const_iterator pos = p.eidx.cbegin(); pos != p.eidx.cend(); ++pos) {
-        i = get_eidx(pos->first.idx1, pos->first.idx2, 0, 0);
-        j = p.get_eidx(pos->first.idx1, pos->first.idx2, 0, 0);
-        for (int k = 0; k < num_var2; ++k) x[i + k] = p.x[j + k];
+void MRFParameterizer::AsymParameter::set_x(const LocalParameter& p) {
+    for (auto it = p.v_offset.cbegin(); it != p.v_offset.cend(); ++it) {
+        size_t offset1 = v_offset[it->first];
+        size_t offset2 = it->second;
+        for (size_t k = 0; k < num_var; ++k) { x[offset1] = p.x[offset2]; ++offset1; ++offset2; }
+    }
+    for (auto it = p.w_offset.cbegin(); it != p.w_offset.cend(); ++it) {
+        size_t offset1 = w_offset[it->first];
+        size_t offset2 = it->second;
+        for (size_t k = 0; k < num_var2; ++k) { x[offset1] = p.x[offset2]; ++offset1; ++offset2; }
     }
 }
 
@@ -125,16 +145,17 @@ lbfgsfloatval_t MRFParameterizer::L2Regularization::evaluate(const lbfgsfloatval
 
 void MRFParameterizer::L2Regularization::regularize_node(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
     const float& lambda = opt.lambda1;
-    for (int k = param.nidx_beg(); k < param.nidx_end(); ++k) {
+    const float& twolambda = 2. * lambda;
+    for (int k = param.v_beg_pos(); k < param.v_end_pos(); ++k) {
         fx += lambda * square(x[k]);
-        g[k] += 2. * lambda * x[k];
+        g[k] += twolambda * x[k];
     }
 }
 
 void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
     const float& lambda = opt.lambda2;
     const float twolambda = 2. * lambda;
-    for (int k = param.eidx_beg(); k < param.eidx_end(); ++k) {
+    for (int k = param.w_beg_pos(); k < param.w_end_pos(); ++k) {
         fx += lambda * square(x[k]);
         g[k] += twolambda * x[k];
     }
@@ -150,12 +171,7 @@ MRFParameterizer::Pseudolikelihood::Pseudolikelihood(const TraceVector& traces, 
   param(param), 
   seq_weight(seq_weight),
   neff(neff) {
-    data.resize(traces.size(), param.length);
-    for (size_t i = 0; i < traces.size(); ++i) {
-        string seq = traces[i].get_matched_aseq();
-        for (size_t j = 0; j < param.length; ++j)
-            data(i, j) = param.abc.get_idx(seq[j]);
-    }
+    data = trace_to_var(traces, param.abc);
 }
 
 lbfgsfloatval_t MRFParameterizer::Pseudolikelihood::evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step) {
@@ -172,30 +188,25 @@ lbfgsfloatval_t MRFParameterizer::Pseudolikelihood::evaluate(const lbfgsfloatval
 }
 
 MatrixXf MRFParameterizer::Pseudolikelihood::calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq) {
-    const Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > nw(x + param.nidx_beg(), param.length, param.num_var);
-    MatrixXf logpot(nw.transpose());
-    for (std::unordered_map<EdgeIndex, int>::const_iterator pos = param.eidx.cbegin(); pos != param.eidx.cend(); ++pos) {
-        const int i = pos->first.idx1;
-        const int j = pos->first.idx2;
-        int ei = pos->second;
+    MapKMatrixXf v(x + param.v_beg_pos(), param.num_node, param.num_var);
+    MatrixXf logpot(v.transpose());
+    for (auto it = param.w_offset.cbegin(); it != param.w_offset.cend(); ++it) {
+        const int i = it->first.idx1;
+        const int j = it->first.idx2;
+        MapKMatrixXf w(x + it->second, param.num_var, param.num_var);
         const int xi = data(m, i);
         const int xj = data(m, j);
-        const Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > ew(x + param.get_eidx_edge(ei, 0, 0), param.num_var, param.num_var);
-        if (xi < param.num_var) {
-            logpot.col(j) += ew.row(xi);
-        } else {
+        if (xi < param.num_var) logpot.col(j) += w.row(xi);
+        else {
             float wi;
             string si = param.abc.get_degeneracy(seq[i], &wi);
-            for (string::iterator c = si.begin(); c != si.end(); ++c)
-                logpot.col(j) += wi * ew.row(param.abc.get_idx(*c));
+            for (auto c = si.cbegin(); c != si.cend(); ++c) logpot.col(j) += wi * w.row(param.abc.get_idx(*c));
         }
-        if (xj < param.num_var) {
-            logpot.col(i) += ew.col(xj);
-        } else {
+        if (xj < param.num_var) logpot.col(i) += w.col(xj);
+        else {
             float wj;
             string sj = param.abc.get_degeneracy(seq[j], &wj);
-            for (string::iterator c = sj.begin(); c != sj.end(); ++c)
-                logpot.col(i) += wj * ew.col(param.abc.get_idx(*c));
+            for (auto c = sj.cbegin(); c != sj.cend(); ++c) logpot.col(i) += wj * w.col(param.abc.get_idx(*c));
         }
     }
     return logpot;
@@ -204,8 +215,7 @@ MatrixXf MRFParameterizer::Pseudolikelihood::calc_logpot(const lbfgsfloatval_t *
 VectorXf MRFParameterizer::Pseudolikelihood::logsumexp(const MatrixXf& b) {
     VectorXf B = b.rowwise().maxCoeff();
     VectorXf r = VectorXf::Zero(b.rows());
-    for (int j = 0; j < b.cols(); ++j)
-        r += (b.col(j) - B).unaryExpr(&exp);
+    for (int j = 0; j < b.cols(); ++j) r += (b.col(j) - B).unaryExpr(&exp);
     return r.unaryExpr(&log) + B;
 }
 
@@ -214,64 +224,59 @@ VectorXf MRFParameterizer::Pseudolikelihood::calc_logz(const MatrixXf& logpot) {
 }
 
 void MRFParameterizer::Pseudolikelihood::update_obj_score(lbfgsfloatval_t& fx, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw) {
-    for (int i = 0; i < param.length; ++i) {
+    for (auto it = param.v_offset.cbegin(); it != param.v_offset.cend(); ++it) {
+        const size_t i = it->first;
         const int xi = data(m, i);
-        if (xi < param.num_var) {
-            fx += -sw * (logpot(xi, i) - logz(i));
-        } else {
-            FloatType w;
-            string s = param.abc.get_degeneracy(seq[i], &w);
-            for (string::iterator c = s.begin(); c != s.end(); ++c)
-                fx += w * (-sw * logpot(param.abc.get_idx(*c), i) + sw * logz(i));
+        if (xi < param.num_var) fx += -sw * (logpot(xi, i) - logz(i));
+        else {
+            float wi;
+            const string s = param.abc.get_degeneracy(seq[i], &wi);
+            for (auto c = s.cbegin(); c != s.cend(); ++c)
+                fx += wi * (-sw * logpot(param.abc.get_idx(*c), i) + sw * logz(i));
         }
     }
 }
 
 void MRFParameterizer::Pseudolikelihood::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw) {
-    string letters = param.abc.get_canonical();
-    float w;
-    MatrixXf nodebel(param.num_var, param.length);
-    for (int t = 0; t < param.num_var; ++t)
+    MatrixXf nodebel(param.num_var, param.num_node);
+    for (size_t t = 0; t < param.num_var; ++t)
         nodebel.row(t) = (logpot.row(t) - logz.transpose()).unaryExpr(&exp);
     nodebel *= sw;
-    Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > dv(g, param.length, param.num_var);
-    for (int i = 0; i < param.length; ++i) {
+    MapMatrixXf dv(g, param.num_node, param.num_var);
+    for (auto it = param.v_offset.cbegin(); it != param.v_offset.cend(); ++it) {
+        const size_t i = it->first;
         int xi = data(m, i);
-        if (xi < param.num_var) {
-            dv(i, xi) -= sw;
-        } else {
-            string s = param.abc.get_degeneracy(seq[i], &w);
-            for (string::iterator c = s.begin(); c != s.end(); ++c) {
-                xi = param.abc.get_idx(*c);
-                dv(i, xi) -= w * sw;
-            }
+        if (xi < param.num_var) dv(i, xi) -= sw;
+        else {
+            float wi;
+            const string s = param.abc.get_degeneracy(seq[i], &wi);
+            for (auto c = s.cbegin(); c != s.cend(); ++c) dv(i, param.abc.get_idx(*c)) -= wi * sw;
         }
         dv.row(i) += nodebel.col(i);
     }
-    for (std::unordered_map<EdgeIndex, int>::const_iterator pos = param.eidx.cbegin(); pos != param.eidx.cend(); ++pos) {
-        const int i = pos->first.idx1;
-        const int j = pos->first.idx2;
-        const int ei = pos->second;
+    for (auto it = param.w_offset.cbegin(); it != param.w_offset.cend(); ++it) {
+        const int i = it->first.idx1;
+        const int j = it->first.idx2;
+        MapMatrixXf dw(g + it->second, param.num_var, param.num_var);
         int xi = data(m, i);
         int xj = data(m, j);
-        Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > dw(g + param.get_eidx_edge(ei, 0, 0), param.num_var, param.num_var);
         if (xi < param.num_var && xj < param.num_var) {
             dw(xi, xj) -= sw * 2.;
             dw.col(xj) += nodebel.col(i);
             dw.row(xi) += nodebel.col(j);
         } else {
-            float wi, wj;
-            string si = param.abc.get_degeneracy(seq[i], &wi);
-            string sj = param.abc.get_degeneracy(seq[j], &wj);
-            w = wi * wj;
-            for (string::iterator ci = si.begin(); ci != si.end(); ++ci) {
+            float wi, wj, wt;
+            const string si = param.abc.get_degeneracy(seq[i], &wi);
+            const string sj = param.abc.get_degeneracy(seq[j], &wj);
+            wt = wi * wj;
+            for (auto ci = si.cbegin(); ci != si.cend(); ++ci) {
                 xi = param.abc.get_idx(*ci);
-                for (string::iterator cj = sj.begin(); cj != sj.end(); ++cj) {
+                for (auto cj = sj.cbegin(); cj != sj.cend(); ++cj) {
                     xj = param.abc.get_idx(*cj);
-                    dw(xi, xj) -= w * sw * 2.;
+                    dw(xi, xj) -= wt * sw * 2.;
                     for (int t = 0; t < param.num_var; ++t) {
-                        dw.col(xj) += w * nodebel.col(i);
-                        dw.row(xi) += w * nodebel.col(j);
+                        dw.col(xj) += wt * nodebel.col(i);
+                        dw.row(xi) += wt * nodebel.col(j);
                     }
                 }
             }
@@ -287,50 +292,41 @@ void MRFParameterizer::Pseudolikelihood::update_gradient(const lbfgsfloatval_t *
 MRFParameterizer::AsymPseudolikelihood::AsymPseudolikelihood(const TraceVector& traces, const Parameter& param, const VectorXf& seq_weight, const float& neff)
 : traces(traces), 
   param(param), 
-  lp(NULL),
   seq_weight(seq_weight),
-  neff(neff) {
-    data.resize(traces.size(), param.length);
-    for (size_t i = 0; i < traces.size(); ++i) {
-        string seq = traces[i].get_matched_aseq();
-        for (size_t j = 0; j < param.length; ++j)
-            data(i, j) = param.abc.get_idx(seq[j]);
-    }
+  neff(neff),
+  lp(NULL) {
+    data = trace_to_var(traces, param.abc);
 }
 
 lbfgsfloatval_t MRFParameterizer::AsymPseudolikelihood::evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step) {
+    if (lp == NULL) return 0.;
     lbfgsfloatval_t fx = 0.;
-    const Parameter* p;
-    if (lp != NULL) p = lp;
-    else p = &param;
     for (size_t i = 0; i < traces.size(); ++i) {
         string seq = traces[i].get_matched_aseq();
         const float sw = seq_weight(i);
-        const VectorXf logpot = calc_logpot(x, i, seq, *p);
+        const VectorXf logpot = calc_logpot(x, i, seq);
         const float logz = calc_logz(logpot);
         update_obj_score(fx, logpot, logz, i, seq, sw);
-        update_gradient(x, g, logpot, logz, i, seq, sw, *p);
+        update_gradient(x, g, logpot, logz, i, seq, sw);
     }
     return fx;
 }
 
-VectorXf MRFParameterizer::AsymPseudolikelihood::calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq, const Parameter& param) {
-    const Eigen::Map<const VectorXf> nw(x + param.get_nidx(obs_node, 0), param.num_var);
-    VectorXf logpot(nw);
-    for (std::unordered_map<EdgeIndex, int>::const_iterator pos = param.eidx.cbegin(); pos != param.eidx.cend(); ++pos) {
-        if (pos->first.idx1 != obs_node) continue;
-        const int i = pos->first.idx1;
-        const int j = pos->first.idx2;
+VectorXf MRFParameterizer::AsymPseudolikelihood::calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq) {
+    MapKVectorXf v(x, lp->num_var);
+    VectorXf logpot(v);
+    for (auto it = lp->w_offset.cbegin(); it != lp->w_offset.cend(); ++it) {
+        const size_t i = it->first.idx1;
+        const size_t j = it->first.idx2;
+        MapKMatrixXf w(x + it->second, lp->num_var, lp->num_var);
         const int xi = data(m, i);
         const int xj = data(m, j);
-        const Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > ew(x + param.get_eidx_edge(pos->second, 0, 0), param.num_var, param.num_var);
-        if (xj < param.num_var) {
-            logpot += ew.col(xj);
-        } else {
+        if (xj < lp->num_var) logpot += w.col(xj);
+        else {
             float wj;
-            string sj = param.abc.get_degeneracy(seq[j], &wj);
-            for (string::iterator c = sj.begin(); c != sj.end(); ++c)
-                logpot += wj * ew.col(param.abc.get_idx(*c));
+            const string sj = lp->abc.get_degeneracy(seq[j], &wj);
+            for (auto c = sj.cbegin(); c != sj.cend(); ++c)
+                logpot += wj * w.col(lp->abc.get_idx(*c));
         }
     }
     return logpot;
@@ -341,59 +337,52 @@ float MRFParameterizer::AsymPseudolikelihood::calc_logz(const VectorXf& logpot) 
 }
 
 void MRFParameterizer::AsymPseudolikelihood::update_obj_score(lbfgsfloatval_t& fx, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw) {
-    int i = obs_node;
+    const size_t i = lp->get_obs_node();
     const int xi = data(m, i);
-    if (xi < param.num_var) {
-        fx += -sw * (logpot(xi) - logz);
-    } else {
-        FloatType w;
-        string s = param.abc.get_degeneracy(seq[i], &w);
-        for (string::iterator c = s.begin(); c != s.end(); ++c)
-            fx += w * (-sw * logpot(param.abc.get_idx(*c)) + sw * logz);
+    if (xi < lp->num_var) fx += -sw * (logpot(xi) - logz);
+    else {
+        float wi;
+        const string s = lp->abc.get_degeneracy(seq[i], &wi);
+        for (auto c = s.cbegin(); c != s.cend(); ++c)
+            fx += wi * (-sw * logpot(lp->abc.get_idx(*c)) + sw * logz);
     }
 }
 
-void MRFParameterizer::AsymPseudolikelihood::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw, const Parameter& param) {
-    string letters = param.abc.get_canonical();
-    float w;
-    VectorXf nodebel(param.num_var);
-    nodebel = (logpot - VectorXf::Constant(param.num_var, logz)).unaryExpr(&exp);
+void MRFParameterizer::AsymPseudolikelihood::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw) {
+    VectorXf nodebel(lp->num_var);
+    nodebel = (logpot - VectorXf::Constant(lp->num_var, logz)).unaryExpr(&exp);
     nodebel *= sw;
-    Eigen::Map<VectorXf> dv(g + param.get_nidx(obs_node, 0), param.num_var);
-    int i = obs_node;
+    MapVectorXf dv(g, lp->num_var);
+    const size_t i = lp->get_obs_node();
     int xi = data(m, i);
-    if (xi < param.num_var) {
-        dv(xi) -= sw;
-    } else {
-        string s = param.abc.get_degeneracy(seq[i], &w);
-        for (string::iterator c = s.begin(); c != s.end(); ++c) {
-            xi = param.abc.get_idx(*c);
-            dv(xi) -= w * sw;
-        }
+    if (xi < lp->num_var) dv(xi) -= sw;
+    else {
+        float wi;
+        const string s = lp->abc.get_degeneracy(seq[i], &wi);
+        for (auto c = s.cbegin(); c != s.cend(); ++c) dv(lp->abc.get_idx(*c)) -= wi * sw;
     }
     dv += nodebel;
-    for (std::unordered_map<EdgeIndex, int>::const_iterator pos = param.eidx.cbegin(); pos != param.eidx.cend(); ++pos) {
-        if (pos->first.idx1 != obs_node) continue;
-        const int i = pos->first.idx1;
-        const int j = pos->first.idx2;
+    for (auto it = lp->w_offset.cbegin(); it != lp->w_offset.cend(); ++it) {
+        const int i = it->first.idx1;
+        const int j = it->first.idx2;
+        MapMatrixXf dw(g + it->second, lp->num_var, lp->num_var);
         int xi = data(m, i);
         int xj = data(m, j);
-        Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > dw(g + param.get_eidx_edge(pos->second, 0, 0), param.num_var, param.num_var);
-        if (xi < param.num_var && xj < param.num_var) {
+        if (xi < lp->num_var && xj < lp->num_var) {
             dw(xi, xj) -= sw;
             dw.col(xj) += nodebel;
         } else {
-            float wi, wj;
-            string si = param.abc.get_degeneracy(seq[i], &wi);
-            string sj = param.abc.get_degeneracy(seq[j], &wj);
-            w = wi * wj;
-            for (string::iterator ci = si.begin(); ci != si.end(); ++ci) {
-                xi = param.abc.get_idx(*ci);
-                for (string::iterator cj = sj.begin(); cj != sj.end(); ++cj) {
-                    xj = param.abc.get_idx(*cj);
-                    dw(xi, xj) -= w * sw;
-                    for (int t = 0; t < param.num_var; ++t) {
-                        dw.col(xj) += w * nodebel;
+            float wi, wj, wt;
+            const string si = lp->abc.get_degeneracy(seq[i], &wi);
+            const string sj = lp->abc.get_degeneracy(seq[j], &wj);
+            wt = wi * wj;
+            for (auto ci = si.cbegin(); ci != si.cend(); ++ci) {
+                xi = lp->abc.get_idx(*ci);
+                for (auto cj = sj.cbegin(); cj != sj.cend(); ++cj) {
+                    xj = lp->abc.get_idx(*cj);
+                    dw(xi, xj) -= wt * sw;
+                    for (int t = 0; t < lp->num_var; ++t) {
+                        dw.col(xj) += wt * nodebel;
                     }
                 }
             }
@@ -453,7 +442,6 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
             //std::cout << "obs_node = " << i << std::endl;
             LocalParameter local_param(model, optim_opt, param, i);
             pll.set_local_param(&local_param);
-            pll.set_obs_node(i);
             funcs.push_back(&pll);
             L2Regularization l2(local_param, opt.l2_opt);
             if (opt.regul == RegulMethod::REGUL_L2) funcs.push_back(&l2);
@@ -461,7 +449,7 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
             int r = optimizer.optimize(&local_param, &obj_func);
             funcs.clear();
             if (r < ret) ret = r;
-            param.set_x(local_param, i);
+            param.set_x(local_param);
         }
         adjust_gauge(param);
         update_model(model, param);
@@ -494,70 +482,56 @@ MatrixXf MRFParameterizer::calc_profile(const TraceVector& traces) {
 }
 
 void MRFParameterizer::update_model(MRF& model, const SymmParameter& param) {
-    string letters = param.abc.get_canonical();
-    for (size_t i = 0; i < model.get_length(); ++i) {
-        VectorXf w = VectorXf::Zero(param.num_var);
-        for (int t = 0; t < param.num_var; ++t) w(t) = (FloatType)param.x[param.get_nidx(i, letters[t])];
-        model.get_node(i).set_weight(w);
-    }
-    for (unordered_map<EdgeIndex, int>::const_iterator pos = param.eidx.begin(); pos != param.eidx.end(); ++pos) {
-        int i = pos->first.idx1;
-        int j = pos->first.idx2;
-        MatrixXf w = MatrixXf::Zero(param.num_var, param.num_var);
-        for (int p = 0; p < param.num_var; ++p)
-            for (int q = 0; q < param.num_var; ++q) w(p, q) = (FloatType)param.x[param.get_eidx(i, j, letters[p], letters[q])];
-        model.get_edge(i, j).set_weight(w);
-    }
+    for (size_t i = 0; i < model.get_length(); ++i)
+        model.get_node(i).set_weight(MapKVectorXf(param.x + param.v_offset.at(i), param.num_var));
+    const EdgeIndexVector eidxs = model.get_edge_idxs();
+    for (auto it = eidxs.cbegin(); it != eidxs.cend(); ++it)
+        model.get_edge(*it).set_weight(MapKMatrixXf(param.x + param.w_offset.at(*it), param.num_var, param.num_var));
 }
 
 void MRFParameterizer::update_model(MRF& model, const AsymParameter& param) {
-    string letters = param.abc.get_canonical();
-    for (size_t i = 0; i < model.get_length(); ++i) {
-        VectorXf w = VectorXf::Zero(param.num_var);
-        for (int t = 0; t < param.num_var; ++t) w(t) = (FloatType)param.x[param.get_nidx(i, letters[t])];
-        model.get_node(i).set_weight(w);
-    }
-    EdgeIndexVector edge_idxs = model.get_edge_idxs();
-    for (EdgeIndexVector::const_iterator pos = edge_idxs.cbegin(); pos != edge_idxs.cend(); ++pos) {
-        const int i = pos->idx1;
-        const int j = pos->idx2;
-        MatrixXf w = MatrixXf::Zero(param.num_var, param.num_var);
-        for (int p = 0; p < param.num_var; ++p)
-            for (int q = 0; q < param.num_var; ++q)
-                w(p, q) += 0.5 * (param.x[param.get_eidx(i, j, p, q)] + param.x[param.get_eidx(j, i, q, p)]);
-        model.get_edge(i, j).set_weight(w);
+    for (size_t i = 0; i < model.get_length(); ++i)
+        model.get_node(i).set_weight(MapKVectorXf(param.x + param.v_offset.at(i), param.num_var));
+    const EdgeIndexVector eidxs = model.get_edge_idxs();
+    for (auto it = eidxs.cbegin(); it != eidxs.cend(); ++it) {
+        MapKMatrixXf w1(param.x + param.w_offset.at(EdgeIndex(it->idx1, it->idx2)), param.num_var, param.num_var);
+        MapKMatrixXf w2(param.x + param.w_offset.at(EdgeIndex(it->idx2, it->idx1)), param.num_var, param.num_var);
+        model.get_edge(*it).set_weight(0.5 * (w1 + w2));
     }
 }
 
 void MRFParameterizer::adjust_gauge(SymmParameter& param) {
-    Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > v(param.x, param.length, param.num_var);
-    for (size_t i = 0; i < param.length; ++i) {
-        v.row(i) -= VectorXf::Constant(param.num_var, v.mean());
+    for (auto it = param.v_offset.cbegin(); it != param.v_offset.cend(); ++it) {
+        MapVectorXf v(param.x + it->second, param.num_var);
+        v = (v.array() - v.mean()).matrix();
     }
-    for (std::unordered_map<EdgeIndex, int>::const_iterator pos = param.eidx.cbegin(); pos != param.eidx.cend(); ++pos) {
-        Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > w(param.x + param.get_eidx_edge(pos->second, 0, 0), param.num_var, param.num_var);
-        float totmn = w.mean();
-        w += MatrixXf::Constant(param.num_var, param.num_var, totmn);
+    for (auto it = param.w_offset.cbegin(); it != param.w_offset.cend(); ++it) {
+        MapMatrixXf w(param.x + it->second, param.num_var, param.num_var);
+        w = (w.array() - w.mean()).matrix();
     }
 }
 
 void MRFParameterizer::adjust_gauge(AsymParameter& param) {
-    Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > v(param.x, param.length, param.num_var);
-    for (size_t i = 0; i < param.length; ++i) {
-        v.row(i) -= VectorXf::Constant(param.num_var, v.mean());
+    for (auto it = param.v_offset.cbegin(); it != param.v_offset.cend(); ++it) {
+        MapVectorXf v(param.x + it->second, param.num_var);
+        v = (v.array() - v.mean()).matrix();
+        for (auto it2 = param.w_offset.cbegin(); it2 != param.w_offset.cend(); ++it2) {
+            if (it2->first.idx1 != it->first) continue;
+            MapMatrixXf w(param.x + it2->second, param.num_var, param.num_var);
+            const VectorXf rowmn(w.rowwise().mean());
+            const float totmn = w.mean();
+            v += (rowmn.array() - totmn).matrix();
+        }
     }
-    for (std::unordered_map<EdgeIndex, int>::const_iterator pos = param.eidx.cbegin(); pos != param.eidx.cend(); ++pos) {
-        const int i = pos->first.idx1;
-        Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > w(param.x + param.get_eidx_edge(pos->second, 0, 0), param.num_var, param.num_var);
-        VectorXf rowmn(w.rowwise().mean());
-        VectorXf colmn(w.colwise().mean());
-        float totmn = w.mean();
-        v.row(i) += rowmn;
-        v.row(i) -= VectorXf::Constant(param.num_var, totmn);
+    for (auto it = param.w_offset.cbegin(); it != param.w_offset.cend(); ++it) {
+        MapMatrixXf w(param.x + it->second, param.num_var, param.num_var);
+        const float totmn = w.mean();
+        const VectorXf rowmn(w.rowwise().mean());
+        const VectorXf colmn(w.colwise().mean());
         for (size_t k = 0; k < param.num_var; ++k) {
             w.col(k) -= rowmn;
             w.row(k) -= colmn;
         }
-        w += MatrixXf::Constant(param.num_var, param.num_var, totmn);
+        w = (w.array() + totmn).matrix();
     }
 }
