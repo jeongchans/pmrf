@@ -61,7 +61,7 @@ void MRFParameterizer::Parameter::set_opt(const Option& opt) {
     opt_param.delta = (lbfgsfloatval_t) opt.delta;          // stopping criterion
     opt_param.max_iterations = opt.max_iterations;          // maximum iteration
     opt_param.linesearch = opt.linesearch;
-    //opt_param.max_linesearch = 50;
+    opt_param.max_linesearch = opt.max_linesearch;
 }
 
 

@@ -45,15 +45,17 @@ class MRFParameterizer {
               epsilon(1e-5),
               past(2), 
               delta(1e-4), 
+              max_iterations(500),
               linesearch(LBFGS_LINESEARCH_BACKTRACKING_ARMIJO),
-              max_iterations(500) {};
+              max_linesearch(50) {};
 
             int corr;
             float epsilon;
             int past;
             float delta;
-            int linesearch;
             int max_iterations;
+            int linesearch;
+            int max_linesearch;;
         };
 
         Parameter(const Alphabet& abc, const size_t& num_var) 
