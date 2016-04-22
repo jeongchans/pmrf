@@ -245,6 +245,7 @@ bool MRFBuildCommandLine::parse_regul(char* optarg, RegulMethod::RegulMethod& ar
 bool MRFBuildCommandLine::parse_seq_wt(char* optarg, MSAProcOption::SeqWeight& arg) {
     string val = string(optarg);
     if (val == "no") arg = MSAProcOption::SW_NO;
+    else if (val == "clstr") arg = MSAProcOption::SW_CLSTR;
     else if (val == "pb") arg = MSAProcOption::SW_PB;
     else {
         error_message = "Unsupported option for sequence weighting: " + val;
