@@ -21,35 +21,17 @@ class MRFParameterizer_SymmParameter_Test : public testing::Test {
 TEST_F(MRFParameterizer_SymmParameter_Test, test_get_nidx) {
     MRFParameterizer::SymmParameter param(mrf, optim_opt);
 
-    int nidx = param.get_nidx(3, 'C');
-    EXPECT_EQ(3 * 21 + 1, nidx);
+    int offset = param.v_offset[3];
+    EXPECT_EQ(0, offset % 21);
 }
 
 TEST_F(MRFParameterizer_SymmParameter_Test, test_get_eidx) {
     MRFParameterizer::SymmParameter param(mrf, optim_opt);
     int i = 2;
     int j = 3;
-    char p = 'E';
-    char q = 'C';
 
-    int eidx = param.get_eidx(i, j, p, q);
-    int expected = length * 21;
-    EdgeIndexVector edge_idxs = mrf.get_edge_idxs();
-    for (EdgeIndexVector::iterator pos = edge_idxs.begin(); pos != edge_idxs.end(); ++pos) {
-        if (pos->idx1 == (size_t) i && pos->idx2 == (size_t) j) break;
-        else expected += 21 * 21;
-    }
-    string letters = abc.get_canonical();
-    for (size_t k = 0; k < letters.size(); ++k) {
-        if (letters[k] == p) break;
-        else expected += 21;
-    }
-    for (size_t k = 0; k < letters.size(); ++k) {
-        if (letters[k] == q) break;
-        else expected++;
-    }
-
-    EXPECT_EQ(expected, eidx);
+    int offset = param.w_offset[EdgeIndex(i, j)];
+    EXPECT_EQ(0, (offset - param.w_beg_pos()) % (21 * 21));
 }
 
 class MRFParameterizer_AsymParameter_Test : public testing::Test {
@@ -65,13 +47,9 @@ TEST_F(MRFParameterizer_AsymParameter_Test, test_get_eidx) {
     MRFParameterizer::AsymParameter param(mrf, optim_opt);
     int i = 2;
     int j = 3;
-    char p = 'E';
-    char q = 'C';
 
-    int eidx1 = param.get_eidx(i, j, p, q);
-    int eidx2 = param.get_eidx(j, i, q, p);
-
-    EXPECT_NE(eidx1, eidx2);
+    int offset = param.w_offset[EdgeIndex(i, j)];
+    EXPECT_EQ(0, (offset - param.w_beg_pos()) % (21 * 21));
 }
 
 class MRFParameterizer_RegularizationFunction_Test : public testing::Test {
@@ -153,32 +131,18 @@ TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_calc_logpot) {
 
     string seq = traces[0].get_matched_aseq();
 
-    MatrixXf logpot = pll.calc_logpot(param.x, 0, seq);
+    MatrixXl logpot = pll.calc_logpot(param.x, 0, seq);
     EXPECT_EQ(param.num_var, logpot.rows());
-    EXPECT_EQ(param.length, logpot.cols());
-}
-
-TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_logsumexp) {
-    MRFParameterizer::Pseudolikelihood pll(traces, param, seq_weight, traces.size());
-
-    MatrixXf x = MatrixXf::Zero(3, 4);
-    for (int i = 0; i < 3; ++i)
-        for (int j = 0; j < 4; ++j)
-            x(i, j) = 4 * i + j + 1;
-
-    VectorXf y = pll.logsumexp(x);
-    ASSERT_TRUE(allclose(y(0), 4.4402));
-    ASSERT_TRUE(allclose(y(1), 8.4402));
-    ASSERT_TRUE(allclose(y(2), 12.4402));
+    EXPECT_EQ(param.num_node, logpot.cols());
 }
 
 TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_calc_logz) {
     MRFParameterizer::Pseudolikelihood pll(traces, param, seq_weight, traces.size());
 
-    MatrixXf logpot = randn_matrix(param.num_var, param.length).unaryExpr(&exp);
+    MatrixXl logpot = randn_matrix(param.num_var, param.num_node).unaryExpr(&exp);
 
-    VectorXf logz = pll.calc_logz(logpot);
-    EXPECT_EQ(param.length, logz.size());
+    VectorXl logz = pll.calc_logz(logpot);
+    EXPECT_EQ(param.num_node, logz.size());
 }
 
 TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_update_obj_score) {
@@ -186,8 +150,8 @@ TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_update_obj_score) {
 
     string seq = traces[0].get_matched_aseq();
     FloatType sw = seq_weight(0);
-    MatrixXf logpot = randn_matrix(param.num_var, param.length).unaryExpr(&exp);
-    VectorXf logz = pll.calc_logz(logpot);
+    MatrixXl logpot = randn_matrix(param.num_var, param.num_node).unaryExpr(&exp);
+    VectorXl logz = pll.calc_logz(logpot);
     lbfgsfloatval_t fx = 0.;
 
     pll.update_obj_score(fx, logpot, logz, 0, seq, sw);
@@ -199,8 +163,8 @@ TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_update_gradient) {
 
     string seq = traces[0].get_matched_aseq();
     FloatType sw = seq_weight(0);
-    MatrixXf logpot = randn_matrix(param.num_var, param.length).unaryExpr(&exp);
-    VectorXf logz = pll.calc_logz(logpot);
+    MatrixXl logpot = randn_matrix(param.num_var, param.num_node).unaryExpr(&exp);
+    VectorXl logz = pll.calc_logz(logpot);
 
     pll.update_gradient(param.x, g, logpot, logz, 0, seq, sw);
     double s = 0.;
