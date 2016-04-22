@@ -19,11 +19,12 @@ namespace RegulMethod {
 
 typedef LBFGS::ObjectiveFunction* PtrObjFunc;
 
-typedef Eigen::Map<VectorXf> MapVectorXf;
-typedef Eigen::Map<const VectorXf> MapKVectorXf;
-
-typedef Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > MapMatrixXf;
-typedef Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> > MapKMatrixXf;
+typedef Eigen::Matrix<lbfgsfloatval_t, Eigen::Dynamic, 1> VectorXl;
+typedef Eigen::Matrix<lbfgsfloatval_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatrixXl;
+typedef Eigen::Map<VectorXl> MapVectorXl;
+typedef Eigen::Map<const VectorXl> MapKVectorXl;
+typedef Eigen::Map<MatrixXl> MapMatrixXl;
+typedef Eigen::Map<const MatrixXl> MapKMatrixXl;
 
 namespace std {
     template<> struct hash<EdgeIndex> {
@@ -140,14 +141,12 @@ class MRFParameterizer {
         const VectorXf& seq_weight;
         const float& neff;
 
-        MatrixXf calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq);
-        VectorXf logsumexp(const MatrixXf& b);
-        VectorXf calc_logz(const MatrixXf& logpot);
-        void update_obj_score(lbfgsfloatval_t& fx, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw);
-        void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw);
+        MatrixXl calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq);
+        VectorXl calc_logz(const MatrixXl& logpot);
+        void update_obj_score(lbfgsfloatval_t& fx, const MatrixXl& logpot, const VectorXl& logz, const size_t m, const string& seq, const float& sw);
+        void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXl& logpot, const VectorXl& logz, const size_t m, const string& seq, const float& sw);
 
         FRIEND_TEST(MRFParameterizer_Pseudolikelihood_Test, test_calc_logpot);
-        FRIEND_TEST(MRFParameterizer_Pseudolikelihood_Test, test_logsumexp);
         FRIEND_TEST(MRFParameterizer_Pseudolikelihood_Test, test_calc_logz);
         FRIEND_TEST(MRFParameterizer_Pseudolikelihood_Test, test_update_obj_score);
         FRIEND_TEST(MRFParameterizer_Pseudolikelihood_Test, test_update_gradient);
@@ -172,10 +171,10 @@ class MRFParameterizer {
         const VectorXf& seq_weight;
         const float& neff;
 
-        VectorXf calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq);
-        float calc_logz(const VectorXf& logpot);
-        void update_obj_score(lbfgsfloatval_t& fx, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw);
-        void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw);
+        VectorXl calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq);
+        lbfgsfloatval_t calc_logz(const VectorXl& logpot);
+        void update_obj_score(lbfgsfloatval_t& fx, const VectorXl& logpot, const lbfgsfloatval_t& logz, const size_t m, const string& seq, const float& sw);
+        void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const VectorXl& logpot, const lbfgsfloatval_t& logz, const size_t m, const string& seq, const float& sw);
     };
 
     // Objective function

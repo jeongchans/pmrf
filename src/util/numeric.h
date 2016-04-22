@@ -9,6 +9,7 @@ typedef float FloatType;
 
 //using Eigen::Dynamic;
 using Eigen::VectorXf;
+using Eigen::VectorXd;
 
 using Eigen::MatrixXi;
 using Eigen::MatrixXf;

@@ -28,9 +28,9 @@ MatrixXi trace_to_var(const TraceVector& traces, const Alphabet& abc) {
 }
 
 /* log-sum-exp trick (https://en.wikipedia.org/wiki/LogSumExp) */
-float logsumexp(const VectorXf& x) {
-    float b = x.maxCoeff();
-    return log((x - VectorXf::Constant(x.size(), b)).unaryExpr(&exp).sum()) + b;
+lbfgsfloatval_t logsumexp(const VectorXl& x) {
+    lbfgsfloatval_t b = x.maxCoeff();
+    return log((x - VectorXl::Constant(x.size(), b)).unaryExpr(&exp).sum()) + b;
 }
 
 /**
@@ -144,8 +144,8 @@ lbfgsfloatval_t MRFParameterizer::L2Regularization::evaluate(const lbfgsfloatval
 }
 
 void MRFParameterizer::L2Regularization::regularize_node(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
-    const float& lambda = opt.lambda1;
-    const float twolambda = 2. * lambda;
+    const lbfgsfloatval_t& lambda = opt.lambda1;
+    const lbfgsfloatval_t twolambda = 2. * lambda;
     for (int k = param.v_beg_pos(); k < param.v_end_pos(); ++k) {
         fx += lambda * square(x[k]);
         g[k] += twolambda * x[k];
@@ -153,8 +153,8 @@ void MRFParameterizer::L2Regularization::regularize_node(const lbfgsfloatval_t *
 }
 
 void MRFParameterizer::L2Regularization::regularize_edge(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
-    const float& lambda = opt.lambda2;
-    const float twolambda = 2. * lambda;
+    const lbfgsfloatval_t& lambda = opt.lambda2;
+    const lbfgsfloatval_t twolambda = 2. * lambda;
     for (int k = param.w_beg_pos(); k < param.w_end_pos(); ++k) {
         fx += lambda * square(x[k]);
         g[k] += twolambda * x[k];
@@ -179,21 +179,21 @@ lbfgsfloatval_t MRFParameterizer::Pseudolikelihood::evaluate(const lbfgsfloatval
     for (size_t i = 0; i < traces.size(); ++i) {
         string seq = traces[i].get_matched_aseq();
         const float sw = seq_weight(i);
-        const MatrixXf logpot = calc_logpot(x, i, seq);
-        const VectorXf logz = calc_logz(logpot);
+        const MatrixXl logpot = calc_logpot(x, i, seq);
+        const VectorXl logz = calc_logz(logpot);
         update_obj_score(fx, logpot, logz, i, seq, sw);
         update_gradient(x, g, logpot, logz, i, seq, sw);
     }
     return fx;
 }
 
-MatrixXf MRFParameterizer::Pseudolikelihood::calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq) {
-    MapKMatrixXf v(x + param.v_beg_pos(), param.num_node, param.num_var);
-    MatrixXf logpot(v.transpose());
+MatrixXl MRFParameterizer::Pseudolikelihood::calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq) {
+    MapKMatrixXl v(x + param.v_beg_pos(), param.num_node, param.num_var);
+    MatrixXl logpot(v.transpose());
     for (auto it = param.w_offset.cbegin(); it != param.w_offset.cend(); ++it) {
         const int i = it->first.idx1;
         const int j = it->first.idx2;
-        MapKMatrixXf w(x + it->second, param.num_var, param.num_var);
+        MapKMatrixXl w(x + it->second, param.num_var, param.num_var);
         const int xi = data(m, i);
         const int xj = data(m, j);
         if (xi < param.num_var) logpot.col(j) += w.row(xi);
@@ -212,18 +212,13 @@ MatrixXf MRFParameterizer::Pseudolikelihood::calc_logpot(const lbfgsfloatval_t *
     return logpot;
 }
 
-VectorXf MRFParameterizer::Pseudolikelihood::logsumexp(const MatrixXf& b) {
-    VectorXf B = b.rowwise().maxCoeff();
-    VectorXf r = VectorXf::Zero(b.rows());
-    for (int j = 0; j < b.cols(); ++j) r += (b.col(j) - B).unaryExpr(&exp);
-    return r.unaryExpr(&log) + B;
+VectorXl MRFParameterizer::Pseudolikelihood::calc_logz(const MatrixXl& logpot) {
+    VectorXl r(logpot.cols());
+    for (int i = 0; i < r.size(); ++i) r(i) = logsumexp(logpot.col(i));
+    return r;
 }
 
-VectorXf MRFParameterizer::Pseudolikelihood::calc_logz(const MatrixXf& logpot) {
-    return logsumexp(logpot.transpose());
-}
-
-void MRFParameterizer::Pseudolikelihood::update_obj_score(lbfgsfloatval_t& fx, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw) {
+void MRFParameterizer::Pseudolikelihood::update_obj_score(lbfgsfloatval_t& fx, const MatrixXl& logpot, const VectorXl& logz, const size_t m, const string& seq, const float& sw) {
     for (auto it = param.v_offset.cbegin(); it != param.v_offset.cend(); ++it) {
         const size_t i = it->first;
         const int xi = data(m, i);
@@ -237,12 +232,12 @@ void MRFParameterizer::Pseudolikelihood::update_obj_score(lbfgsfloatval_t& fx, c
     }
 }
 
-void MRFParameterizer::Pseudolikelihood::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXf& logpot, const VectorXf& logz, const size_t m, const string& seq, const float& sw) {
-    MatrixXf nodebel(param.num_var, param.num_node);
+void MRFParameterizer::Pseudolikelihood::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXl& logpot, const VectorXl& logz, const size_t m, const string& seq, const float& sw) {
+    MatrixXl nodebel(param.num_var, param.num_node);
     for (size_t t = 0; t < param.num_var; ++t)
         nodebel.row(t) = (logpot.row(t) - logz.transpose()).unaryExpr(&exp);
     nodebel *= sw;
-    MapMatrixXf dv(g, param.num_node, param.num_var);
+    MapMatrixXl dv(g, param.num_node, param.num_var);
     for (auto it = param.v_offset.cbegin(); it != param.v_offset.cend(); ++it) {
         const size_t i = it->first;
         int xi = data(m, i);
@@ -257,7 +252,7 @@ void MRFParameterizer::Pseudolikelihood::update_gradient(const lbfgsfloatval_t *
     for (auto it = param.w_offset.cbegin(); it != param.w_offset.cend(); ++it) {
         const int i = it->first.idx1;
         const int j = it->first.idx2;
-        MapMatrixXf dw(g + it->second, param.num_var, param.num_var);
+        MapMatrixXl dw(g + it->second, param.num_var, param.num_var);
         int xi = data(m, i);
         int xj = data(m, j);
         if (xi < param.num_var && xj < param.num_var) {
@@ -303,22 +298,21 @@ lbfgsfloatval_t MRFParameterizer::AsymPseudolikelihood::evaluate(const lbfgsfloa
     for (size_t i = 0; i < traces.size(); ++i) {
         string seq = traces[i].get_matched_aseq();
         const float sw = seq_weight(i);
-        const VectorXf logpot = calc_logpot(x, i, seq);
-        const float logz = calc_logz(logpot);
+        const VectorXl logpot = calc_logpot(x, i, seq);
+        const lbfgsfloatval_t logz = calc_logz(logpot);
         update_obj_score(fx, logpot, logz, i, seq, sw);
         update_gradient(x, g, logpot, logz, i, seq, sw);
     }
-    std::cout << "\t" << fx << std::endl;
     return fx;
 }
 
-VectorXf MRFParameterizer::AsymPseudolikelihood::calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq) {
-    MapKVectorXf v(x, lp->num_var);
-    VectorXf logpot(v);
+VectorXl MRFParameterizer::AsymPseudolikelihood::calc_logpot(const lbfgsfloatval_t *x, const size_t m, const string& seq) {
+    MapKVectorXl v(x, lp->num_var);
+    VectorXl logpot(v);
     for (auto it = lp->w_offset.cbegin(); it != lp->w_offset.cend(); ++it) {
         const size_t i = it->first.idx1;
         const size_t j = it->first.idx2;
-        MapKMatrixXf w(x + it->second, lp->num_var, lp->num_var);
+        MapKMatrixXl w(x + it->second, lp->num_var, lp->num_var);
         const int xi = data(m, i);
         const int xj = data(m, j);
         if (xj < lp->num_var) logpot += w.col(xj);
@@ -332,11 +326,11 @@ VectorXf MRFParameterizer::AsymPseudolikelihood::calc_logpot(const lbfgsfloatval
     return logpot;
 }
 
-float MRFParameterizer::AsymPseudolikelihood::calc_logz(const VectorXf& logpot) {
+lbfgsfloatval_t MRFParameterizer::AsymPseudolikelihood::calc_logz(const VectorXl& logpot) {
     return logsumexp(logpot);
 }
 
-void MRFParameterizer::AsymPseudolikelihood::update_obj_score(lbfgsfloatval_t& fx, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw) {
+void MRFParameterizer::AsymPseudolikelihood::update_obj_score(lbfgsfloatval_t& fx, const VectorXl& logpot, const lbfgsfloatval_t& logz, const size_t m, const string& seq, const float& sw) {
     const size_t i = lp->get_obs_node();
     const int xi = data(m, i);
     if (xi < lp->num_var) fx += -sw * (logpot(xi) - logz);
@@ -348,11 +342,11 @@ void MRFParameterizer::AsymPseudolikelihood::update_obj_score(lbfgsfloatval_t& f
     }
 }
 
-void MRFParameterizer::AsymPseudolikelihood::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw) {
-    VectorXf nodebel(lp->num_var);
-    nodebel = (logpot - VectorXf::Constant(lp->num_var, logz)).unaryExpr(&exp);
+void MRFParameterizer::AsymPseudolikelihood::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const VectorXl& logpot, const lbfgsfloatval_t& logz, const size_t m, const string& seq, const float& sw) {
+    VectorXl nodebel(lp->num_var);
+    nodebel = (logpot - VectorXl::Constant(lp->num_var, logz)).unaryExpr(&exp);
     nodebel *= sw;
-    MapVectorXf dv(g + lp->v_beg_pos(), lp->num_var);
+    MapVectorXl dv(g + lp->v_beg_pos(), lp->num_var);
     const size_t i = lp->get_obs_node();
     int xi = data(m, i);
     if (xi < lp->num_var) dv(xi) -= sw;
@@ -365,7 +359,7 @@ void MRFParameterizer::AsymPseudolikelihood::update_gradient(const lbfgsfloatval
     for (auto it = lp->w_offset.cbegin(); it != lp->w_offset.cend(); ++it) {
         const int i = it->first.idx1;
         const int j = it->first.idx2;
-        MapMatrixXf dw(g + it->second, lp->num_var, lp->num_var);
+        MapMatrixXl dw(g + it->second, lp->num_var, lp->num_var);
         int xi = data(m, i);
         int xj = data(m, j);
         if (xi < lp->num_var && xj < lp->num_var) {
@@ -484,51 +478,51 @@ MatrixXf MRFParameterizer::calc_profile(const TraceVector& traces) {
 
 void MRFParameterizer::update_model(MRF& model, const SymmParameter& param) {
     for (size_t i = 0; i < model.get_length(); ++i)
-        model.get_node(i).set_weight(MapKVectorXf(param.x + param.v_offset.at(i), param.num_var));
+        model.get_node(i).set_weight(MapKVectorXl(param.x + param.v_offset.at(i), param.num_var).cast<float>());
     const EdgeIndexVector eidxs = model.get_edge_idxs();
     for (auto it = eidxs.cbegin(); it != eidxs.cend(); ++it)
-        model.get_edge(*it).set_weight(MapKMatrixXf(param.x + param.w_offset.at(*it), param.num_var, param.num_var));
+        model.get_edge(*it).set_weight(MapKMatrixXl(param.x + param.w_offset.at(*it), param.num_var, param.num_var).cast<float>());
 }
 
 void MRFParameterizer::update_model(MRF& model, const AsymParameter& param) {
     for (size_t i = 0; i < model.get_length(); ++i)
-        model.get_node(i).set_weight(MapKVectorXf(param.x + param.v_offset.at(i), param.num_var));
+        model.get_node(i).set_weight(MapKVectorXl(param.x + param.v_offset.at(i), param.num_var).cast<float>());
     const EdgeIndexVector eidxs = model.get_edge_idxs();
     for (auto it = eidxs.cbegin(); it != eidxs.cend(); ++it) {
-        MapKMatrixXf w1(param.x + param.w_offset.at(EdgeIndex(it->idx1, it->idx2)), param.num_var, param.num_var);
-        MapKMatrixXf w2(param.x + param.w_offset.at(EdgeIndex(it->idx2, it->idx1)), param.num_var, param.num_var);
-        model.get_edge(*it).set_weight(0.5 * (w1 + w2));
+        MapKMatrixXl w1(param.x + param.w_offset.at(EdgeIndex(it->idx1, it->idx2)), param.num_var, param.num_var);
+        MapKMatrixXl w2(param.x + param.w_offset.at(EdgeIndex(it->idx2, it->idx1)), param.num_var, param.num_var);
+        model.get_edge(*it).set_weight((0.5 * (w1 + w2)).cast<float>());
     }
 }
 
 void MRFParameterizer::adjust_gauge(SymmParameter& param) {
     for (auto it = param.v_offset.cbegin(); it != param.v_offset.cend(); ++it) {
-        MapVectorXf v(param.x + it->second, param.num_var);
+        MapVectorXl v(param.x + it->second, param.num_var);
         v = (v.array() - v.mean()).matrix();
     }
     for (auto it = param.w_offset.cbegin(); it != param.w_offset.cend(); ++it) {
-        MapMatrixXf w(param.x + it->second, param.num_var, param.num_var);
+        MapMatrixXl w(param.x + it->second, param.num_var, param.num_var);
         w = (w.array() - w.mean()).matrix();
     }
 }
 
 void MRFParameterizer::adjust_gauge(AsymParameter& param) {
     for (auto it = param.v_offset.cbegin(); it != param.v_offset.cend(); ++it) {
-        MapVectorXf v(param.x + it->second, param.num_var);
+        MapVectorXl v(param.x + it->second, param.num_var);
         v = (v.array() - v.mean()).matrix();
         for (auto it2 = param.w_offset.cbegin(); it2 != param.w_offset.cend(); ++it2) {
             if (it2->first.idx1 != it->first) continue;
-            MapMatrixXf w(param.x + it2->second, param.num_var, param.num_var);
-            const VectorXf rowmn(w.rowwise().mean());
-            const float totmn = w.mean();
+            MapMatrixXl w(param.x + it2->second, param.num_var, param.num_var);
+            const VectorXl rowmn(w.rowwise().mean());
+            const lbfgsfloatval_t totmn = w.mean();
             v += (rowmn.array() - totmn).matrix();
         }
     }
     for (auto it = param.w_offset.cbegin(); it != param.w_offset.cend(); ++it) {
-        MapMatrixXf w(param.x + it->second, param.num_var, param.num_var);
-        const float totmn = w.mean();
-        const VectorXf rowmn(w.rowwise().mean());
-        const VectorXf colmn(w.colwise().mean());
+        MapMatrixXl w(param.x + it->second, param.num_var, param.num_var);
+        const lbfgsfloatval_t totmn = w.mean();
+        const VectorXl rowmn(w.rowwise().mean());
+        const VectorXl colmn(w.colwise().mean());
         for (size_t k = 0; k < param.num_var; ++k) {
             w.col(k) -= rowmn;
             w.row(k) -= colmn;
