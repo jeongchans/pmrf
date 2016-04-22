@@ -27,6 +27,12 @@ MatrixXi trace_to_var(const TraceVector& traces, const Alphabet& abc) {
     return data;
 }
 
+/* log-sum-exp trick (https://en.wikipedia.org/wiki/LogSumExp) */
+float logsumexp(const VectorXf& x) {
+    float b = x.maxCoeff();
+    return log((x - VectorXf::Constant(x.size(), b)).unaryExpr(&exp).sum()) + b;
+}
+
 /**
    @class MRFParameterizer::Parameter
  */
@@ -39,15 +45,9 @@ void MRFParameterizer::Parameter::init(const vector<NodeIndex>& v_idxs, const ve
     n = n_v + n_w;
     size_t offset = 0;
     v_offset.clear();
-    for (auto it = v_idxs.cbegin(); it != v_idxs.cend(); ++it) {
-        v_offset[*it] = offset;
-        offset += num_var;
-    }
+    for (auto it = v_idxs.cbegin(); it != v_idxs.cend(); ++it, offset += num_var) v_offset[*it] = offset;
     w_offset.clear();
-    for (auto it = w_idxs.begin(); it != w_idxs.end(); ++it) {
-        w_offset[*it] = offset;
-        offset += num_var2;
-    }
+    for (auto it = w_idxs.begin(); it != w_idxs.end(); ++it, offset += num_var2) w_offset[*it] = offset;
     LBFGS::Parameter::malloc_x();       // This should be called after setting this->n
     set_opt(opt);
 }
@@ -90,7 +90,7 @@ MRFParameterizer::LocalParameter::LocalParameter(const MRF& model, const Option&
         if (it->first.idx1 == obs_node) w_idxs.push_back(it->first);
     init(v_idxs, w_idxs, opt);
     // set x values
-    size_t offset1 = 0;
+    size_t offset1 = v_offset.at(obs_node);
     size_t offset2 = p.v_offset.at(obs_node);
     for (size_t k = 0; k < num_var; ++k, ++offset1, ++offset2) x[offset1] = p.x[offset2];
     for (auto it = w_offset.cbegin(); it != w_offset.cend(); ++it) {
@@ -145,7 +145,7 @@ lbfgsfloatval_t MRFParameterizer::L2Regularization::evaluate(const lbfgsfloatval
 
 void MRFParameterizer::L2Regularization::regularize_node(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, lbfgsfloatval_t& fx) {
     const float& lambda = opt.lambda1;
-    const float& twolambda = 2. * lambda;
+    const float twolambda = 2. * lambda;
     for (int k = param.v_beg_pos(); k < param.v_end_pos(); ++k) {
         fx += lambda * square(x[k]);
         g[k] += twolambda * x[k];
@@ -299,7 +299,6 @@ MRFParameterizer::AsymPseudolikelihood::AsymPseudolikelihood(const TraceVector& 
 }
 
 lbfgsfloatval_t MRFParameterizer::AsymPseudolikelihood::evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step) {
-    if (lp == NULL) return 0.;
     lbfgsfloatval_t fx = 0.;
     for (size_t i = 0; i < traces.size(); ++i) {
         string seq = traces[i].get_matched_aseq();
@@ -309,6 +308,7 @@ lbfgsfloatval_t MRFParameterizer::AsymPseudolikelihood::evaluate(const lbfgsfloa
         update_obj_score(fx, logpot, logz, i, seq, sw);
         update_gradient(x, g, logpot, logz, i, seq, sw);
     }
+    std::cout << "\t" << fx << std::endl;
     return fx;
 }
 
@@ -333,7 +333,7 @@ VectorXf MRFParameterizer::AsymPseudolikelihood::calc_logpot(const lbfgsfloatval
 }
 
 float MRFParameterizer::AsymPseudolikelihood::calc_logz(const VectorXf& logpot) {
-    return log(logpot.unaryExpr(&exp).sum());
+    return logsumexp(logpot);
 }
 
 void MRFParameterizer::AsymPseudolikelihood::update_obj_score(lbfgsfloatval_t& fx, const VectorXf& logpot, const float& logz, const size_t m, const string& seq, const float& sw) {
@@ -352,7 +352,7 @@ void MRFParameterizer::AsymPseudolikelihood::update_gradient(const lbfgsfloatval
     VectorXf nodebel(lp->num_var);
     nodebel = (logpot - VectorXf::Constant(lp->num_var, logz)).unaryExpr(&exp);
     nodebel *= sw;
-    MapVectorXf dv(g, lp->num_var);
+    MapVectorXf dv(g + lp->v_beg_pos(), lp->num_var);
     const size_t i = lp->get_obs_node();
     int xi = data(m, i);
     if (xi < lp->num_var) dv(xi) -= sw;
@@ -381,9 +381,7 @@ void MRFParameterizer::AsymPseudolikelihood::update_gradient(const lbfgsfloatval
                 for (auto cj = sj.cbegin(); cj != sj.cend(); ++cj) {
                     xj = lp->abc.get_idx(*cj);
                     dw(xi, xj) -= wt * sw;
-                    for (int t = 0; t < lp->num_var; ++t) {
-                        dw.col(xj) += wt * nodebel;
-                    }
+                    dw.col(xj) += wt * nodebel;
                 }
             }
         }
@@ -397,8 +395,8 @@ void MRFParameterizer::AsymPseudolikelihood::update_gradient(const lbfgsfloatval
 lbfgsfloatval_t MRFParameterizer::ObjectiveFunction::evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step) {
     lbfgsfloatval_t fx = 0.;
     for (int i = 0; i < param.n; ++i) g[i] = 0.;
-    for (vector<PtrObjFunc>::const_iterator pos = funcs.cbegin(); pos != funcs.cend(); ++pos)
-        fx += (*pos)->evaluate(x, g, n, step);
+    for (auto it = funcs.cbegin(); it != funcs.cend(); ++it)
+        fx += (*it)->evaluate(x, g, n, step);
     return fx;
 }
 
@@ -411,7 +409,7 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     size_t num_var = model.get_num_var();
     size_t num_edge = model.get_num_edge();
     int ret = 0;
-    /* sequeing weights */
+    /* sequence weights */
     vector<string> msa = traces.get_matched_aseq_vec();
     msa = msa_analyzer.termi_gap_remover->filter(msa);
     VectorXf sw = msa_analyzer.seq_weight_estimator->estimate(msa);
@@ -439,7 +437,6 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
         AsymParameter param(model, optim_opt);
         AsymPseudolikelihood pll(traces, param, sw, neff);
         for (size_t i = 0; i < length; ++i) {
-            //std::cout << "obs_node = " << i << std::endl;
             LocalParameter local_param(model, optim_opt, param, i);
             pll.set_local_param(&local_param);
             funcs.push_back(&pll);
@@ -447,9 +444,10 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
             if (opt.regul == RegulMethod::REGUL_L2) funcs.push_back(&l2);
             ObjectiveFunction obj_func(funcs, local_param);
             int r = optimizer.optimize(&local_param, &obj_func);
-            funcs.clear();
             if (r < ret) ret = r;
             param.set_x(local_param);
+            funcs.clear();
+            //std::cout << "(obs_node, ret) = " << i << ", " << r << std::endl;
         }
         adjust_gauge(param);
         update_model(model, param);
