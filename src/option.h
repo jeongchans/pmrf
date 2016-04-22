@@ -32,7 +32,6 @@ namespace Build {
         string eidx_filename;
         MSAFormat msa_fmt;
         MSAAnalyzer::Option msa_analyzer_opt;
-        //MRFParameterizer::ObjectiveFunction::Option parameterizer_opt;
         MRFParameterizer::Option parameterizer_opt;
         MRFParameterizer::Parameter::Option optim_opt;
     };
@@ -53,10 +52,11 @@ namespace Build {
         "Preprocessing options:\n"
         " --seqwt <method>          sequence weighting\n"
         "                           no: no sequence weighting\n"
-        "                           pb: Henikoff's position-based weights (default)\n"
-        " --neff <method>           effective number of sequences\n"
-        "                           no: no effective number\n"
-        "                           clstr: number of sequences clustered by sequence identity (default)\n"
+//        "                           pb: Henikoff's position-based weights (default)\n"
+        "                           clstr: Henikoff's position-based weights (default)\n"
+//        " --neff <method>           effective number of sequences\n"
+//        "                           no: no effective number\n"
+//        "                           clstr: number of sequences clustered by sequence identity (default)\n"
 //        "                           shan: exponential of average shannon entropy of amino acid pair\n"
         " --clstr-maxidt <float>    maximum sequence identity between sequence clusters (default: 0.6)\n"
         "\n"
@@ -74,8 +74,13 @@ namespace Build {
 //        " --no-regw-sc-neff         disable edge regularization scaling w.r.t. effective number of sequences\n"
         "\n"
         "Optimization options:\n"
+//        " --lbfgs-corr <int>        number of correction\n"
+//        " --epsilon <float>         minimum rate of decrease for node and edge weights\n"
         " --delta <float>           minimum rate of decrease for objective function (default: 1e-4)\n"
+//        " --maxiter <int>           maximum iteration\n"
         "\n"
+        "Experimental options:\n"
+        " --no-profile              disable sequence profile\n"
         " -h, --help                show this help message\n";
 }
 

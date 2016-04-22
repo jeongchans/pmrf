@@ -62,4 +62,19 @@ class PSIBLASTPBSeqWeightEstimator : public SeqWeightEstimator {
     int abc_idx(const char& c) const;
 };
 
+// Number of sequences in the clustered MSA by a given sequence identity
+// Note: The maxidt specifies the maximum sequence identity in the clustered MSA
+class ClstrSeqWeightEstimator : public SeqWeightEstimator {
+  public:
+    ClstrSeqWeightEstimator(const Alphabet& abc, const float maxidt) : abc(abc), maxidt(maxidt) {};
+
+    virtual VectorXf estimate(const vector<string>& msa) const;
+
+  private:
+    const Alphabet& abc;
+    float maxidt;       // maximum sequence identity
+
+    float calc_identity(const string& seq1, const string& seq2) const;
+};
+
 #endif

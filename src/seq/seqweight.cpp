@@ -92,3 +92,25 @@ int PSIBLASTPBSeqWeightEstimator::abc_idx(const char& c) const {
     if (isalpha(c)) return toupper((int) c) - 'A';
     else return gap_idx;
 }
+
+VectorXf ClstrSeqWeightEstimator::estimate(const vector<string>& msa) const {
+    const size_t rows = msa.size();
+    VectorXf memnum = VectorXf::Ones(rows);
+    for (size_t i = 0; i < rows; ++i) {
+        for (size_t j = i + 1; j < rows; ++j) {
+            if (calc_identity(msa[i], msa[j]) > maxidt) {
+                memnum(i) += 1;
+                memnum(j) += 1;
+            }
+        }
+    }
+    return VectorXf::Ones(rows).cwiseQuotient(memnum);
+}
+
+float ClstrSeqWeightEstimator::calc_identity(const string& seq1, const string& seq2) const {
+    size_t n = seq1.size();
+    float f = 0.;
+    for (size_t i = 0; i < n; ++i)
+        if (seq1[i] == seq2[i]) ++f;
+    return f / (float) n;
+}

@@ -407,10 +407,12 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     vector<string> msa = traces.get_matched_aseq_vec();
     msa = msa_analyzer.termi_gap_remover->filter(msa);
     VectorXf sw = msa_analyzer.seq_weight_estimator->estimate(msa);
-    sw /= sw.sum();
+    float neff = sw.sum();
     /* effective number of sequences */
-    float neff = msa_analyzer.eff_seq_num_estimator->estimate(msa);
-    sw *= neff;
+    if (neff == 1) {
+        neff = msa_analyzer.eff_seq_num_estimator->estimate(msa);
+        sw *= neff;
+    }
     /* sequence profile */
     MatrixXf psfm = MatrixXf::Zero(length, num_var);
     FloatType gap_prob = 0.;
