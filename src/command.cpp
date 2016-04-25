@@ -150,6 +150,9 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         {"regw-sc-neff", required_argument, 0, 0},
         {"clstr-maxidt", required_argument, 0, 0},
         {"symmetric", 0, 0, 0},
+        {"regw-lambda-max", required_argument, 0, 0},
+        {"regw-lambda-min", required_argument, 0, 0},
+        {"regw-lambda-sc", required_argument, 0, 0},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -170,11 +173,11 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
                 if (parse_float(optarg, opt.parameterizer_opt.regnode_lambda)) break;
                 else return false;
             case 3:
-                if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda)) break;
-                else return false;
+                //if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda)) break;
+                //else return false;
             case 4:
-                if (parse_bool(optarg, opt.parameterizer_opt.regedge_sc_deg)) break;
-                else return false;
+                //if (parse_bool(optarg, opt.parameterizer_opt.regedge_sc_deg)) break;
+                //else return false;
             case 5:
                 if (parse_msa_fmt(optarg, opt.msa_fmt)) break;
                 else return false;
@@ -191,14 +194,23 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
                 if (parse_eff_num(optarg, opt.msa_analyzer_opt.eff_num)) break;
                 else return false;
             case 10:
-                if (parse_bool(optarg, opt.parameterizer_opt.regedge_sc_neff)) break;
-                else return false;
+                //if (parse_bool(optarg, opt.parameterizer_opt.regedge_sc_neff)) break;
+                //else return false;
             case 11:
                 if (parse_float(optarg, opt.msa_analyzer_opt.clstr_maxidt, 0., 1.)) break;
                 else return false;
             case 12:
                 opt.parameterizer_opt.asymmetric = !opt.parameterizer_opt.asymmetric;
                 break;
+            case 13:
+                if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda_max)) break;
+                else return false;
+            case 14:
+                if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda_min)) break;
+                else return false;
+            case 15:
+                if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda_sc)) break;
+                else return false;
             }
             break;
         case 'h':

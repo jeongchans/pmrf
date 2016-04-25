@@ -66,10 +66,10 @@ namespace Build {
         "                           no: no\n"
         "                           l2: L2 regularization (default)\n"
         " --regv-lambda <float>     weighting factor for node regularization (default: 0.01)\n"
-        " --regw-lambda <float>     weighting factor for edge regularization (default: 0.2)\n"
-        " --regw-sc-deg <yes|no>    scaling edge regularization w.r.t. average degree (default: yes)\n"
-        " --regw-sc-neff <yes|no>   scaling edge regularization w.r.t. effective number of sequences\n"
-        "                           (default: yes)\n"
+        //" --regw-lambda <float>     weighting factor for edge regularization (default: 0.2)\n"
+        //" --regw-sc-deg <yes|no>    scaling edge regularization w.r.t. average degree (default: yes)\n"
+        //" --regw-sc-neff <yes|no>   scaling edge regularization w.r.t. effective number of sequences\n"
+        //"                           (default: yes)\n"
 //        " --no-regw-sc-deg          disable edge regularization scaling w.r.t. average degree\n"
 //        " --no-regw-sc-neff         disable edge regularization scaling w.r.t. effective number of sequences\n"
         "\n"
@@ -80,7 +80,10 @@ namespace Build {
 //        " --maxiter <int>           maximum iteration\n"
         "\n"
         "Experimental options:\n"
-        " --no-profile              disable sequence profile\n"
+        //" --no-profile              disable sequence profile\n"
+        " --regw-lambda-max <float> maximum weighting factor for edge regularization (default: 0.1)\n"
+        " --regw-lambda-min <float> minimum weighting factor for edge regularization (default: 0.01)\n"
+        " --regw-lambda-sc <float>  scaling factor for edge regularization (default: 1.0)\n"
         " -h, --help                show this help message\n";
 }
 

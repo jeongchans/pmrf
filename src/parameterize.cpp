@@ -420,16 +420,11 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     psfm.rightCols<1>().setConstant(gap_prob);
     model.set_psfm(psfm);
     /* MRF */
-    // plmDCA-style regedge_lambda
-    if (neff > 500) opt.regedge_lambda = 0.01;
-    else opt.regedge_lambda = 0.1 - 0.09 * neff / 500.;
-
-    if (opt.regedge_sc_deg) opt.regedge_lambda *= 2. * (float) num_edge / (float) length;
-    if (opt.regedge_sc_neff) opt.regedge_lambda *= neff;
-    if (opt.asymmetric) opt.regedge_lambda *= 0.5;
+    float avg_deg = 2. * (float) num_edge / (float) length;
+    float regedge_lambda = get_regedge_lambda(avg_deg, neff);
     if (opt.regul == RegulMethod::REGUL_L2) {
         opt.l2_opt.lambda1 = opt.regnode_lambda;
-        opt.l2_opt.lambda2 = opt.regedge_lambda;
+        opt.l2_opt.lambda2 = regedge_lambda;
     }
     vector<PtrObjFunc> funcs;
     LBFGS::Optimizer optimizer;
@@ -463,6 +458,14 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
         update_model(model, param);
     }
     return ret;
+}
+
+float MRFParameterizer::get_regedge_lambda(const float& avg_deg, const float& neff) {
+    const float d = opt.regedge_lambda_max - opt.regedge_lambda_min;
+    const float x = (neff - 1.) / avg_deg;
+    float lambda = d * exp(-opt.regedge_lambda_sc * x) + opt.regedge_lambda_min;
+    if (opt.asymmetric) lambda *= 0.5;
+    return lambda;
 }
 
 MatrixXf MRFParameterizer::calc_profile(const TraceVector& traces) {

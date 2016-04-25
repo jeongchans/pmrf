@@ -199,18 +199,26 @@ class MRFParameterizer {
       public:
         Option()
         : regul(RegulMethod::REGUL_L2), 
-          l2_opt(regnode_lambda, regedge_lambda),
+          //l2_opt(regnode_lambda, regedge_lambda),
+          l2_opt(regnode_lambda, regedge_lambda_min),
           regnode_lambda(0.01), 
-          regedge_lambda(0.2),
-          regedge_sc_deg(true),
-          regedge_sc_neff(true),
+          //regedge_lambda(0.2),
+          regedge_lambda_max(0.1),
+          regedge_lambda_min(0.01),
+          regedge_lambda_sc(1.0),
+          //regedge_sc_deg(true),
+          //regedge_sc_neff(true),
           asymmetric(true) {};
 
         RegulMethod::RegulMethod regul;
         float regnode_lambda;
-        float regedge_lambda;
-        bool regedge_sc_deg;
-        bool regedge_sc_neff;
+        //float regedge_lambda;
+        //bool regedge_sc_deg;
+        //bool regedge_sc_neff;
+        float regedge_lambda_max;
+        float regedge_lambda_min;
+        float regedge_lambda_sc;
+
         bool asymmetric;
 
         L2Regularization::Option l2_opt;
@@ -232,6 +240,7 @@ class MRFParameterizer {
     void adjust_gauge(SymmParameter& param);
     void adjust_gauge(AsymParameter& param);
     MatrixXf calc_profile(const TraceVector& traces);
+    float get_regedge_lambda(const float& avg_deg, const float& neff);
 
     FRIEND_TEST(MRFParameterizer_Test, test_update_model);
 };
