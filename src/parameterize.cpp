@@ -422,6 +422,8 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     /* MRF */
     float avg_deg = 2. * (float) num_edge / (float) length;
     float regedge_lambda = get_regedge_lambda(avg_deg, neff);
+    opt.regnode_lambda *= neff;
+    regedge_lambda *= neff;
     if (opt.regul == RegulMethod::REGUL_L2) {
         opt.l2_opt.lambda1 = opt.regnode_lambda;
         opt.l2_opt.lambda2 = regedge_lambda;
