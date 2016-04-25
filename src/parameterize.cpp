@@ -463,11 +463,23 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
 }
 
 float MRFParameterizer::get_regedge_lambda(const float& avg_deg, const float& neff) {
-    const float d = opt.regedge_lambda_max - opt.regedge_lambda_min;
-    const float x = (neff - 1.) / avg_deg;
-    float lambda = d * exp(-opt.regedge_lambda_sc * x) + opt.regedge_lambda_min;
+    /* linear (plmDCA) */
+    float lambda;
+    if (neff > 500) lambda = 0.01;
+    else lambda = 0.1 - (0.1 - 0.01) * neff / 500.;
     if (opt.asymmetric) lambda *= 0.5;
     return lambda;
+
+    /* exponential */
+    /* optimal parameter: lambda_max = 0.1, lambda_min = 0.01, lambda_sc = 0.5 */
+//    const float d = opt.regedge_lambda_max - opt.regedge_lambda_min;
+//    const float x = (neff - 1.) / avg_deg;
+//    float lambda = d * exp(-opt.regedge_lambda_sc * x) + opt.regedge_lambda_min;
+//    if (opt.asymmetric) lambda *= 0.5;
+//    return lambda;
+
+    /* logistric */
+    // not yet implemented
 }
 
 MatrixXf MRFParameterizer::calc_profile(const TraceVector& traces) {
