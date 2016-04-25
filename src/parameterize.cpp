@@ -420,6 +420,10 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     psfm.rightCols<1>().setConstant(gap_prob);
     model.set_psfm(psfm);
     /* MRF */
+    // plmDCA-style regedge_lambda
+    if (neff > 500) opt.regedge_lambda = 0.01;
+    else opt.regedge_lambda = 0.1 - 0.09 * neff / 500.;
+
     if (opt.regedge_sc_deg) opt.regedge_lambda *= 2. * (float) num_edge / (float) length;
     if (opt.regedge_sc_neff) opt.regedge_lambda *= neff;
     if (opt.asymmetric) opt.regedge_lambda *= 0.5;
