@@ -374,7 +374,7 @@ double MRFInferProcessor::calc_prof_ll(const MRF& model, const string& aseq) {
     size_t n = model.get_length();
     const Alphabet& abc = model.get_alphabet();
     MatrixXf mat = model.get_psfm().unaryExpr(&log);
-    mat = (mat.array() - log(1. / mat.cols())).matrix();
+    mat = (mat.array() - log(0.05)).matrix();
     mat.col(20) = VectorXf::Zero(mat.rows());       // ignore gaps
     for (size_t i = 0; i < n; ++i) {
         float w;
