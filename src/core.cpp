@@ -314,40 +314,46 @@ MRFInferProcessor::~MRFInferProcessor() {
 
 int MRFInferProcessor::infer() {
     MRF model = read_mrf(opt->mrf_filename, abc);
-    double wtscore = calc_pll(model, model.get_seq());
+    Score ref_score = calc_score(model, model.get_seq());
     const string& seq_filename = opt->seq_filename;
     std::ifstream ifs(seq_filename.c_str());
     assert_file_handle(ifs, seq_filename);
     FastaParser parser(ifs);
     string delim = " ";
-    std::cout << setw(4) << right << "#" << delim
-              << setw(10) << "Score" << delim
-              << setw(10) << "Diff" << delim
-              << setw(30) << left << "Description" << std::endl;
-    std::cout << "----" << delim
-              << "----------" << delim
-              << "----------" << delim
-              << "--------------------" << std::endl;
+    static const string header =
+        "     -------- MRF -------- ------ Profile ------                     \n"
+        "   #      Score       Diff      Score       Diff Description         \n"
+        "---- ---------- ---------- ---------- ---------- --------------------\n";
+    std::cout << header;
     size_t idx = 0;
     while (parser.has_next()) {
         SeqRecord r = parser.next();
-        double mtscore = calc_pll(model, r.seq);
+        Score score = calc_score(model, r.seq);
         std::cout << setw(4) << right << ++idx << delim
-                  << setw(10) << fixed << setprecision(2) << mtscore << delim
-                  << setw(10) << fixed << setprecision(2) << mtscore - wtscore << delim
+                  << setw(10) << fixed << setprecision(2) << score.mrf_pll << delim
+                  << setw(10) << fixed << setprecision(2) << score.mrf_pll - ref_score.mrf_pll << delim
+                  << setw(10) << fixed << setprecision(2) << score.prof_ll << delim
+                  << setw(10) << fixed << setprecision(2) << score.prof_ll - ref_score.prof_ll << delim
                   << setw(30) << left << r.desc.substr(0, 30) << std::endl;
     }
     return 0;
 }
 
-double MRFInferProcessor::calc_pll(const MRF& model, const string& aseq) {
+MRFInferProcessor::Score MRFInferProcessor::calc_score(const MRF& model, const string& aseq) {
+    Score score;
+    score.mrf_pll = calc_mrf_pll(model, aseq);
+    score.prof_ll = calc_prof_ll(model, aseq);
+    return score;
+}
+
+double MRFInferProcessor::calc_mrf_pll(const MRF& model, const string& aseq) {
     double pll = 0.;
     size_t n = model.get_length();
     const Alphabet& abc = model.get_alphabet();
     for (size_t i = 0; i < n; ++i) {
         FloatType w1;
         string s1 = abc.get_degeneracy(aseq[i], &w1);
-        for (string::iterator c = s1.begin(); c != s1.end(); ++c)
+        for (auto c = s1.cbegin(); c != s1.cend(); ++c)
             pll += w1 * model.get_node(i).get_weight()(abc.get_idx(*c));
         for (size_t j = i + 1; j < n; ++j) {
             if (model.has_edge(i, j)) {
@@ -361,6 +367,21 @@ double MRFInferProcessor::calc_pll(const MRF& model, const string& aseq) {
         }
     }
     return pll;
+}
+
+double MRFInferProcessor::calc_prof_ll(const MRF& model, const string& aseq) {
+    double ll = 0.;
+    size_t n = model.get_length();
+    const Alphabet& abc = model.get_alphabet();
+    MatrixXf mat = model.get_psfm().unaryExpr(&log);
+    mat = (mat.array() - log(1. / mat.cols())).matrix();
+    mat.col(20) = VectorXf::Zero(mat.rows());       // ignore gaps
+    for (size_t i = 0; i < n; ++i) {
+        float w;
+        string s = abc.get_degeneracy(aseq[i], &w);
+        for (auto c = s.cbegin(); c != s.cend(); ++c) ll += w * mat(i, abc.get_idx(*c));
+    }
+    return ll;
 }
 
 /**

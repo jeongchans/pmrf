@@ -105,6 +105,11 @@ class MRFStatProcessor : public MRFCmdProcessor {
 
 class MRFInferProcessor : public MRFCmdProcessor {
   public:
+    struct Score {
+        double mrf_pll;
+        double prof_ll;
+    };
+
     MRFInferProcessor(int argc, char** argv);
     ~MRFInferProcessor();
 
@@ -114,7 +119,9 @@ class MRFInferProcessor : public MRFCmdProcessor {
     const Alphabet& abc;
     Infer::Option* opt;
 
-    double calc_pll(const MRF& model, const string& aseq);
+    double calc_mrf_pll(const MRF& model, const string& aseq);
+    double calc_prof_ll(const MRF& model, const string& aseq);
+    Score calc_score(const MRF& model, const string& aseq);
 };
 
 class MRFShowProcessor : public MRFCmdProcessor {

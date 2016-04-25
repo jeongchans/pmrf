@@ -113,11 +113,10 @@ class MRF {
     const NodeElement& get_node(const size_t& idx) const { return nodes[idx]; }
     const EdgeElement& get_edge(const size_t& idx1, const size_t& idx2) const 
         { return get_edge(EdgeIndex(idx1, idx2)); }
-    const EdgeElement& get_edge(const EdgeIndex& eidx) const { return edges.find(eidx)->second; }
+    const EdgeElement& get_edge(const EdgeIndex& eidx) const;
     EdgeIndexVector get_edge_idxs() const;
 
-    bool has_edge(const size_t& idx1, const size_t& idx2) const
-        { return edges.find(EdgeIndex(idx1, idx2)) != edges.end(); }
+    bool has_edge(const size_t& idx1, const size_t& idx2) const;
 
   private:
     const Alphabet& abc;
@@ -129,5 +128,15 @@ class MRF {
 
     void init(const EdgeIndexVector* eidxs);
 };
+
+inline bool MRF::has_edge(const size_t& idx1, const size_t& idx2) const {
+    if (idx1 < idx2) return edges.find(EdgeIndex(idx1, idx2)) != edges.end();
+    else return edges.find(EdgeIndex(idx2, idx1)) != edges.end();
+}
+
+inline const MRF::EdgeElement& MRF::get_edge(const EdgeIndex& eidx) const {
+    if (eidx.idx1 < eidx.idx2) return edges.find(eidx)->second;
+    else return edges.find(EdgeIndex(eidx.idx2, eidx.idx1))->second;
+}
 
 #endif
