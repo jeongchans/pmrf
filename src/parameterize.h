@@ -240,7 +240,7 @@ class MRFParameterizer {
     void adjust_gauge(SymmParameter& param);
     void adjust_gauge(AsymParameter& param);
     MatrixXf calc_profile(const TraceVector& traces);
-    float get_regedge_lambda(const float& avg_deg, const float& neff);
+    void get_reg_lambda(float& regnode_lambda, float& regedge_lambda, const float& avg_deg, const float& neff);
 
     FRIEND_TEST(MRFParameterizer_Test, test_update_model);
 };

@@ -108,7 +108,7 @@ class MRF {
     // element getter
     NodeElement& get_node(const size_t& idx) { return nodes[idx]; }
     EdgeElement& get_edge(const size_t& idx1, const size_t& idx2) { return get_edge(EdgeIndex(idx1, idx2)); }
-    EdgeElement& get_edge(const EdgeIndex& eidx) { return edges[eidx]; }
+    EdgeElement& get_edge(const EdgeIndex& eidx) { return edges.at(eidx); }
 
     const NodeElement& get_node(const size_t& idx) const { return nodes[idx]; }
     const EdgeElement& get_edge(const size_t& idx1, const size_t& idx2) const 
