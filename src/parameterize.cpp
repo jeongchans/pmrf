@@ -56,7 +56,7 @@ void MRFParameterizer::Parameter::set_opt(const Option& opt) {
     /* L-BFGS options */
     LBFGS::Parameter::init_param();     // This should be called before setting parameters
     opt_param.m = opt.corr;                                         // number of correction
-    opt_param.epsilon = (lbfgsfloatval_t) opt.epsilon * sqrt(n);    // convergence criterion
+    opt_param.epsilon = (lbfgsfloatval_t) opt.epsilon;              // convergence criterion
     opt_param.past = opt.past;                                      // stopping criterion
     opt_param.delta = (lbfgsfloatval_t) opt.delta;                  // stopping criterion
     opt_param.max_iterations = opt.max_iterations;                  // maximum iteration
@@ -441,10 +441,15 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
             if (opt.regul == RegulMethod::REGUL_L2) funcs.push_back(&l2);
             ObjectiveFunction obj_func(funcs, local_param);
             int r = optimizer.optimize(&local_param, &obj_func);
-            if (r < ret) ret = r;
+            if (r < 0) ret = -1;
             param.set_x(local_param);
             funcs.clear();
-            //std::cout << "(obs_node, ret) = " << i << ", " << r << std::endl;
+#ifdef _DEBUG_
+            std::clog << "[Parameterizer]"
+                      << "  obs_node = " << i
+                      << ", lbfgs_ret = " << r
+                      << std::endl;
+#endif
         }
         adjust_gauge(param);
         update_model(model, param);

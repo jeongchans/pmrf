@@ -44,10 +44,10 @@ class MRFParameterizer {
             : corr(100),
               epsilon(1e-5),
               past(2), 
-              delta(1e-9), 
+              delta(1e-7), 
               max_iterations(500),
-              linesearch(LBFGS_LINESEARCH_BACKTRACKING_ARMIJO),
-              max_linesearch(50) {};
+              linesearch(LBFGS_LINESEARCH_BACKTRACKING_STRONG_WOLFE),
+              max_linesearch(30) {};
 
             int corr;
             float epsilon;

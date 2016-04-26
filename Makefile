@@ -34,6 +34,15 @@ clean : test_clean prog_clean
 prog_clean:
 	rm -rf $(PROG_MRFMAIN)
 
+
+####################################
+# Increase verbosity for debugging #
+####################################
+
+debug : CXXFLAGS += -D_DEBUG_
+debug : all
+
+
 ###############
 # Test runner #
 ###############
@@ -63,6 +72,7 @@ test_clean :
 		$(MAKE) -C $$dir clean;\
 	done
 	rm -rf $(TESTRUNNER)
+
 
 ############
 # Profiler #
