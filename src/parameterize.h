@@ -41,10 +41,10 @@ class MRFParameterizer {
         class Option {
           public:
             Option()
-            : corr(10),
+            : corr(100),
               epsilon(1e-5),
               past(2), 
-              delta(1e-4), 
+              delta(1e-9), 
               max_iterations(500),
               linesearch(LBFGS_LINESEARCH_BACKTRACKING_ARMIJO),
               max_linesearch(50) {};
