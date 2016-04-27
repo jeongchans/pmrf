@@ -405,7 +405,7 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     int ret = 0;
     /* sequence weights */
     vector<string> msa = traces.get_matched_aseq_vec();
-    msa = msa_analyzer.termi_gap_remover->filter(msa);
+    //msa = msa_analyzer.termi_gap_remover->filter(msa);
     VectorXf sw = msa_analyzer.seq_weight_estimator->estimate(msa);
     float neff = sw.sum();
     /* effective number of sequences */
@@ -420,6 +420,13 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     psfm.rightCols<1>().setConstant(gap_prob);
     model.set_psfm(psfm);
     /* MRF */
+#ifdef _DEBUG_
+    //std::clog << "[Seq weight]" << std::endl << sw << std::endl;
+    std::clog << "[NEFF]"
+              << "  n = " << traces.size()
+              << ", neff = " << neff
+              << std::endl;
+#endif
     float avg_deg = 2. * (float) num_edge / (float) length;
     if (opt.regul == RegulMethod::REGUL_L2) get_reg_lambda(opt.l2_opt.lambda1, opt.l2_opt.lambda2, avg_deg, neff);
     vector<PtrObjFunc> funcs;
@@ -531,7 +538,7 @@ void MRFParameterizer::update_model(MRF& model, const AsymParameter& param) {
     for (auto it = eidxs.cbegin(); it != eidxs.cend(); ++it) {
         MapKMatrixXl w1(param.x + param.w_offset.at(EdgeIndex(it->idx1, it->idx2)), param.num_var, param.num_var);
         MapKMatrixXl w2(param.x + param.w_offset.at(EdgeIndex(it->idx2, it->idx1)), param.num_var, param.num_var);
-        model.get_edge(*it).set_weight((0.5 * (w1 + w2)).cast<float>());
+        model.get_edge(*it).set_weight((0.5 * (w1 + w2.transpose())).cast<float>());
     }
 }
 

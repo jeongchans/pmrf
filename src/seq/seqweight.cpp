@@ -108,9 +108,9 @@ VectorXf ClstrSeqWeightEstimator::estimate(const vector<string>& msa) const {
 }
 
 float ClstrSeqWeightEstimator::calc_identity(const string& seq1, const string& seq2) const {
-    size_t n = seq1.size();
-    float f = 0.;
+    float n = (float) seq1.size();
+    float m = 0.;
     for (size_t i = 0; i < n; ++i)
-        if (seq1[i] == seq2[i]) ++f;
-    return f / (float) n;
+        if (seq1[i] == seq2[i]) m += 1;
+    return m / n;
 }
