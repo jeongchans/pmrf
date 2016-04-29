@@ -139,7 +139,7 @@ TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_calc_logpot) {
 TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_calc_logz) {
     MRFParameterizer::Pseudolikelihood pll(traces, param, seq_weight, traces.size());
 
-    MatrixXl logpot = randn_matrix(param.num_var, param.num_node).unaryExpr(&exp);
+    MatrixXl logpot = randn_matrix(param.num_var, param.num_node).unaryExpr(&exp).cast<lbfgsfloatval_t>();
 
     VectorXl logz = pll.calc_logz(logpot);
     EXPECT_EQ(param.num_node, logz.size());
@@ -150,7 +150,7 @@ TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_update_obj_score) {
 
     string seq = traces[0].get_matched_aseq();
     FloatType sw = seq_weight(0);
-    MatrixXl logpot = randn_matrix(param.num_var, param.num_node).unaryExpr(&exp);
+    MatrixXl logpot = randn_matrix(param.num_var, param.num_node).unaryExpr(&exp).cast<lbfgsfloatval_t>();
     VectorXl logz = pll.calc_logz(logpot);
     lbfgsfloatval_t fx = 0.;
 
@@ -163,7 +163,7 @@ TEST_F(MRFParameterizer_Pseudolikelihood_Test, test_update_gradient) {
 
     string seq = traces[0].get_matched_aseq();
     FloatType sw = seq_weight(0);
-    MatrixXl logpot = randn_matrix(param.num_var, param.num_node).unaryExpr(&exp);
+    MatrixXl logpot = randn_matrix(param.num_var, param.num_node).unaryExpr(&exp).cast<lbfgsfloatval_t>();
     VectorXl logz = pll.calc_logz(logpot);
 
     pll.update_gradient(param.x, g, logpot, logz, 0, seq, sw);
