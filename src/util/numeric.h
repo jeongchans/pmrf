@@ -38,6 +38,10 @@ inline bool allclose(const MatrixXf& x, const MatrixXf& y, const float& atol=1e-
     return x.isApprox(y, atol);
 }
 
+inline float min2(const float& x, const float& y) {
+    return x < y ? x : y;
+}
+
 inline float square(const float x) {
     return x * x;
 }

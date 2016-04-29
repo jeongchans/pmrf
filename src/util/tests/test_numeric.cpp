@@ -2,6 +2,13 @@
 
 #include "numeric.h"
 
+TEST(NumericTest, test_min2) {
+    float x = 3.8;
+    float y = 4.3;
+    EXPECT_EQ(x, min2(x, y));
+    EXPECT_EQ(x, min2(y, x));
+}
+
 TEST(NumericTest, test_randn_vector) {
     VectorXf x = randn_vector(3);
     ASSERT_EQ(x.size(), 3);

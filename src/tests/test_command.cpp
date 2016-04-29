@@ -163,12 +163,15 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_lbfgs_param) {
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_experimental_param) {
-    int argc = 4;
-    char* argv[4] = {"build", "example.afa",
-                     "--termi-maxgap", "0.4"};
+    int argc = 8;
+    char* argv[8] = {"build", "example.afa",
+                     "--regw-lambda-max", "0.4",
+                     "--regw-lambda-min", "0.1",
+                     "--regw-lambda-sc", "2.0"};
     MRFBuildCommandLine cmd_line(argc, argv);
-
-    EXPECT_FLOAT_EQ(0.4, cmd_line.opt.msa_analyzer_opt.termi_maxgapperc);
+    EXPECT_FLOAT_EQ(0.4, cmd_line.opt.parameterizer_opt.regedge_lambda_max);
+    EXPECT_FLOAT_EQ(0.1, cmd_line.opt.parameterizer_opt.regedge_lambda_min);
+    EXPECT_FLOAT_EQ(2.0, cmd_line.opt.parameterizer_opt.regedge_lambda_sc);
 }
 
 class MRFStatCommandLine_Test : public testing::Test {

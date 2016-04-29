@@ -137,6 +137,7 @@ void MRFBuildCommandLine::show_help() {
 bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
     optind = 0;     // initialize getopt_long()
     static struct option opts[] = {
+        /* official options */
         {"msa",             required_argument,  0, 100},
         {"edge",            required_argument,  0, 'e'},
         {"output",          required_argument,  0, 'o'},
@@ -154,10 +155,11 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         {"lbfgs-delta",     required_argument,  0, 512},
         {"lbfgs-maxiter",   required_argument,  0, 513},
         {"help",            no_argument,        0, 'h'},
-        {"termi-maxgap",    required_argument,  0, -100},
-//        {"regw-lambda-max", required_argument,  0, -1},
-//        {"regw-lambda-min", required_argument,  0, -1},
-//        {"regw-lambda-sc",  required_argument,  0, -1},
+        /* experimental options */
+//        {"termi-maxgap",    required_argument,  0, -100},
+        {"regw-lambda-max", required_argument,  0, -200},
+        {"regw-lambda-min", required_argument,  0, -201},
+        {"regw-lambda-sc",  required_argument,  0, -202},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -210,18 +212,10 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
             show_help();
             exit(0);
         /* experimental options */
-        case -100:
-            if (parse_float(optarg, opt.msa_analyzer_opt.termi_maxgapperc)) break;
-            else return false;
-//        case -100:
-//            if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda_max)) break;
-//            else return false;
-//        case 1:
-//            if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda_min)) break;
-//            else return false;
-//        case 2:
-//            if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda_sc)) break;
-//            else return false;
+//        case -100: parse_float(optarg, opt.msa_analyzer_opt.termi_maxgapperc); break;
+        case -200: parse_float(optarg, opt.parameterizer_opt.regedge_lambda_max); break;
+        case -201: parse_float(optarg, opt.parameterizer_opt.regedge_lambda_min); break;
+        case -202: parse_float(optarg, opt.parameterizer_opt.regedge_lambda_sc); break;
         default:
             return false;
         }

@@ -79,16 +79,9 @@ namespace Build {
         " --lbfgs-delta <float>     stopping criterion (default: 1e-7)\n"
         " --lbfgs-maxiter <int>     maximum iteration (default: 500)\n"
         "\n"
-        " -h, --help                show this help message\n"
-        "\n"
-        "Experimental options:\n"
-        //" --no-profile              disable sequence profile\n"
-        //" --regw-lambda-max <float> maximum weighting factor for edge regularization (default: 0.1)\n"
-        //" --regw-lambda-min <float> minimum weighting factor for edge regularization (default: 0.01)\n"
-        //" --regw-lambda-sc <float>  scaling factor for edge regularization (default: 1.0)\n"
-        " --termi-maxgap <float>    maximum gap percentage at terminus regions (default: 0.1)\n";
+        " -h, --help                show this help message\n";
 }
-
+ 
 namespace Stat {
     enum Mode { MODE_PAIR, MODE_POS };
 

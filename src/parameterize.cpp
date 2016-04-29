@@ -472,14 +472,14 @@ void MRFParameterizer::get_reg_lambda(float& regnode_lambda, float& regedge_lamb
     float lambda;
 
     /* linear (plmDCA) */
-    if (neff > 500) lambda = 0.01;
-    else lambda = 0.1 - (0.1 - 0.01) * neff / 500.;
+//    if (neff > 500) lambda = 0.01;
+//    else lambda = 0.1 - (0.1 - 0.01) * neff / 500.;
 
     /* exponential */
     /* optimal parameter: lambda_max = 0.1, lambda_min = 0.01, lambda_sc = 0.5 */
-//    const float d = opt.regedge_lambda_max - opt.regedge_lambda_min;
-//    const float x = (neff - 1.) / avg_deg;
-//    lambda = d * exp(-opt.regedge_lambda_sc * x) + opt.regedge_lambda_min;
+    const float x = (neff - 1.) / min2(avg_deg, 1);
+    const float d = opt.regedge_lambda_max - opt.regedge_lambda_min;
+    lambda = d * exp(-opt.regedge_lambda_sc * x) + opt.regedge_lambda_min;
 
     /* logistric */
     /* optimal parameter: lambda_max = NA, lambda_min = NA, lambda_sc = NA */
@@ -494,16 +494,17 @@ void MRFParameterizer::get_reg_lambda(float& regnode_lambda, float& regedge_lamb
 //    const float x = (neff - 1.) / avg_deg;
 //    lambda = opt.regedge_lambda_sc / x + opt.regedge_lambda_min;
 
-    lambda *= neff;
     regnode_lambda = lambda;
     regedge_lambda = lambda;
-    if (opt.asymmetric) regedge_lambda *= 0.5;
 #ifdef _DEBUG_
     std::clog << "[Parameterizer]"
               << "  regnode_lambda = " << regnode_lambda
               << ", regedge_lambda = " << regedge_lambda
               << std::endl;
 #endif
+    regnode_lambda *= neff;
+    regedge_lambda *= neff;
+    if (opt.asymmetric) regedge_lambda *= 0.5;
 }
 
 MatrixXf MRFParameterizer::calc_profile(const TraceVector& traces) {
