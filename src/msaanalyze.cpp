@@ -24,5 +24,5 @@ MSAAnalyzer::MSAAnalyzer(Option& opt, const Alphabet& abc) {
     }
 
     termi_gap_remover = std::shared_ptr<TerminalGapRemover>(
-        new TerminalGapRemover(abc, 0.1));
+        new TerminalGapRemover(abc, opt.termi_maxgapperc));
 }

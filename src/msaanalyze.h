@@ -23,12 +23,14 @@ class MSAAnalyzer {
         Option()
         : seq_wt(MSAProcOption::SW_CLSTR),
           eff_num(MSAProcOption::NEFF_CLSTR),
-          clstr_maxidt(0.8) {};
+          clstr_maxidt(0.8),
+          termi_maxgapperc(0.1) {};
 
         MSAProcOption::SeqWeight seq_wt;
         MSAProcOption::EffSeqNum eff_num;
 
         float clstr_maxidt;
+        float termi_maxgapperc;
     };
 
     MSAAnalyzer(Option& opt, const Alphabet& abc);

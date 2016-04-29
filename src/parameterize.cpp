@@ -59,7 +59,7 @@ void MRFParameterizer::Parameter::set_opt(const Option& opt) {
     opt_param.epsilon = (lbfgsfloatval_t) opt.epsilon;              // convergence criterion
     opt_param.past = opt.past;                                      // stopping criterion
     opt_param.delta = (lbfgsfloatval_t) opt.delta;                  // stopping criterion
-    opt_param.max_iterations = opt.max_iterations;                  // maximum iteration
+    opt_param.max_iterations = opt.max_iter;                        // maximum iteration
     opt_param.linesearch = opt.linesearch;
     opt_param.max_linesearch = opt.max_linesearch;
 }
@@ -405,7 +405,7 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     int ret = 0;
     /* sequence weights */
     vector<string> msa = traces.get_matched_aseq_vec();
-    //msa = msa_analyzer.termi_gap_remover->filter(msa);
+    msa = msa_analyzer.termi_gap_remover->filter(msa);
     VectorXf sw = msa_analyzer.seq_weight_estimator->estimate(msa);
     float neff = sw.sum();
     /* effective number of sequences */

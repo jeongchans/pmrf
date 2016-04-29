@@ -45,7 +45,7 @@ class MRFParameterizer {
               epsilon(1e-5),
               past(2), 
               delta(1e-7), 
-              max_iterations(500),
+              max_iter(500),
               linesearch(LBFGS_LINESEARCH_BACKTRACKING_STRONG_WOLFE),
               max_linesearch(30) {};
 
@@ -53,7 +53,7 @@ class MRFParameterizer {
             float epsilon;
             int past;
             float delta;
-            int max_iterations;
+            int max_iter;
             int linesearch;
             int max_linesearch;;
         };

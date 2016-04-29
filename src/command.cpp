@@ -137,88 +137,91 @@ void MRFBuildCommandLine::show_help() {
 bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
     optind = 0;     // initialize getopt_long()
     static struct option opts[] = {
-        {"help", 0, 0, 0},
-        {"regul", required_argument, 0, 0},
-        {"regv-lambda", required_argument, 0, 0},
-        {"regw-lambda", required_argument, 0, 0},
-        {"regw-sc-deg", required_argument, 0, 0},
-        {"msa", required_argument, 0, 0},
-        {"edge", required_argument, 0, 0},
-        {"delta", required_argument, 0, 0},
-        {"seqwt", required_argument, 0, 0},
-        {"neff", required_argument, 0, 0},
-        {"regw-sc-neff", required_argument, 0, 0},
-        {"clstr-maxidt", required_argument, 0, 0},
-        {"symmetric", 0, 0, 0},
-        {"regw-lambda-max", required_argument, 0, 0},
-        {"regw-lambda-min", required_argument, 0, 0},
-        {"regw-lambda-sc", required_argument, 0, 0},
+        {"msa",             required_argument,  0, 100},
+        {"edge",            required_argument,  0, 'e'},
+        {"output",          required_argument,  0, 'o'},
+        {"seqwt",           required_argument,  0, 300},
+//        {"neff",            required_argument,  0, 0},
+        {"clstr-maxidt",    required_argument,  0, 310},
+        {"symmetric",       no_argument,        0, 400},
+        {"regul",           required_argument,  0, 401},
+//        {"regv-lambda",     required_argument,  0, 0},
+//        {"regw-lambda",     required_argument,  0, 0},
+//        {"regw-sc-deg",     required_argument,  0, 0},
+//        {"regw-sc-neff",    required_argument,  0, 0},
+        {"lbfgs-corr",      required_argument,  0, 510},
+        {"lbfgs-epsilon",   required_argument,  0, 511},
+        {"lbfgs-delta",     required_argument,  0, 512},
+        {"lbfgs-maxiter",   required_argument,  0, 513},
+        {"help",            no_argument,        0, 'h'},
+        {"termi-maxgap",    required_argument,  0, -100},
+//        {"regw-lambda-max", required_argument,  0, -1},
+//        {"regw-lambda-min", required_argument,  0, -1},
+//        {"regw-lambda-sc",  required_argument,  0, -1},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
     int c;
     while (true) {
-        c = getopt_long(argc, argv, "ho:", opts, &opt_idx);
+        c = getopt_long(argc, argv, "e:o:h", opts, &opt_idx);
         if (c == -1) break;
         switch (c) {
-        case 0:
-            switch (opt_idx) {
-            case 0:
-                show_help();
-                exit(0);
-            case 1:
-                if (parse_regul(optarg, opt.parameterizer_opt.regul)) break;
-                else return false;
-            case 2:
-                if (parse_float(optarg, opt.parameterizer_opt.regnode_lambda)) break;
-                else return false;
-            case 3:
-                //if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda)) break;
-                //else return false;
-            case 4:
-                //if (parse_bool(optarg, opt.parameterizer_opt.regedge_sc_deg)) break;
-                //else return false;
-            case 5:
-                if (parse_msa_fmt(optarg, opt.msa_fmt)) break;
-                else return false;
-            case 6:
-                if (parse_str(optarg, opt.eidx_filename)) break;
-                else return false;
-            case 7:
-                if (parse_float(optarg, opt.optim_opt.delta)) break;
-                else return false;
-            case 8:
-                if (parse_seq_wt(optarg, opt.msa_analyzer_opt.seq_wt)) break;
-                else return false;
-            case 9:
-                if (parse_eff_num(optarg, opt.msa_analyzer_opt.eff_num)) break;
-                else return false;
-            case 10:
-                //if (parse_bool(optarg, opt.parameterizer_opt.regedge_sc_neff)) break;
-                //else return false;
-            case 11:
-                if (parse_float(optarg, opt.msa_analyzer_opt.clstr_maxidt, 0., 1.)) break;
-                else return false;
-            case 12:
-                opt.parameterizer_opt.asymmetric = !opt.parameterizer_opt.asymmetric;
-                break;
-            case 13:
-                if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda_max)) break;
-                else return false;
-            case 14:
-                if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda_min)) break;
-                else return false;
-            case 15:
-                if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda_sc)) break;
-                else return false;
-            }
-            break;
-        case 'h':
-            show_help();
-            exit(0);
+        /* official options */
+        case 100:
+            if (parse_msa_fmt(optarg, opt.msa_fmt)) break;
+            else return false;
+        case 'e':
+            if (parse_str(optarg, opt.eidx_filename)) break;
+            else return false;
         case 'o':
             opt.out_filename = optarg;
             break;
+        case 300:
+            if (parse_seq_wt(optarg, opt.msa_analyzer_opt.seq_wt)) break;
+            else return false;
+        case 310:
+            if (parse_float(optarg, opt.msa_analyzer_opt.clstr_maxidt, 0., 1.)) break;
+            else return false;
+//        case 9:
+//            if (parse_eff_num(optarg, opt.msa_analyzer_opt.eff_num)) break;
+//            else return false;
+        case 400:
+            opt.parameterizer_opt.asymmetric = !opt.parameterizer_opt.asymmetric;
+            break;
+        case 401:
+            if (parse_regul(optarg, opt.parameterizer_opt.regul)) break;
+            else return false;
+//        case 10:
+//            //if (parse_bool(optarg, opt.parameterizer_opt.regedge_sc_neff)) break;
+//            //else return false;
+        case 510:
+            if (parse_int(optarg, opt.optim_opt.corr)) break;
+            else return false;
+        case 511:
+            if (parse_float(optarg, opt.optim_opt.epsilon)) break;
+            else return false;
+        case 512:
+            if (parse_float(optarg, opt.optim_opt.delta)) break;
+            else return false;
+        case 513:
+            if (parse_int(optarg, opt.optim_opt.max_iter)) break;
+            else return false;
+        case 'h':
+            show_help();
+            exit(0);
+        /* experimental options */
+        case -100:
+            if (parse_float(optarg, opt.msa_analyzer_opt.termi_maxgapperc)) break;
+            else return false;
+//        case -100:
+//            if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda_max)) break;
+//            else return false;
+//        case 1:
+//            if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda_min)) break;
+//            else return false;
+//        case 2:
+//            if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda_sc)) break;
+//            else return false;
         default:
             return false;
         }
