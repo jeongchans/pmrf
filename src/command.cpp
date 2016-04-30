@@ -7,6 +7,24 @@
 using std::cout;
 using std::endl;
 
+MRFCommandLine::MRFCommandLine(int argc, char** argv, const string& usage_message, const string& opt_message) 
+: argc(argc), 
+  usage_message(usage_message), 
+  opt_message(opt_message),
+  validity(false), 
+  error_message("") {
+    this->argv = (char**)malloc(sizeof(char*) * argc);
+    for (int i = 0; i < argc; ++i) {
+        this->argv[i] = (char*)malloc(strlen(argv[i]) + 1);
+        strcpy(this->argv[i], argv[i]);
+    }
+}
+
+MRFCommandLine::~MRFCommandLine() {
+    for (int i = 0; i < argc; ++i) free(argv[i]);
+    free(argv);
+}
+
 bool MRFCommandLine::parse_bool(char* optarg, bool& arg) {
     string val = string(optarg);
     if (val == "yes") arg = true;
@@ -42,26 +60,14 @@ bool MRFCommandLine::set_opt_err_msg(const string& opt, const char* optarg) {
    @class MRFMainCommandLine
  */
 
-MRFMainCommandLine::MRFMainCommandLine(int argc, char** argv) : MRFCommandLine(argc, argv) {
+MRFMainCommandLine::MRFMainCommandLine(int argc, char** argv) 
+: MRFCommandLine(argc, argv, Main::usage_message, Main::command_list_message) {
     subcmd = NONE;
     validity = parse_command_line(this->argc, (char**)(this->argv));
 }
 
 int MRFMainCommandLine::process_command(MRFCmdProcessor *processor) {
     return ((MRFMainProcessor*)processor)->run_mrf_cmd(subcmd);
-}
-
-void MRFMainCommandLine::show_help() {
-    cout << "Usage: " << PROGNAME << " <command> [<args>]" << endl
-         << endl
-         << "The following commands are available for MRF modeling and varisous applications:" << endl
-         << endl
-         << Main::command_list_message
-         << endl;
-}
-
-void MRFMainCommandLine::show_version() {
-    cout << PROGNAME << " version " << VERSION << endl;
 }
 
 bool MRFMainCommandLine::parse_command_line(int argc, char** argv) {
@@ -117,7 +123,8 @@ bool MRFMainCommandLine::parse_command_line(int argc, char** argv) {
    @class MRFBuildCommandLine
  */
 
-MRFBuildCommandLine::MRFBuildCommandLine(int argc, char** argv) : MRFCommandLine(argc, argv) {
+MRFBuildCommandLine::MRFBuildCommandLine(int argc, char** argv) 
+: MRFCommandLine(argc, argv, Build::usage_message, Build::option_message) {
     opt.out_filename = "";
     opt.msa_fmt = AFASTA;
     validity = parse_command_line(this->argc, (char**)(this->argv));
@@ -125,13 +132,6 @@ MRFBuildCommandLine::MRFBuildCommandLine(int argc, char** argv) : MRFCommandLine
 
 int MRFBuildCommandLine::process_command(MRFCmdProcessor *processor) {
     return ((MRFBuildProcessor*)processor)->build();
-}
-
-void MRFBuildCommandLine::show_help() {
-    cout << "Usage: " << PROGNAME << " build <msa_file> [options]" << endl
-         << endl
-         << Build::option_message
-         << endl;
 }
 
 bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
@@ -233,19 +233,13 @@ bool MRFBuildCommandLine::set_regul(RegulMethod::RegulMethod& arg, const string&
    @class MRFStatCommandLine
  */
 
-MRFStatCommandLine::MRFStatCommandLine(int argc, char** argv) : MRFCommandLine(argc, argv) {
+MRFStatCommandLine::MRFStatCommandLine(int argc, char** argv) 
+: MRFCommandLine(argc, argv, Stat::usage_message, Stat::option_message) {
     validity = parse_command_line(this->argc, (char**)(this->argv));
 }
 
 int MRFStatCommandLine::process_command(MRFCmdProcessor *processor) {
     return ((MRFStatProcessor*)processor)->stat();
-}
-
-void MRFStatCommandLine::show_help() {
-    cout << "Usage: " << PROGNAME << " stat <mrf_file> [options]" << endl
-         << endl
-         << Stat::option_message
-         << endl;
 }
 
 bool MRFStatCommandLine::parse_command_line(int argc, char** argv) {
@@ -292,19 +286,13 @@ bool MRFStatCommandLine::set_corr(Stat::Correct& arg, const string& val) {
    @class MRFInferCommandLine
  */
 
-MRFInferCommandLine::MRFInferCommandLine(int argc, char** argv) : MRFCommandLine(argc, argv) {
+MRFInferCommandLine::MRFInferCommandLine(int argc, char** argv) 
+: MRFCommandLine(argc, argv, Infer::usage_message, Infer::option_message) {
     validity = parse_command_line(this->argc, (char**)(this->argv));
 }
 
 int MRFInferCommandLine::process_command(MRFCmdProcessor *processor) {
     return ((MRFInferProcessor*)processor)->infer();
-}
-
-void MRFInferCommandLine::show_help() {
-    cout << "Usage: " << PROGNAME << " infer <mrf_file> <seq_file> [options]" << endl
-         << endl
-         << Infer::option_message
-         << endl;
 }
 
 bool MRFInferCommandLine::parse_command_line(int argc, char** argv) {
@@ -332,19 +320,13 @@ bool MRFInferCommandLine::parse_command_line(int argc, char** argv) {
    @class MRFShowCommandLine
  */
 
-MRFShowCommandLine::MRFShowCommandLine(int argc, char** argv) : MRFCommandLine(argc, argv) {
+MRFShowCommandLine::MRFShowCommandLine(int argc, char** argv) 
+: MRFCommandLine(argc, argv, Show::usage_message, Show::option_message) {
     validity = parse_command_line(this->argc, (char**)(this->argv));
 }
 
 int MRFShowCommandLine::process_command(MRFCmdProcessor *processor) {
     return ((MRFShowProcessor*)processor)->show();
-}
-
-void MRFShowCommandLine::show_help() {
-    cout << "Usage: " << PROGNAME << " show <mrf_file> [options]" << endl
-         << endl
-         << Show::option_message
-         << endl;
 }
 
 bool MRFShowCommandLine::parse_command_line(int argc, char** argv) {

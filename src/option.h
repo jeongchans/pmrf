@@ -11,7 +11,11 @@ using std::string;
 enum SubCommand { NONE, HELP, BUILD, INFER, STAT, SHOW };
 
 namespace Main {
+    static const string usage_message = "<command> [<args>]";
+
     static const string command_list_message =
+        "The following commands are available for MRF modeling and varisous applications:\n"
+        "\n"
         "generate MRF model\n"
         "  build        Build MRF model\n"
         "\n"
@@ -35,6 +39,8 @@ namespace Build {
         MRFParameterizer::Option parameterizer_opt;
         MRFParameterizer::Parameter::Option optim_opt;
     };
+
+    static const string usage_message = "build <msa_file> [options]";
 
     static const string option_message =
         "Input options:\n"
@@ -98,6 +104,8 @@ namespace Stat {
         bool zscore;
     };
 
+    static const string usage_message = "stat <mrf_file> [options]";
+
     static const string option_message =
         "Options:\n"
         " --mode <mode>             calculation mode of evolutionary constraints\n"
@@ -119,6 +127,8 @@ namespace Infer {
         string seq_filename;
     };
 
+    static const string usage_message = "infer <mrf_file> <seq_file> [options]";
+
     static const string option_message =
         "Options:\n"
 //        " --ref <seq_file>          calculate the score difference for <seq_file> (FASTA)\n"
@@ -131,6 +141,8 @@ namespace Show {
     struct Option {
         string mrf_filename;
     };
+
+    static const string usage_message = "show <mrf_file> [options]";
 
     static const string option_message =
         "Options:\n"

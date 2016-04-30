@@ -17,30 +17,24 @@ class MRFCmdProcessor;
 
 class MRFCommandLine {
   public:
-    MRFCommandLine(int argc, char** argv) : validity(false), error_message(""), argc(argc) {
-        this->argv = (char**)malloc(sizeof(char*) * argc);
-        for (int i = 0; i < argc; ++i) {
-            this->argv[i] = (char*)malloc(strlen(argv[i]) + 1);
-            strcpy(this->argv[i], argv[i]);
-        }
-    }
 
-    virtual ~MRFCommandLine() {
-        for (int i = 0; i < argc; ++i) free(argv[i]);
-        free(argv);
-    }
+    MRFCommandLine(int argc, char** argv, const string& usage_message, const string& opt_message);
+    virtual ~MRFCommandLine();
 
     virtual int process_command(MRFCmdProcessor *processor) = 0;
-    virtual void show_help() = 0;
 
+    void show_usage() { std::cout << "Usage: " << PROGNAME << " " << usage_message << std::endl; }
+    void show_help() { show_usage(); std::cout << std::endl << opt_message << std::endl; }
     bool is_valid() const { return validity; }
     void show_error() { std::cerr << error_message << std::endl; }
 
   protected:
-    bool validity;
-    string error_message;
     int argc;
     char **argv;
+    const string usage_message;
+    const string opt_message;
+    bool validity;
+    string error_message;
 
     virtual bool parse_command_line(int argc, char** argv) = 0;
 
@@ -57,9 +51,8 @@ class MRFMainCommandLine : public MRFCommandLine {
     MRFMainCommandLine(int argc, char** argv);
 
     virtual int process_command(MRFCmdProcessor *processor);
-    virtual void show_help();
 
-    void show_version();
+    void show_version() { std::cout << PROGNAME << " version " << VERSION << std::endl; }
 
     SubCommand subcmd;
 
@@ -72,7 +65,6 @@ class MRFBuildCommandLine : public MRFCommandLine {
     MRFBuildCommandLine(int argc, char** argv);
 
     virtual int process_command(MRFCmdProcessor *processor);
-    virtual void show_help();
 
     Build::Option opt;
 
@@ -89,7 +81,6 @@ class MRFStatCommandLine : public MRFCommandLine {
     MRFStatCommandLine(int argc, char** argv);
 
     virtual int process_command(MRFCmdProcessor *processor);
-    virtual void show_help();
 
     Stat::Option opt;
 
@@ -104,7 +95,6 @@ class MRFInferCommandLine : public MRFCommandLine {
     MRFInferCommandLine(int argc, char** argv);
 
     virtual int process_command(MRFCmdProcessor *processor);
-    virtual void show_help();
 
     Infer::Option opt;
 
@@ -117,7 +107,6 @@ class MRFShowCommandLine : public MRFCommandLine {
     MRFShowCommandLine(int argc, char** argv);
 
     virtual int process_command(MRFCmdProcessor *processor);
-    virtual void show_help();
 
     Show::Option opt;
 
