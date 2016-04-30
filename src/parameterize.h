@@ -201,8 +201,8 @@ class MRFParameterizer {
         : regul(RegulMethod::REGUL_L2), 
           //l2_opt(regnode_lambda, regedge_lambda),
           l2_opt(regnode_lambda, regedge_lambda_min),
-          regnode_lambda(0.01), 
-          //regedge_lambda(0.2),
+          regnode_lambda(UNDETERMINED_F), 
+          regedge_lambda(UNDETERMINED_F),
           regedge_lambda_max(0.1),
           regedge_lambda_min(0.01),
           regedge_lambda_sc(1.0),
@@ -212,7 +212,7 @@ class MRFParameterizer {
 
         RegulMethod::RegulMethod regul;
         float regnode_lambda;
-        //float regedge_lambda;
+        float regedge_lambda;
         //bool regedge_sc_deg;
         //bool regedge_sc_neff;
         float regedge_lambda_max;

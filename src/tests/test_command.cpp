@@ -78,8 +78,8 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_param_default) {
 
     EXPECT_EQ(true, cmd_line.opt.parameterizer_opt.asymmetric);
     EXPECT_EQ(RegulMethod::REGUL_L2, cmd_line.opt.parameterizer_opt.regul);
-//    EXPECT_FLOAT_EQ(0.01, cmd_line.opt.parameterizer_opt.regnode_lambda);
-//    EXPECT_FLOAT_EQ(0.2, cmd_line.opt.parameterizer_opt.regedge_lambda);
+    EXPECT_FLOAT_EQ(UNDETERMINED_F, cmd_line.opt.parameterizer_opt.regnode_lambda);
+    EXPECT_FLOAT_EQ(UNDETERMINED_F, cmd_line.opt.parameterizer_opt.regedge_lambda);
 //    EXPECT_EQ(true, cmd_line.opt.parameterizer_opt.regedge_sc_deg);
 //    EXPECT_EQ(true, cmd_line.opt.parameterizer_opt.regedge_sc_neff);
 
@@ -134,7 +134,6 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_learning_param) {
     char* argv[3] = {"build", "example.afa",
                       "--symmetric"};
     MRFBuildCommandLine cmd_line(argc, argv);
-
     EXPECT_EQ(false, cmd_line.opt.parameterizer_opt.asymmetric);
 }
 
@@ -142,9 +141,16 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_regul_param) {
     int argc1 = 4;
     char* argv1[4] = {"build", "example.afa",
                       "--regul", "no"};
-    MRFBuildCommandLine cmd_line(argc1, argv1);
+    MRFBuildCommandLine cmd_line1(argc1, argv1);
+    EXPECT_EQ(RegulMethod::REGUL_NONE, cmd_line1.opt.parameterizer_opt.regul);
 
-    EXPECT_EQ(RegulMethod::REGUL_NONE, cmd_line.opt.parameterizer_opt.regul);
+    int argc2 = 6;
+    char* argv2[6] = {"build", "example.afa",
+                      "--regul-vl", "0.2",
+                      "--regul-wl", "0.02"};
+    MRFBuildCommandLine cmd_line2(argc2, argv2);
+    EXPECT_FLOAT_EQ(0.2, cmd_line2.opt.parameterizer_opt.regnode_lambda);
+    EXPECT_FLOAT_EQ(0.02, cmd_line2.opt.parameterizer_opt.regedge_lambda);
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_lbfgs_param) {
@@ -155,7 +161,6 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_lbfgs_param) {
                      "--lbfgs-delta", "1e-2",
                      "--lbfgs-maxiter", "100"};
     MRFBuildCommandLine cmd_line(argc, argv);
-
     EXPECT_EQ(5, cmd_line.opt.optim_opt.corr);
     EXPECT_FLOAT_EQ(1e-3, cmd_line.opt.optim_opt.epsilon);
     EXPECT_FLOAT_EQ(1e-2, cmd_line.opt.optim_opt.delta);

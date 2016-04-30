@@ -61,12 +61,12 @@ namespace Build {
         " --clstr-maxidt <float>    maximum sequence identity between sequence clusters (default: 0.8)\n"
         "\n"
         "Parameterization options:\n"
-        " --symmetric               symmetry constraint for edge weights\n"
+        " --symmetric               use symmetry constraint on edge weights\n"
         " --regul <method>          regularization of node and edge weights\n"
         "                           no: no\n"
         "                           l2: L2 regularization (default)\n"
-        //" --regv-lambda <float>     weighting factor for node regularization (default: 0.01)\n"
-        //" --regw-lambda <float>     weighting factor for edge regularization (default: 0.2)\n"
+        " --regul-vl <float>        weighting factor for node regularization (default: auto)\n"
+        " --regul-wl <float>        weighting factor for edge regularization (default: auto)\n"
         //" --regw-sc-deg <yes|no>    scaling edge regularization w.r.t. average degree (default: yes)\n"
         //" --regw-sc-neff <yes|no>   scaling edge regularization w.r.t. effective number of sequences\n"
         //"                           (default: yes)\n"
@@ -81,7 +81,7 @@ namespace Build {
         "\n"
         " -h, --help                show this help message\n";
 }
- 
+
 namespace Stat {
     enum Mode { MODE_PAIR, MODE_POS };
 

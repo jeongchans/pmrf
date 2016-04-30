@@ -494,8 +494,8 @@ void MRFParameterizer::get_reg_lambda(float& regnode_lambda, float& regedge_lamb
 //    const float x = (neff - 1.) / avg_deg;
 //    lambda = opt.regedge_lambda_sc / x + opt.regedge_lambda_min;
 
-    regnode_lambda = lambda;
-    regedge_lambda = lambda;
+    regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda;
+    regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda;
 #ifdef _DEBUG_
     std::clog << "[Parameterizer]"
               << "  regnode_lambda = " << regnode_lambda

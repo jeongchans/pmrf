@@ -146,8 +146,8 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         {"clstr-maxidt",    required_argument,  0, 310},
         {"symmetric",       no_argument,        0, 400},
         {"regul",           required_argument,  0, 401},
-//        {"regv-lambda",     required_argument,  0, 0},
-//        {"regw-lambda",     required_argument,  0, 0},
+        {"regul-vl",        required_argument,  0, 410},
+        {"regul-wl",        required_argument,  0, 411},
 //        {"regw-sc-deg",     required_argument,  0, 0},
 //        {"regw-sc-neff",    required_argument,  0, 0},
         {"lbfgs-corr",      required_argument,  0, 510},
@@ -192,6 +192,12 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
             break;
         case 401:
             if (parse_regul(optarg, opt.parameterizer_opt.regul)) break;
+            else return false;
+        case 410:
+            if (parse_float(optarg, opt.parameterizer_opt.regnode_lambda)) break;
+            else return false;
+        case 411:
+            if (parse_float(optarg, opt.parameterizer_opt.regedge_lambda)) break;
             else return false;
 //        case 10:
 //            //if (parse_bool(optarg, opt.parameterizer_opt.regedge_sc_neff)) break;

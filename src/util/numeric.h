@@ -5,6 +5,8 @@
 
 #include <eigen3/Eigen/Core>
 
+#define UNDETERMINED_F  -1000.
+
 typedef float FloatType;
 
 //using Eigen::Dynamic;
