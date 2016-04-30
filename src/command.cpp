@@ -141,6 +141,7 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
     optind = 0;     // initialize getopt_long()
     static struct option opts[] = {
         /* official options */
+        {"help",            no_argument,        0, 'h'},
         {"msa",             required_argument,  0, 100},
         {"edge",            required_argument,  0, 'e'},
         {"output",          required_argument,  0, 'o'},
@@ -155,7 +156,6 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         {"lbfgs-epsilon",   required_argument,  0, 511},
         {"lbfgs-delta",     required_argument,  0, 512},
         {"lbfgs-maxiter",   required_argument,  0, 513},
-        {"help",            no_argument,        0, 'h'},
         /* experimental options */
 //        {"termi-maxgap",    required_argument,  0, -100},
         {"regw-lambda-max", required_argument,  0, -200},
@@ -191,10 +191,7 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         else validity = false;
         if (!validity) return set_opt_err_msg("--" + string(opts[opt_idx].name), optarg);
     }
-    if (optind != argc - 1) {
-        show_help();
-        exit(EXIT_FAILURE);
-    }
+    if (optind != argc - 1) { show_help(); exit(EXIT_FAILURE); }
     opt.msa_filename = argv[optind++];
     return true;
 }
@@ -252,11 +249,12 @@ void MRFStatCommandLine::show_help() {
 }
 
 bool MRFStatCommandLine::parse_command_line(int argc, char** argv) {
+    string sval;
     optind = 0;     // initialize getopt_long()
     static struct option opts[] = {
-        {"help", 0, 0, 0},
-        {"mode", required_argument, 0, 0},
-        {"corr", required_argument, 0, 0},
+        {"help",            no_argument,        0, 'h'},
+        {"mode",            required_argument,  0, 100},
+        {"corr",            required_argument,  0, 300},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -264,57 +262,29 @@ bool MRFStatCommandLine::parse_command_line(int argc, char** argv) {
     while (true) {
         c = getopt_long(argc, argv, "h", opts, &opt_idx);
         if (c == -1) break;
-        switch (c) {
-        case 0:
-            switch (opt_idx) {
-            case 0:
-                show_help();
-                exit(0);
-            case 1:
-                if (parse_mode(optarg, opt.mode)) break;
-                return false;
-            case 2:
-                if (parse_corr(optarg, opt.corr)) break;
-                return false;
-            }
-            break;
-        case 'h':
-            show_help();
-            exit(0);
-        default:
-            return false;
-        }
+        else if (c == 100) validity = parse_str(optarg, sval) && set_mode(opt.mode, sval);
+        else if (c == 300) validity = parse_str(optarg, sval) && set_corr(opt.corr, sval);
+        else if (c == 'h') { show_help(); exit(0); }
+        else validity = false;
+        if (!validity) return set_opt_err_msg("--" + string(opts[opt_idx].name), optarg);
     }
-    if (optind < argc) {
-        opt.mrf_filename = argv[optind];
-    } else {
-        error_message = "Not enough arguments\n";
-        return false;
-    }
+    if (optind != argc - 1) { show_help(); exit(EXIT_FAILURE); }
+    opt.mrf_filename = argv[optind++];
     return true;
 }
 
-bool MRFStatCommandLine::parse_mode(char* optarg, Stat::Mode& arg) {
-    string mode = string(optarg);
-    if (mode == "pair") arg = Stat::MODE_PAIR;
-    else if (mode == "pos") arg = Stat::MODE_POS;
-    else {
-        error_message = "Unsupported mode: " + mode;
-        return false;
-    }
+bool MRFStatCommandLine::set_mode(Stat::Mode& arg, const string& val) {
+    if (val == "pair") arg = Stat::MODE_PAIR;
+    else if (val == "pos") arg = Stat::MODE_POS;
+    else return false;
     return true;
 }
 
-bool MRFStatCommandLine::parse_corr(char* optarg, Stat::Correct& arg) {
-    int d;
-    if (!parse_int(optarg, d)) return false;
-    if (d == 0) arg = Stat::CORR_NONE;
-    else if (d == 1) arg = Stat::CORR_APC;
-    else if (d == 2) arg = Stat::CORR_NCPS;
-    else {
-        error_message = "Unsupported correction: " + string(optarg);
-        return false;
-    }
+bool MRFStatCommandLine::set_corr(Stat::Correct& arg, const string& val) {
+    if (val == "no") arg = Stat::CORR_NONE;
+    else if (val == "apc") arg = Stat::CORR_APC;
+    else if (val == "ncps") arg = Stat::CORR_NCPS;
+    else return false;
     return true;
 }
 

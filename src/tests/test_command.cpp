@@ -108,12 +108,14 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_preproc_param) {
     char* argv1[4] = {"build", "example.afa",
                       "--seqwt", "no"};
     MRFBuildCommandLine cmd_line1(argc1, argv1);
+    ASSERT_TRUE(cmd_line1.is_valid());
     EXPECT_EQ(MSAProcOption::SW_NO, cmd_line1.opt.msa_analyzer_opt.seq_wt);
 
     int argc2 = 4;
     char* argv2[4] = {"build", "example.afa",
                       "--clstr-maxidt", "0.4"};
     MRFBuildCommandLine cmd_line2(argc2, argv2);
+    ASSERT_TRUE(cmd_line2.is_valid());
     EXPECT_FLOAT_EQ(0.4, cmd_line2.opt.msa_analyzer_opt.clstr_maxidt);
 }
 
@@ -134,6 +136,7 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_learning_param) {
     char* argv[3] = {"build", "example.afa",
                       "--symmetric"};
     MRFBuildCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
     EXPECT_EQ(false, cmd_line.opt.parameterizer_opt.asymmetric);
 }
 
@@ -142,6 +145,7 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_regul_param) {
     char* argv1[4] = {"build", "example.afa",
                       "--regul", "no"};
     MRFBuildCommandLine cmd_line1(argc1, argv1);
+    ASSERT_TRUE(cmd_line1.is_valid());
     EXPECT_EQ(RegulMethod::REGUL_NONE, cmd_line1.opt.parameterizer_opt.regul);
 
     int argc2 = 6;
@@ -149,6 +153,7 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_regul_param) {
                       "--regul-vl", "0.2",
                       "--regul-wl", "0.02"};
     MRFBuildCommandLine cmd_line2(argc2, argv2);
+    ASSERT_TRUE(cmd_line2.is_valid());
     EXPECT_FLOAT_EQ(0.2, cmd_line2.opt.parameterizer_opt.regnode_lambda);
     EXPECT_FLOAT_EQ(0.02, cmd_line2.opt.parameterizer_opt.regedge_lambda);
 }
@@ -161,6 +166,7 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_lbfgs_param) {
                      "--lbfgs-delta", "1e-2",
                      "--lbfgs-maxiter", "100"};
     MRFBuildCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
     EXPECT_EQ(5, cmd_line.opt.optim_opt.corr);
     EXPECT_FLOAT_EQ(1e-3, cmd_line.opt.optim_opt.epsilon);
     EXPECT_FLOAT_EQ(1e-2, cmd_line.opt.optim_opt.delta);
@@ -174,6 +180,7 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_experimental_param) {
                      "--regw-lambda-min", "0.1",
                      "--regw-lambda-sc", "2.0"};
     MRFBuildCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
     EXPECT_FLOAT_EQ(0.4, cmd_line.opt.parameterizer_opt.regedge_lambda_max);
     EXPECT_FLOAT_EQ(0.1, cmd_line.opt.parameterizer_opt.regedge_lambda_min);
     EXPECT_FLOAT_EQ(2.0, cmd_line.opt.parameterizer_opt.regedge_lambda_sc);
@@ -183,29 +190,35 @@ class MRFStatCommandLine_Test : public testing::Test {
   protected:
 };
 
-TEST_F(MRFStatCommandLine_Test, test_parse_param) {
+TEST_F(MRFStatCommandLine_Test, test_parse_param_default) {
     int argc = 2;
-    char* argv[2] = {"stat",
-                     "aaa.mrf"};
+    char* argv[2] = {"stat", "example.mrf"};
     MRFStatCommandLine cmd_line(argc, argv);
     ASSERT_TRUE(cmd_line.is_valid());
-    EXPECT_EQ("aaa.mrf", cmd_line.opt.mrf_filename);
-
+    EXPECT_EQ("example.mrf", cmd_line.opt.mrf_filename);
     EXPECT_EQ(Stat::MODE_PAIR, cmd_line.opt.mode);
     EXPECT_EQ(Stat::CORR_APC, cmd_line.opt.corr);
 }
 
-TEST_F(MRFStatCommandLine_Test, test_parse_opt_param) {
-    int argc = 6;
-    char* argv[6] = {"stat",
-                     "aaa.mrf",
-                     "--mode", "pos",
-                     "--corr", "2"};
+TEST_F(MRFStatCommandLine_Test, test_parse_pos_param) {
+    int argc = 4;
+    char* argv[4] = {"stat", "example.mrf",
+                     "--mode", "pos"};
     MRFStatCommandLine cmd_line(argc, argv);
     ASSERT_TRUE(cmd_line.is_valid());
-    EXPECT_EQ("aaa.mrf", cmd_line.opt.mrf_filename);
-
+    EXPECT_EQ("example.mrf", cmd_line.opt.mrf_filename);
     EXPECT_EQ(Stat::MODE_POS, cmd_line.opt.mode);
+}
+
+TEST_F(MRFStatCommandLine_Test, test_parse_pair_param) {
+    int argc = 6;
+    char* argv[6] = {"stat", "example.mrf",
+                     "--mode", "pair",
+                     "--corr", "ncps"};
+    MRFStatCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
+    EXPECT_EQ("example.mrf", cmd_line.opt.mrf_filename);
+    EXPECT_EQ(Stat::MODE_PAIR, cmd_line.opt.mode);
     EXPECT_EQ(Stat::CORR_NCPS, cmd_line.opt.corr);
 }
 

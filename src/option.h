@@ -103,10 +103,10 @@ namespace Stat {
         " --mode <mode>             calculation mode of evolutionary constraints\n"
         "                           pos: positional mode\n"
         "                           pair: pairwise mode (default)\n"
-        " --corr <int>              pairwise coevolution score correction\n"
-        "                           0: no correction\n"
-        "                           1: average product (default)\n"
-        "                           2: normalized coevolutionary pattern similarity\n"
+        " --corr <method>           pairwise coevolution score correction\n"
+        "                           no: no correction\n"
+        "                           apc: average product (default)\n"
+        "                           ncps: normalized coevolutionary pattern similarity\n"
         "\n"
         " -h, --help                show this help message\n";
 }
