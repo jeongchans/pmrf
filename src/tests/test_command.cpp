@@ -228,12 +228,11 @@ class MRFInferCommandLine_Test : public testing::Test {
 
 TEST_F(MRFInferCommandLine_Test, test_parse_param) {
     int argc = 3;
-    char* argv[3] = {"infer",
-                     "aaa.mrf", "aaa.fa"};
+    char* argv[3] = {"infer", "example.mrf", "example.fa"};
     MRFInferCommandLine cmd_line(argc, argv);
     ASSERT_TRUE(cmd_line.is_valid());
-    EXPECT_EQ("aaa.mrf", cmd_line.opt.mrf_filename);
-    EXPECT_EQ("aaa.fa", cmd_line.opt.seq_filename);
+    EXPECT_EQ("example.mrf", cmd_line.opt.mrf_filename);
+    EXPECT_EQ("example.fa", cmd_line.opt.seq_filename);
 }
 
 class MRFShowCommandLine_Test : public testing::Test {
@@ -242,9 +241,8 @@ class MRFShowCommandLine_Test : public testing::Test {
 
 TEST_F(MRFShowCommandLine_Test, test_parse_param) {
     int argc = 2;
-    char* argv[2] = {"show",
-                     "aaa.mrf"};
+    char* argv[2] = {"show", "example.mrf"};
     MRFShowCommandLine cmd_line(argc, argv);
     ASSERT_TRUE(cmd_line.is_valid());
-    EXPECT_EQ("aaa.mrf", cmd_line.opt.mrf_filename);
+    EXPECT_EQ("example.mrf", cmd_line.opt.mrf_filename);
 }

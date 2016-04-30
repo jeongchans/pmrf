@@ -103,6 +103,8 @@ namespace Stat {
         " --mode <mode>             calculation mode of evolutionary constraints\n"
         "                           pos: positional mode\n"
         "                           pair: pairwise mode (default)\n"
+        "\n"
+        "Pairwise coevolution options:\n"
         " --corr <method>           pairwise coevolution score correction\n"
         "                           no: no correction\n"
         "                           apc: average product (default)\n"

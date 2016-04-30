@@ -310,7 +310,7 @@ void MRFInferCommandLine::show_help() {
 bool MRFInferCommandLine::parse_command_line(int argc, char** argv) {
     optind = 0;     // initialize getopt_long()
     static struct option opts[] = {
-        {"help", 0, 0, 0},
+        {"help",            no_argument,        0, 'h'},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -318,28 +318,13 @@ bool MRFInferCommandLine::parse_command_line(int argc, char** argv) {
     while (true) {
         c = getopt_long(argc, argv, "h", opts, &opt_idx);
         if (c == -1) break;
-        switch (c) {
-        case 0:
-            switch (opt_idx) {
-            case 0:
-                show_help();
-                exit(0);
-            }
-            break;
-        case 'h':
-            show_help();
-            exit(0);
-        default:
-            return false;
-        }
+        else if (c == 'h') { show_help(); exit(0); }
+        else validity = false;
+        if (!validity) return set_opt_err_msg("--" + string(opts[opt_idx].name), optarg);
     }
-    if (optind < argc) {
-        opt.mrf_filename = argv[optind++];
-        opt.seq_filename = argv[optind];
-    } else {
-        error_message = "Not enough arguments\n";
-        return false;
-    }
+    if (optind != argc - 2) { show_help(); exit(EXIT_FAILURE); }
+    opt.mrf_filename = argv[optind++];
+    opt.seq_filename = argv[optind++];
     return true;
 }
 
@@ -365,7 +350,7 @@ void MRFShowCommandLine::show_help() {
 bool MRFShowCommandLine::parse_command_line(int argc, char** argv) {
     optind = 0;     // initialize getopt_long()
     static struct option opts[] = {
-        {"help", 0, 0, 0},
+        {"help",            no_argument,        0, 'h'},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -373,26 +358,11 @@ bool MRFShowCommandLine::parse_command_line(int argc, char** argv) {
     while (true) {
         c = getopt_long(argc, argv, "h", opts, &opt_idx);
         if (c == -1) break;
-        switch (c) {
-        case 0:
-            switch (opt_idx) {
-            case 0:
-                show_help();
-                exit(0);
-            }
-            break;
-        case 'h':
-            show_help();
-            exit(0);
-        default:
-            return false;
-        }
+        else if (c == 'h') { show_help(); exit(0); }
+        else validity = false;
+        if (!validity) return set_opt_err_msg("--" + string(opts[opt_idx].name), optarg);
     }
-    if (optind < argc) {
-        opt.mrf_filename = argv[optind++];
-    } else {
-        error_message = "Not enough arguments\n";
-        return false;
-    }
+    if (optind != argc - 1) { show_help(); exit(EXIT_FAILURE); }
+    opt.mrf_filename = argv[optind++];
     return true;
 }
