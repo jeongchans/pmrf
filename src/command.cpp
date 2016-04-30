@@ -69,7 +69,7 @@ bool MRFMainCommandLine::parse_command_line(int argc, char** argv) {
         else if (cmd == "stat") subcmd = STAT;
         else if (cmd == "show") subcmd = SHOW;
         else {
-            error_message = string("Unknown command: '") + cmd + "'\n" + "Use `pmrf --help'\n";
+            error_message = string("Unknown command: '") + cmd + "'\n" + "Use `pmrf --help'";
             return false;
         }
         return true;
@@ -84,7 +84,7 @@ bool MRFMainCommandLine::parse_command_line(int argc, char** argv) {
     while (true) {
         c = getopt_long(argc, argv, "h", opts, &opt_idx);
         if (c == -1) break;
-        else if (c == 'v') { show_version(); exit(0); }
+        else if (c == 100) { show_version(); exit(0); }
         else if (c == 'h') { show_help(); exit(0); }
         else return false;
     }
