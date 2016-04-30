@@ -4,7 +4,6 @@
 #include <string>
 #include <iostream>
 #include <cstring>
-#include <cfloat>
 
 #include "option.h"
 
@@ -47,8 +46,10 @@ class MRFCommandLine {
 
     bool parse_bool(char* optarg, bool& arg);
     bool parse_int(char* optarg, int& arg);
-    bool parse_float(char* optarg, float& arg, const float& minval=FLT_MIN, const float& maxval=FLT_MAX);
+    bool parse_float(char* optarg, float& arg);
     bool parse_str(char* optarg, string& arg);
+    bool set_opt_err_msg(const string& opt, const char* optarg);
+    template <typename T> bool set_val(T& arg, const T& val) { arg = val; return true; }
 };
 
 class MRFMainCommandLine : public MRFCommandLine {
@@ -77,10 +78,10 @@ class MRFBuildCommandLine : public MRFCommandLine {
 
   protected:
     virtual bool parse_command_line(int argc, char** argv);
-    bool parse_msa_fmt(char* optarg, MSAFormat& arg);
-    bool parse_regul(char* optarg, RegulMethod::RegulMethod& arg);
-    bool parse_seq_wt(char* optarg, MSAProcOption::SeqWeight& arg);
-    bool parse_eff_num(char* optarg, MSAProcOption::EffSeqNum& arg);
+    bool set_msa_fmt(MSAFormat& arg, const string& val);
+    bool set_seq_wt(MSAProcOption::SeqWeight& arg, const string& val);
+    bool set_regul(RegulMethod::RegulMethod& arg, const string& val);
+    //bool parse_eff_num(char* optarg, MSAProcOption::EffSeqNum& arg);
 };
 
 class MRFStatCommandLine : public MRFCommandLine {
