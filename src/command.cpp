@@ -25,17 +25,6 @@ MRFCommandLine::~MRFCommandLine() {
     free(argv);
 }
 
-bool MRFCommandLine::parse_bool(char* optarg, bool& arg) {
-    string val = string(optarg);
-    if (val == "yes") arg = true;
-    else if (val == "no") arg = false;
-    else {
-        error_message = "Not acceptable: " + string(optarg);
-        return false;
-    }
-    return true;
-}
-
 bool MRFCommandLine::parse_int(char* optarg, int& arg) {
     arg = atoi(optarg);
     return true;
@@ -71,10 +60,7 @@ int MRFMainCommandLine::process_command(MRFCmdProcessor *processor) {
 }
 
 bool MRFMainCommandLine::parse_command_line(int argc, char** argv) {
-    if (argc < 2) {
-        show_help();
-        exit(0);
-    }
+    if (argc < 2) { show_help(); exit(0); }
     if (argv[1][0] != '-') {
         string cmd = argv[1];
         if (cmd == "help") subcmd = HELP;
@@ -83,14 +69,14 @@ bool MRFMainCommandLine::parse_command_line(int argc, char** argv) {
         else if (cmd == "stat") subcmd = STAT;
         else if (cmd == "show") subcmd = SHOW;
         else {
-            error_message = string("Unknown command: ") + cmd + "\n";
+            error_message = string("Unknown command: '") + cmd + "'\n" + "Use `pmrf --help'\n";
             return false;
         }
         return true;
     }
     static struct option opts[] = {
-        {"help", 0, 0, 0},
-        {"version", 0, 0, 0},
+        {"help",            no_argument,        0, 'h'},
+        {"version",         no_argument,        0, 100},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -98,23 +84,9 @@ bool MRFMainCommandLine::parse_command_line(int argc, char** argv) {
     while (true) {
         c = getopt_long(argc, argv, "h", opts, &opt_idx);
         if (c == -1) break;
-        switch (c) {
-        case 0:
-            switch (opt_idx) {
-            case 0:
-                show_help();
-                exit(0);
-            case 1:
-                show_version();
-                exit(0);
-            }
-            break;
-        case 'h':
-            show_help();
-            exit(0);
-        default:
-            return false;
-        }
+        else if (c == 'v') { show_version(); exit(0); }
+        else if (c == 'h') { show_help(); exit(0); }
+        else return false;
     }
     return true;
 }

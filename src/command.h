@@ -38,12 +38,12 @@ class MRFCommandLine {
 
     virtual bool parse_command_line(int argc, char** argv) = 0;
 
-    bool parse_bool(char* optarg, bool& arg);
     bool parse_int(char* optarg, int& arg);
     bool parse_float(char* optarg, float& arg);
     bool parse_str(char* optarg, string& arg);
-    bool set_opt_err_msg(const string& opt, const char* optarg);
     template <typename T> bool set_val(T& arg, const T& val) { arg = val; return true; }
+
+    bool set_opt_err_msg(const string& opt, const char* optarg);
 };
 
 class MRFMainCommandLine : public MRFCommandLine {

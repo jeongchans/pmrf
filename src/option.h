@@ -12,7 +12,6 @@ enum SubCommand { NONE, HELP, BUILD, INFER, STAT, SHOW };
 
 namespace Main {
     static const string usage_message = "<command> [<args>]";
-
     static const string command_list_message =
         "The following commands are available for MRF modeling and varisous applications:\n"
         "\n"
@@ -41,7 +40,6 @@ namespace Build {
     };
 
     static const string usage_message = "build <msa_file> [options]";
-
     static const string option_message =
         "Input options:\n"
         " --msa <fmt>               choose format of MSA file\n"
@@ -90,8 +88,7 @@ namespace Build {
 
 namespace Stat {
     enum Mode { MODE_PAIR, MODE_POS };
-
-    enum Correct { CORR_NONE = 0, CORR_APC = 1, CORR_NCPS = 2 };
+    enum Correct { CORR_NONE, CORR_APC, CORR_NCPS };
 
     class Option {
       public:
@@ -105,7 +102,6 @@ namespace Stat {
     };
 
     static const string usage_message = "stat <mrf_file> [options]";
-
     static const string option_message =
         "Options:\n"
         " --mode <mode>             calculation mode of evolutionary constraints\n"
@@ -128,7 +124,6 @@ namespace Infer {
     };
 
     static const string usage_message = "infer <mrf_file> <seq_file> [options]";
-
     static const string option_message =
         "Options:\n"
 //        " --ref <seq_file>          calculate the score difference for <seq_file> (FASTA)\n"
@@ -143,7 +138,6 @@ namespace Show {
     };
 
     static const string usage_message = "show <mrf_file> [options]";
-
     static const string option_message =
         "Options:\n"
 //        " --brief                   show only the brief information\n"
