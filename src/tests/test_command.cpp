@@ -174,16 +174,18 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_lbfgs_param) {
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_experimental_param) {
-    int argc = 8;
-    char* argv[8] = {"build", "example.afa",
-                     "--regw-lambda-max", "0.4",
-                     "--regw-lambda-min", "0.1",
-                     "--regw-lambda-sc", "2.0"};
+    int argc = 10;
+    char* argv[10] = {"build", "example.afa",
+                      "--reg-lambda-c1", "0.4",
+                      "--reg-lambda-c2", "0.1",
+                      "--reg-lambda-c3", "0.8",
+                      "--reg-lambda-c4", "0.2"};
     MRFBuildCommandLine cmd_line(argc, argv);
     ASSERT_TRUE(cmd_line.is_valid());
-    EXPECT_FLOAT_EQ(0.4, cmd_line.opt.parameterizer_opt.regedge_lambda_max);
-    EXPECT_FLOAT_EQ(0.1, cmd_line.opt.parameterizer_opt.regedge_lambda_min);
-    EXPECT_FLOAT_EQ(2.0, cmd_line.opt.parameterizer_opt.regedge_lambda_sc);
+    EXPECT_FLOAT_EQ(0.4, cmd_line.opt.parameterizer_opt.reg_lambda_c1);
+    EXPECT_FLOAT_EQ(0.1, cmd_line.opt.parameterizer_opt.reg_lambda_c2);
+    EXPECT_FLOAT_EQ(0.8, cmd_line.opt.parameterizer_opt.reg_lambda_c3);
+    EXPECT_FLOAT_EQ(0.2, cmd_line.opt.parameterizer_opt.reg_lambda_c4);
 }
 
 class MRFStatCommandLine_Test : public testing::Test {

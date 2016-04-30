@@ -40,6 +40,10 @@ inline bool allclose(const MatrixXf& x, const MatrixXf& y, const float& atol=1e-
     return x.isApprox(y, atol);
 }
 
+inline float max2(const float& x, const float& y) {
+    return x > y ? x : y;
+}
+
 inline float min2(const float& x, const float& y) {
     return x < y ? x : y;
 }

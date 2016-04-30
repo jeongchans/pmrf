@@ -2,6 +2,13 @@
 
 #include "numeric.h"
 
+TEST(NumericTest, test_max2) {
+    float x = 3.8;
+    float y = 4.3;
+    EXPECT_EQ(y, max2(x, y));
+    EXPECT_EQ(y, max2(y, x));
+}
+
 TEST(NumericTest, test_min2) {
     float x = 3.8;
     float y = 4.3;

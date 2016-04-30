@@ -199,15 +199,15 @@ class MRFParameterizer {
       public:
         Option()
         : regul(RegulMethod::REGUL_L2), 
-          //l2_opt(regnode_lambda, regedge_lambda),
-          l2_opt(regnode_lambda, regedge_lambda_min),
+          l2_opt(regnode_lambda, regedge_lambda),
           regnode_lambda(UNDETERMINED_F), 
           regedge_lambda(UNDETERMINED_F),
-          regedge_lambda_max(0.1),
-          regedge_lambda_min(0.01),
-          regedge_lambda_sc(1.0),
           //regedge_sc_deg(true),
           //regedge_sc_neff(true),
+          reg_lambda_c1(0.1),
+          reg_lambda_c2(0.01),
+          reg_lambda_c3(0.1),
+          reg_lambda_c4(0.01),
           asymmetric(true) {};
 
         RegulMethod::RegulMethod regul;
@@ -215,9 +215,10 @@ class MRFParameterizer {
         float regedge_lambda;
         //bool regedge_sc_deg;
         //bool regedge_sc_neff;
-        float regedge_lambda_max;
-        float regedge_lambda_min;
-        float regedge_lambda_sc;
+        float reg_lambda_c1;
+        float reg_lambda_c2;
+        float reg_lambda_c3;
+        float reg_lambda_c4;
 
         bool asymmetric;
 

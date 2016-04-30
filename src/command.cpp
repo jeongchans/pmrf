@@ -129,10 +129,10 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         {"lbfgs-delta",     required_argument,  0, 512},
         {"lbfgs-maxiter",   required_argument,  0, 513},
         /* experimental options */
-//        {"termi-maxgap",    required_argument,  0, -100},
-        {"regw-lambda-max", required_argument,  0, -200},
-        {"regw-lambda-min", required_argument,  0, -201},
-        {"regw-lambda-sc",  required_argument,  0, -202},
+        {"reg-lambda-c1",   required_argument,  0, -200},
+        {"reg-lambda-c2",   required_argument,  0, -201},
+        {"reg-lambda-c3",   required_argument,  0, -202},
+        {"reg-lambda-c4",   required_argument,  0, -203},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -156,10 +156,10 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         else if (c == 513) validity = parse_int(optarg, ival) && ival > 0 && set_val<int>(opt.optim_opt.max_iter, ival);
         else if (c == 'h') { show_help(); exit(0); }
         /* experimental options */
-//        else if (c == -100) validity = parse_float(optarg, opt.msa_analyzer_opt.termi_maxgapperc);
-        else if (c == -200) validity = parse_float(optarg, opt.parameterizer_opt.regedge_lambda_max);
-        else if (c == -201) validity = parse_float(optarg, opt.parameterizer_opt.regedge_lambda_min);
-        else if (c == -202) validity = parse_float(optarg, opt.parameterizer_opt.regedge_lambda_sc);
+        else if (c == -200) validity = parse_float(optarg, opt.parameterizer_opt.reg_lambda_c1);
+        else if (c == -201) validity = parse_float(optarg, opt.parameterizer_opt.reg_lambda_c2);
+        else if (c == -202) validity = parse_float(optarg, opt.parameterizer_opt.reg_lambda_c3);
+        else if (c == -203) validity = parse_float(optarg, opt.parameterizer_opt.reg_lambda_c4);
         else validity = false;
         if (!validity) return set_opt_err_msg("--" + string(opts[opt_idx].name), optarg);
     }
