@@ -479,21 +479,20 @@ void MRFParameterizer::get_reg_lambda(float& regnode_lambda, float& regedge_lamb
     /* method #1 */
     /* exponentially decrease as sample size increases */
     /* optimal parameter: lambda_c1 = NA, lambda_c2 = NA */
-    float x = avg_deg > 0. ? exp(-neff / avg_deg) : 0.;
-    float lambda = opt.reg_lambda_c1 * x + opt.reg_lambda_c2;
-    regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda;
-    regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda;
+//    float x = avg_deg > 0. ? exp(-neff / avg_deg) : 0.;
+//    float lambda = opt.reg_lambda_c1 * x + opt.reg_lambda_c2;
+//    regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda;
+//    regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda;
 
     /* method #2 */
     /* extend the method #1 to combine both sample size and native protein structure */
     /* lambda : determined based on sample size */
     /* lambda2 : determined based on both sample size and native protein structure */
-    //const float x = neff / max2(avg_deg, 1);
-//    float x = avg_deg > 0. ? exp(-neff / avg_deg) : 0.;
-//    float lambda1 = opt.reg_lambda_c1 * x + opt.reg_lambda_c2;
-//    float lambda2 = opt.reg_lambda_c3 * x + opt.reg_lambda_c4 * avg_deg;
-//    regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda1;
-//    regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda2;
+    float x = avg_deg > 0. ? exp(-neff / avg_deg) : 0.;
+    float lambda1 = opt.reg_lambda_c1 * x + opt.reg_lambda_c2;
+    float lambda2 = opt.reg_lambda_c3 * x + opt.reg_lambda_c4 * avg_deg;
+    regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda1;
+    regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda2;
 
     /* logistric */
     /* optimal parameter: lambda_max = NA, lambda_min = NA, lambda_sc = NA */
