@@ -32,7 +32,7 @@ clean : test_clean prog_clean
 	done
 
 prog_clean:
-	rm -rf $(PROG_MRFMAIN)
+	rm -f $(PROG_MRFMAIN)
 
 
 ####################################
@@ -71,7 +71,7 @@ test_clean :
 	@for dir in $(TEST_DIRS); do\
 		$(MAKE) -C $$dir clean;\
 	done
-	rm -rf $(TESTRUNNER)
+	rm -f $(TESTRUNNER)
 
 
 ############

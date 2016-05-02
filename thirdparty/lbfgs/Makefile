@@ -7,4 +7,4 @@ OBJECTS     = $(patsubst %.cpp, %.o, $(wildcard *.cpp))
 all : $(OBJECTS)
 
 clean :
-	rm -rf *.o 
+	rm -f *.o 

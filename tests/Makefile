@@ -8,4 +8,4 @@ INCPATH     = -I ../
 all : $(OBJECTS)
 
 clean :
-	rm -rf *.o 
+	rm -f *.o 

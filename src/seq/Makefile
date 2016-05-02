@@ -1,5 +1,5 @@
 OBJECTS     = $(patsubst %.cpp, %.o, $(wildcard *.cpp))
-INCPATH     = -I ../
+INCPATH     = -I ../ -I ../../thirdparty/
 
 .SUFFIXES : .o .cpp
 %.o : %.cpp
@@ -8,4 +8,4 @@ INCPATH     = -I ../
 all : $(OBJECTS)
 
 clean :
-	rm -rf *.o 
+	rm -f *.o 
