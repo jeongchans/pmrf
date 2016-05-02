@@ -10,6 +10,10 @@
 #include "mrf.h"
 #include "msaanalyze.h"
 
+#ifdef _TEST_
+#include <gtest/gtest_prod.h>
+#endif
+
 using std::string;
 using std::unordered_map;
 
@@ -148,10 +152,12 @@ class MRFParameterizer {
         void update_obj_score(lbfgsfloatval_t& fx, const MatrixXl& logpot, const VectorXl& logz, const size_t m, const string& seq, const float& sw);
         void update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const MatrixXl& logpot, const VectorXl& logz, const size_t m, const string& seq, const float& sw);
 
+#ifdef _TEST_
         FRIEND_TEST(MRFParameterizer_Pseudolikelihood_Test, test_calc_logpot);
         FRIEND_TEST(MRFParameterizer_Pseudolikelihood_Test, test_calc_logz);
         FRIEND_TEST(MRFParameterizer_Pseudolikelihood_Test, test_update_obj_score);
         FRIEND_TEST(MRFParameterizer_Pseudolikelihood_Test, test_update_gradient);
+#endif
     };
 
     // Asymmetric pseudolikelihood function
@@ -243,7 +249,9 @@ class MRFParameterizer {
     MatrixXf calc_profile(const TraceVector& traces);
     void get_reg_lambda(float& regnode_lambda, float& regedge_lambda, const float& avg_deg, const float& neff);
 
+#ifdef _TEST_
     FRIEND_TEST(MRFParameterizer_Test, test_update_model);
+#endif
 };
 
 #endif

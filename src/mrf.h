@@ -6,8 +6,6 @@
 #include <map>
 #include <unordered_map>
 
-#include <gtest/gtest_prod.h>
-
 #include "util/common.h"
 #include "seq/alphabet.h"
 
