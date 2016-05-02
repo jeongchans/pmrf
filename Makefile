@@ -1,7 +1,7 @@
 export CXX          = g++
 export CXXFLAGS     = -std=c++11 -DNDEBUG
 
-LBFGS_MODULE 	    = lbfgs
+LBFGS_MODULE 	    = thirdparty/lbfgs
 LBFGS_SRC_DIR 	    = $(LBFGS_MODULE)
 
 SRC_DIR 			= src $(addprefix src/, seq util)
