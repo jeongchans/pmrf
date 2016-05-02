@@ -4,9 +4,6 @@ This is an evolutionary analysis tool using Markov random field.
 
 ## Installation
 
-### Requirements
-The [Eigen] library is essential for building and running this software. We used the [Eigen], version 3.2.8.
-
 ### Download
 Download the latest release from the [PMRF repository].
 
@@ -17,7 +14,6 @@ Download the latest release from the [PMRF repository].
   ``
   $ make
   ``
-
 3. The executable will be placed in the directory.
 
 
@@ -29,7 +25,6 @@ Show the general help page.
   ``
   $ pmrf --help
   ``
-
 Show the help page for a specific command.
   ``
   $ pmrf <COMMAND> --help
@@ -51,8 +46,15 @@ TBA
 TBA
 
 
+## Licenses
+
+- PMRF is distributed under the MIT license. Please see the [file](LICENSE).
+- PMRF includes the [libLBFGS] (currently version 1.10) library. [libLBFGS] is licensed under the MIT license. Please see the [file](thirdparty/lbfgs/lbfgs.h).
+- PMRF includes the [Eigen] (currently version 3.2.8) library. [Eigen] is licensed under the MPL2 license. Please see the [file](thirdparty/eigen3/COPYING.README).
+
+
 ## Acknowledgements
-This software includes and uses [libLBFGS] (http://www.chokkan.org/software/liblbfgs/).
+This software includes and uses [libLBFGS] and [Eigen] libraries.
 
 
 [PMRF repository]: https://github.com/jeongchans/pmrf/releases
