@@ -4,6 +4,9 @@ This is an evolutionary analysis tool using Markov random field.
 
 ## Installation
 
+### Requirements
+PMRF does not have any dependencies other than the C++11 standard library.
+
 ### Download
 Download the latest release from the [PMRF repository].
 
@@ -47,16 +50,25 @@ TBA
 
 
 ## Licenses
+PMRF is distributed under the MIT license. Please see the [LICENSE](LICENSE) file for details.
 
-- PMRF is distributed under the MIT license. Please see the [file](LICENSE).
-- PMRF includes the [libLBFGS] (currently version 1.10) library. [libLBFGS] is licensed under the MIT license. Please see the [file](thirdparty/lbfgs/lbfgs.h).
-- PMRF includes the [Eigen] (currently version 3.2.8) library. [Eigen] is licensed under the MPL2 license. Please see the [file](thirdparty/eigen3/COPYING.README).
+Note that PMRF includes and uses third-party libraries licensed as below.
+
+  - libLBFGS
+    Files: thirdparty/lbfgs/*
+    License: MIT license
+    Please see the [thirdparty/lbfgs/lbfgs.h](thirdparty/lbfgs/lbfgs.h) file for details.
+
+  - Eigen
+    Files: thirdparty/eigen/*
+    License: MPL2 license
+    Please see the [thirdparty/eigen3/COPYING.README](thirdparty/eigen3/COPYING.README) file for details.
 
 
 ## Acknowledgements
-This software includes and uses [libLBFGS] and [Eigen] libraries.
+This software includes and uses [libLBFGS] (currently version 1.10) and [Eigen] libraries (currently version 3.2.8).
 
 
 [PMRF repository]: https://github.com/jeongchans/pmrf/releases
-[Eigen]: http://eigen.tuxfamily.org/
 [libLBFGS]: http://www.chokkan.org/software/liblbfgs/
+[Eigen]: http://eigen.tuxfamily.org/
