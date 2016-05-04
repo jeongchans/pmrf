@@ -59,10 +59,6 @@ MRFMainProcessor::MRFMainProcessor(int argc, char** argv) {
     this->argv = argv;
 }
 
-MRFMainProcessor::~MRFMainProcessor() {
-    delete cmd_line;
-}
-
 int MRFMainProcessor::run_mrf_cmd(const SubCommand& cmd) {
     argv++;
     argc--;
@@ -90,10 +86,6 @@ int MRFMainProcessor::run_mrf_cmd(const SubCommand& cmd) {
 MRFBuildProcessor::MRFBuildProcessor(int argc, char** argv) : abc(AA) {
     cmd_line = new MRFBuildCommandLine(argc, argv);
     opt = &(((MRFBuildCommandLine*)cmd_line)->opt);
-}
-
-MRFBuildProcessor::~MRFBuildProcessor() {
-    delete cmd_line;
 }
 
 int MRFBuildProcessor::build() {
@@ -144,10 +136,6 @@ void MRFBuildProcessor::export_mrf(const MRF& model) {
 MRFStatProcessor::MRFStatProcessor(int argc, char** argv) : abc(AA) {
     cmd_line = new MRFStatCommandLine(argc, argv);
     opt = &(((MRFStatCommandLine*)cmd_line)->opt);
-}
-
-MRFStatProcessor::~MRFStatProcessor() {
-    delete cmd_line;
 }
 
 int MRFStatProcessor::stat() {
@@ -308,10 +296,6 @@ MRFInferProcessor::MRFInferProcessor(int argc, char** argv) : abc(AA) {
     opt = &(((MRFInferCommandLine*)cmd_line)->opt);
 }
 
-MRFInferProcessor::~MRFInferProcessor() {
-    delete cmd_line;
-}
-
 int MRFInferProcessor::infer() {
     MRF model = read_mrf(opt->mrf_filename, abc);
     Score ref_score = calc_score(model, model.get_seq());
@@ -391,10 +375,6 @@ double MRFInferProcessor::calc_prof_ll(const MRF& model, const string& aseq) {
 MRFShowProcessor::MRFShowProcessor(int argc, char** argv) : abc(AA) {
     cmd_line = new MRFShowCommandLine(argc, argv);
     opt = &(((MRFShowCommandLine*)cmd_line)->opt);
-}
-
-MRFShowProcessor::~MRFShowProcessor() {
-    delete cmd_line;
 }
 
 int MRFShowProcessor::show() {

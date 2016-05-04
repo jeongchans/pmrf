@@ -37,7 +37,7 @@ class MRFCmdProcessor {
 class MRFMainProcessor : public MRFCmdProcessor {
   public:
     MRFMainProcessor(int argc, char** argv);
-    ~MRFMainProcessor();
+    ~MRFMainProcessor() { delete cmd_line; }
 
     int run_mrf_cmd(const SubCommand& cmd);
 
@@ -49,7 +49,7 @@ class MRFMainProcessor : public MRFCmdProcessor {
 class MRFBuildProcessor : public MRFCmdProcessor {
   public:
     MRFBuildProcessor(int argc, char** argv);
-    ~MRFBuildProcessor();
+    ~MRFBuildProcessor() { delete cmd_line; }
 
     int build();
 
@@ -86,7 +86,7 @@ class MRFStatProcessor : public MRFCmdProcessor {
 
   public:
     MRFStatProcessor(int argc, char** argv);
-    ~MRFStatProcessor();
+    ~MRFStatProcessor() { delete cmd_line; }
 
     int stat();
 
@@ -111,7 +111,7 @@ class MRFInferProcessor : public MRFCmdProcessor {
     };
 
     MRFInferProcessor(int argc, char** argv);
-    ~MRFInferProcessor();
+    ~MRFInferProcessor() { delete cmd_line; }
 
     int infer();
 
@@ -127,7 +127,7 @@ class MRFInferProcessor : public MRFCmdProcessor {
 class MRFShowProcessor : public MRFCmdProcessor {
   public:
     MRFShowProcessor(int argc, char** argv);
-    ~MRFShowProcessor();
+    ~MRFShowProcessor() { delete cmd_line; }
 
     int show();
 
