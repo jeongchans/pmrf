@@ -32,6 +32,14 @@ TEST_F(EffSeqNumEstimatorTest, test_exp_entropy_eff_seq_num_estimator) {
     ExpEntropyEffSeqNumEstimator estimator(abc, &seq_weight_estimator);
     //EXPECT_TRUE(allclose(2.1431, estimator.estimate(msa1))) << estimator.estimate(msa1);  // base=2, range=[1, 75.33]
     EXPECT_TRUE(allclose(1.6961, estimator.estimate(msa1))) << estimator.estimate(msa1);    // base=e, range=[1, 20]
+    EXPECT_TRUE(allclose(1.5881, estimator.estimate(msa2))) << estimator.estimate(msa2);    // base=e, range=[1, 20]
+}
+
+TEST_F(EffSeqNumEstimatorTest, test_exp_joint_entropy_eff_seq_num_estimator) {
+    NullSeqWeightEstimator seq_weight_estimator;
+    ExpJointEntropyEffSeqNumEstimator estimator(abc, &seq_weight_estimator);
+    EXPECT_TRUE(allclose(2.4833, estimator.estimate(msa1))) << estimator.estimate(msa1);    // base=e, range=[1, 400]
+    EXPECT_TRUE(allclose(1.7219, estimator.estimate(msa2))) << estimator.estimate(msa2);    // base=e, range=[1, 400]
 }
 
 TEST_F(EffSeqNumEstimatorTest, test_clstr_eff_seq_num_estimator) {

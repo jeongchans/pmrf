@@ -210,8 +210,8 @@ class MRFParameterizer {
           regedge_lambda(UNDETERMINED_F),
           //regedge_sc_deg(true),
           //regedge_sc_neff(true),
-          reg_lambda_c1(0.1),
-          reg_lambda_c2(0.01),
+          reg_lambda_c1(10),
+          reg_lambda_c2(1e-4),
           reg_lambda_c3(0.1),
           reg_lambda_c4(0.01),
           asymmetric(true) {};

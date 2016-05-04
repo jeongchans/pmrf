@@ -403,16 +403,11 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     size_t num_var = model.get_num_var();
     size_t num_edge = model.get_num_edge();
     int ret = 0;
-    /* sequence weights */
-    vector<string> msa = traces.get_matched_aseq_vec();
-    msa = msa_analyzer.termi_gap_remover->filter(msa);
-    VectorXf sw = msa_analyzer.seq_weight_estimator->estimate(msa);
-    float neff = sw.sum();
-    /* effective number of sequences */
-    if (neff == 1) {
-        neff = msa_analyzer.eff_seq_num_estimator->estimate(msa);
-        sw *= neff;
-    }
+    /* sequence weights and effective number of sequences */
+    VectorXf sw;
+    float neff;
+    msa_analyzer.calc_sw_and_neff(traces, sw, neff);
+    sw *= neff / sw.sum();
     /* sequence profile */
     MatrixXf psfm = MatrixXf::Zero(length, num_var);
     FloatType gap_prob = 0.;
@@ -469,56 +464,24 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
 }
 
 void MRFParameterizer::get_reg_lambda(float& regnode_lambda, float& regedge_lambda, const float& avg_deg, const float& neff) {
-    /* linear (plmDCA) */
-//    float lambda;
-//    if (neff > 500) lambda = 0.01;
-//    else lambda = 0.1 - (0.1 - 0.01) * neff / 500.;
-//    regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda;
-//    regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda;
-
-    /* method #1 */
-    /* exponentially decrease as sample size increases */
-    /* optimal parameter: lambda_c1 = NA, lambda_c2 = NA */
-//    float x = avg_deg > 0. ? exp(-neff / avg_deg) : 0.;
-//    float lambda = opt.reg_lambda_c1 * x + opt.reg_lambda_c2;
-//    regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda;
-//    regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda;
-
-    /* method #2 */
-    /* extend the method #1 to combine both sample size and native protein structure */
-    /* lambda : determined based on sample size */
-    /* lambda2 : determined based on both sample size and native protein structure */
-//    float x = avg_deg > 0. ? exp(-neff / avg_deg) : 0.;
-//    float lambda1 = opt.reg_lambda_c1 * x + opt.reg_lambda_c2;
-//    float lambda2 = opt.reg_lambda_c3 * x + opt.reg_lambda_c4 * avg_deg;
-//    regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda1;
-//    regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda2;
-
-    /* method #3 */
-    /* extend the method #1 to combine both sample size and native protein structure */
-    /* lambda : determined based on sample size */
-    /* lambda2 : determined based on both sample size and native protein structure */
+    /* method #3 
+     * Address both sample size and native protein structure 
+     * lambda : determined based on sample size 
+     * lambda2 : determined based on both sample size and native protein structure 
+     * 
+     * Optimized parameters with SW_CLSTR and NEFF_CLSTR
+     * c1 = 10
+     * c2 = 1e-4
+     *
+     * Optimized parameters with SW_PB and NEFF_JOINT_SHANNON
+     * c1 = NA
+     * c2 = NA
+     **/
     float lambda = opt.reg_lambda_c1 / neff;
     float lambda1 = lambda;
     float lambda2 = lambda + opt.reg_lambda_c2 * avg_deg;
     regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda1;
     regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda2;
-
-    /* logistric */
-    /* optimal parameter: lambda_max = NA, lambda_min = NA, lambda_sc = NA */
-    // (0.1 - 0.01) / (1 + exp(1.0 * (x-5))) + 0.01
-//    const float d = opt.regedge_lambda_max - opt.regedge_lambda_min;
-//    const float x = (neff - 1.) / avg_deg;
-//    const float b = 5.;
-//    lambda = d / (1. + exp(opt.regedge_lambda_sc * (x - b))) + opt.regedge_lambda_min;
-
-    /* inverse linear */
-    /* 0.5 / x + 0.01 */
-//    const float x = (neff - 1.) / avg_deg;
-//    lambda = opt.regedge_lambda_sc / x + opt.regedge_lambda_min;
-
-    //regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda;
-    //regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda;
 #ifdef _DEBUG_
     std::clog << "[Parameterizer]"
               << "  regnode_lambda = " << regnode_lambda

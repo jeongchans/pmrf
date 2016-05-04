@@ -50,7 +50,7 @@ Profile ProfileBuilder::build(const TraceVector& traces) const {
         vector<string> msa;
         collect_trace(traces, i, trs, msa);
         VectorXf wt = seq_weight_estimator->estimate(msa);
-        double eff_num = eff_seq_num_estimator->estimate(msa);
+        double eff_num = eff_seq_num_estimator->estimate(msa, wt);
         VectorXf f = calc_freq(trs, i, wt, eff_num);    // frequency
         if (f.sum() > 0) profile.set_prob(i, emit_prob_estimator->estimate(f));
         else profile.set_prob(i, ROBINSON_BGFREQ.get_array(abc));

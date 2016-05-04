@@ -22,23 +22,38 @@ size_t RTEffSeqNumEstimator::calc_num_res_type(const string& column) const {
     return (n.array() != 0).count();
 }
 
-double ExpEntropyEffSeqNumEstimator::estimate(const vector<string>& msa) const {
+double ExpEntropyEffSeqNumEstimator::estimate(const vector<string>& msa, const VectorXf& wt) const {
     int rows = msa.size();
     if (rows == 0) return 0.0;
     int cols = msa[0].size();
-    VectorXf wt = seq_weight_estimator->estimate(msa);
     double s = 0;
     int n = abc.get_canonical_size(false);
-    VectorXf p(n);
     for (int i = 0; i < cols; ++i) {
-        p.setZero();
+        VectorXf p = VectorXf::Zero(n);
         for (int j = 0; j < rows; ++j)
-            p += abc.get_count(msa[j][i]) * wt(j);
+            p += wt(j) * abc.get_count(msa[j][i]);
         p /= p.sum();
-        for (int j = 0; j < n; ++j)
-            if (p(j) > 0) s += p(j) * log(p(j));
+        s += -(p.array() > 0).select(p.cwiseProduct(p.unaryExpr(&log)), 0.).sum();
     }
-    return exp(-s / (double) cols);
+    return exp(s / (double) cols);
+}
+
+double ExpJointEntropyEffSeqNumEstimator::estimate(const vector<string>& msa, const VectorXf& wt) const {
+    int rows = msa.size();
+    if (rows == 0) return 0.0;
+    int cols = msa[0].size();
+    double s = 0;
+    int n = abc.get_canonical_size(false);
+    for (int i = 0; i < cols; ++i) {
+        for (int j = i + 1; j < cols; ++j) {
+            MatrixXf p = MatrixXf::Zero(n, n);
+            for (int m = 0; m < rows; ++m)
+                p += wt(m) * abc.get_count(msa[m][i]) * abc.get_count(msa[m][j]).transpose();
+            p /= p.sum();
+            s += -(p.array() > 0).select(p.cwiseProduct(p.unaryExpr(&log)), 0.).sum();
+        }
+    }
+    return exp(s / (double) (cols * (cols - 1) / 2));
 }
 
 double ClstrEffSeqNumEstimator::estimate(const vector<string>& msa) const {

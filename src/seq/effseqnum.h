@@ -7,6 +7,7 @@
 class EffSeqNumEstimator {
   public:
     virtual double estimate(const vector<string>& msa) const = 0;
+    virtual double estimate(const vector<string>& msa, const VectorXf& wt) const = 0;
 };
 
 // Null effective sequence number estimator gives the total number of MSA sequences
@@ -14,9 +15,8 @@ class NullEffSeqNumEstimator : public EffSeqNumEstimator {
   public:
     NullEffSeqNumEstimator() {};
 
-    virtual double estimate(const vector<string>& msa) const {
-        return msa.size();
-    }
+    virtual double estimate(const vector<string>& msa) const { return msa.size(); }
+    virtual double estimate(const vector<string>& msa, const VectorXf& wt) const { return estimate(msa); }
 };
 
 // Average number of different residue types is used as effective sequence
@@ -26,6 +26,7 @@ class RTEffSeqNumEstimator : public EffSeqNumEstimator {
     RTEffSeqNumEstimator(const Alphabet& abc) : abc(abc) {};
 
     virtual double estimate(const vector<string>& msa) const;
+    virtual double estimate(const vector<string>& msa, const VectorXf& wt) const { return estimate(msa); }
 
   private:
     const Alphabet& abc;
@@ -43,7 +44,24 @@ class ExpEntropyEffSeqNumEstimator : public EffSeqNumEstimator {
   public:
     ExpEntropyEffSeqNumEstimator(const Alphabet& abc, SeqWeightEstimator* seq_weight_estimator) : abc(abc), seq_weight_estimator(seq_weight_estimator) {};
 
-    virtual double estimate(const vector<string>& msa) const;
+    virtual double estimate(const vector<string>& msa) const { return estimate(msa, seq_weight_estimator->estimate(msa)); }
+    virtual double estimate(const vector<string>& msa, const VectorXf& wt) const;
+
+  private:
+    const Alphabet& abc;
+    SeqWeightEstimator *seq_weight_estimator;
+};
+
+// Exponential of average joint entropy
+// Note: The resulting Neff is bounded to [1, 400].
+//       That is, the Neff indicates the expected number of different amino acid pairs
+//       observed at a position pair.
+class ExpJointEntropyEffSeqNumEstimator : public EffSeqNumEstimator {
+  public:
+    ExpJointEntropyEffSeqNumEstimator(const Alphabet& abc, SeqWeightEstimator* seq_weight_estimator) : abc(abc), seq_weight_estimator(seq_weight_estimator) {};
+
+    virtual double estimate(const vector<string>& msa) const { return estimate(msa, seq_weight_estimator->estimate(msa)); }
+    virtual double estimate(const vector<string>& msa, const VectorXf& wt) const;
 
   private:
     const Alphabet& abc;
@@ -57,6 +75,7 @@ class ClstrEffSeqNumEstimator : public EffSeqNumEstimator {
     ClstrEffSeqNumEstimator(const Alphabet& abc, const float maxidt) : abc(abc), maxidt(maxidt) {};
 
     virtual double estimate(const vector<string>& msa) const;
+    virtual double estimate(const vector<string>& msa, const VectorXf& wt) const { return estimate(msa); }
 
   private:
     const Alphabet& abc;

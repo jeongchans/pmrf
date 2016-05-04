@@ -118,7 +118,7 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         {"edge",            required_argument,  0, 'e'},
         {"output",          required_argument,  0, 'o'},
         {"seqwt",           required_argument,  0, 300},
-//        {"neff",            required_argument,  0, 0},
+        {"neff",            required_argument,  0, 301},
         {"clstr-maxidt",    required_argument,  0, 310},
         {"symmetric",       no_argument,        0, 400},
         {"regul",           required_argument,  0, 401},
@@ -145,6 +145,7 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         else if (c == 'e') validity = parse_str(optarg, opt.eidx_filename);
         else if (c == 'o') validity = parse_str(optarg, opt.out_filename);
         else if (c == 300) validity = parse_str(optarg, sval) && set_seq_wt(opt.msa_analyzer_opt.seq_wt, sval);
+        else if (c == 301) validity = parse_str(optarg, sval) && set_eff_num(opt.msa_analyzer_opt.eff_num, sval);
         else if (c == 310) validity = parse_float(optarg, fval) && fval >= 0. && fval <= 1. && set_val<float>(opt.msa_analyzer_opt.clstr_maxidt, fval);
         else if (c == 400) validity = set_val<bool>(opt.parameterizer_opt.asymmetric, !opt.parameterizer_opt.asymmetric);
         else if (c == 401) validity = parse_str(optarg, sval) && set_regul(opt.parameterizer_opt.regul, sval);
@@ -183,16 +184,16 @@ bool MRFBuildCommandLine::set_seq_wt(MSAProcOption::SeqWeight& arg, const string
     return true;
 }
 
-//bool MRFBuildCommandLine::parse_eff_num(char* optarg, MSAProcOption::EffSeqNum& arg) {
-//    string val = string(optarg);
-//    if (val == "no") arg = MSAProcOption::NEFF_NO;
-//    else if (val == "clstr") arg = MSAProcOption::NEFF_CLSTR;
-//    else {
-//        error_message = "Unsupported option for effective number estimation: " + val;
-//        return false;
-//    }
-//    return true;
-//}
+bool MRFBuildCommandLine::set_eff_num(MSAProcOption::EffSeqNum& arg, const string& val) {
+    if (val == "no") arg = MSAProcOption::NEFF_NO;
+    else if (val == "clstr") arg = MSAProcOption::NEFF_CLSTR;
+    else if (val == "shan2") arg = MSAProcOption::NEFF_JOINT_SHANNON;
+    else {
+        error_message = "Unsupported option for effective number estimation: " + val;
+        return false;
+    }
+    return true;
+}
 
 bool MRFBuildCommandLine::set_regul(RegulMethod::RegulMethod& arg, const string& val) {
     if (val == "no") arg = RegulMethod::REGUL_NONE;

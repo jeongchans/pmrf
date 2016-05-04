@@ -73,15 +73,13 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_param_default) {
     EXPECT_EQ(AFASTA, cmd_line.opt.msa_fmt);
 
     EXPECT_EQ(MSAProcOption::SW_CLSTR, cmd_line.opt.msa_analyzer_opt.seq_wt);
-//    EXPECT_EQ(MSAProcOption::NEFF_CLSTR, cmd_line.opt.msa_analyzer_opt.eff_num);
+    EXPECT_EQ(MSAProcOption::NEFF_CLSTR, cmd_line.opt.msa_analyzer_opt.eff_num);
     EXPECT_FLOAT_EQ(0.8, cmd_line.opt.msa_analyzer_opt.clstr_maxidt);
 
     EXPECT_EQ(true, cmd_line.opt.parameterizer_opt.asymmetric);
     EXPECT_EQ(RegulMethod::REGUL_L2, cmd_line.opt.parameterizer_opt.regul);
     EXPECT_FLOAT_EQ(UNDETERMINED_F, cmd_line.opt.parameterizer_opt.regnode_lambda);
     EXPECT_FLOAT_EQ(UNDETERMINED_F, cmd_line.opt.parameterizer_opt.regedge_lambda);
-//    EXPECT_EQ(true, cmd_line.opt.parameterizer_opt.regedge_sc_deg);
-//    EXPECT_EQ(true, cmd_line.opt.parameterizer_opt.regedge_sc_neff);
 
     EXPECT_EQ(100, cmd_line.opt.optim_opt.corr);
     EXPECT_FLOAT_EQ(1e-5, cmd_line.opt.optim_opt.epsilon);
@@ -104,12 +102,14 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_input_param) {
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_preproc_param) {
-    int argc1 = 4;
-    char* argv1[4] = {"build", "example.afa",
-                      "--seqwt", "no"};
+    int argc1 = 6;
+    char* argv1[6] = {"build", "example.afa",
+                      "--seqwt", "no",
+                      "--neff", "no"};
     MRFBuildCommandLine cmd_line1(argc1, argv1);
     ASSERT_TRUE(cmd_line1.is_valid());
     EXPECT_EQ(MSAProcOption::SW_NO, cmd_line1.opt.msa_analyzer_opt.seq_wt);
+    EXPECT_EQ(MSAProcOption::NEFF_NO, cmd_line1.opt.msa_analyzer_opt.eff_num);
 
     int argc2 = 4;
     char* argv2[4] = {"build", "example.afa",
@@ -118,18 +118,6 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_preproc_param) {
     ASSERT_TRUE(cmd_line2.is_valid());
     EXPECT_FLOAT_EQ(0.4, cmd_line2.opt.msa_analyzer_opt.clstr_maxidt);
 }
-
-//TEST_F(MRFBuildCommandLine_Test, test_parse_neff_clstr_param) {
-//    int argc = 8;
-//    char* argv[8] = {"build",
-//                      "aaa.afa", "-o", "aaa.mrf",
-//                      "--neff", "clstr",
-//                      "--clstr-maxidt", "0.2"};
-//    MRFBuildCommandLine cmd_line(argc, argv);
-//
-//    EXPECT_EQ(MSAProcOption::NEFF_CLSTR, cmd_line.opt.msa_analyzer_opt.eff_num);
-//    EXPECT_FLOAT_EQ(0.2, cmd_line.opt.msa_analyzer_opt.clstr_maxidt);
-//}
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_learning_param) {
     int argc = 3;
@@ -174,18 +162,27 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_lbfgs_param) {
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_experimental_param) {
-    int argc = 10;
-    char* argv[10] = {"build", "example.afa",
-                      "--reg-lambda-c1", "0.4",
-                      "--reg-lambda-c2", "0.1",
-                      "--reg-lambda-c3", "0.8",
-                      "--reg-lambda-c4", "0.2"};
-    MRFBuildCommandLine cmd_line(argc, argv);
-    ASSERT_TRUE(cmd_line.is_valid());
-    EXPECT_FLOAT_EQ(0.4, cmd_line.opt.parameterizer_opt.reg_lambda_c1);
-    EXPECT_FLOAT_EQ(0.1, cmd_line.opt.parameterizer_opt.reg_lambda_c2);
-    EXPECT_FLOAT_EQ(0.8, cmd_line.opt.parameterizer_opt.reg_lambda_c3);
-    EXPECT_FLOAT_EQ(0.2, cmd_line.opt.parameterizer_opt.reg_lambda_c4);
+    int argc1 = 10;
+    char* argv1[10] = {"build", "example.afa",
+                       "--reg-lambda-c1", "0.4",
+                       "--reg-lambda-c2", "0.1",
+                       "--reg-lambda-c3", "0.8",
+                       "--reg-lambda-c4", "0.2"};
+    MRFBuildCommandLine cmd_line1(argc1, argv1);
+    ASSERT_TRUE(cmd_line1.is_valid());
+    EXPECT_FLOAT_EQ(0.4, cmd_line1.opt.parameterizer_opt.reg_lambda_c1);
+    EXPECT_FLOAT_EQ(0.1, cmd_line1.opt.parameterizer_opt.reg_lambda_c2);
+    EXPECT_FLOAT_EQ(0.8, cmd_line1.opt.parameterizer_opt.reg_lambda_c3);
+    EXPECT_FLOAT_EQ(0.2, cmd_line1.opt.parameterizer_opt.reg_lambda_c4);
+
+    int argc2 = 6;
+    char* argv2[6] = {"build", "example.afa",
+                      "--seqwt", "pb",
+                      "--neff", "shan2"};
+    MRFBuildCommandLine cmd_line2(argc2, argv2);
+    ASSERT_TRUE(cmd_line2.is_valid());
+    EXPECT_EQ(MSAProcOption::SW_PB, cmd_line2.opt.msa_analyzer_opt.seq_wt);
+    EXPECT_EQ(MSAProcOption::NEFF_JOINT_SHANNON, cmd_line2.opt.msa_analyzer_opt.eff_num);
 }
 
 class MRFStatCommandLine_Test : public testing::Test {

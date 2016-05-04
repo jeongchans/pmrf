@@ -72,8 +72,8 @@ class MRFBuildCommandLine : public MRFCommandLine {
     virtual bool parse_command_line(int argc, char** argv);
     bool set_msa_fmt(MSAFormat& arg, const string& val);
     bool set_seq_wt(MSAProcOption::SeqWeight& arg, const string& val);
+    bool set_eff_num(MSAProcOption::EffSeqNum& arg, const string& val);
     bool set_regul(RegulMethod::RegulMethod& arg, const string& val);
-    //bool parse_eff_num(char* optarg, MSAProcOption::EffSeqNum& arg);
 };
 
 class MRFStatCommandLine : public MRFCommandLine {
