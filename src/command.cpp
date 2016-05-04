@@ -276,6 +276,7 @@ bool MRFInferCommandLine::parse_command_line(int argc, char** argv) {
         {"node-offset",     required_argument,  0, 200},
         {"edge-offset",     required_argument,  0, 201},
         {"prof-offset",     required_argument,  0, 300},
+        {"gap-score",       required_argument,  0, 301},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -286,6 +287,7 @@ bool MRFInferCommandLine::parse_command_line(int argc, char** argv) {
         else if (c == 200) validity = parse_float(optarg, fval) && set_val<float>(opt.node_offset, fval);
         else if (c == 201) validity = parse_float(optarg, fval) && set_val<float>(opt.edge_offset, fval);
         else if (c == 300) validity = parse_float(optarg, fval) && set_val<float>(opt.prof_offset, fval);
+        else if (c == 301) validity = parse_float(optarg, fval) && set_val<float>(opt.gap_score, fval);
         else if (c == 'h') { show_help(); exit(0); }
         else validity = false;
         if (!validity) return set_opt_err_msg("--" + string(opts[opt_idx].name), optarg);

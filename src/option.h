@@ -120,13 +120,14 @@ namespace Stat {
 namespace Infer {
     class Option {
       public:
-        Option() : node_offset(0.), edge_offset(0.), prof_offset(log(0.05)) {};
+        Option() : node_offset(0.), edge_offset(0.), prof_offset(log(0.05)), gap_score(0.) {};
 
         string mrf_filename;
         string seq_filename;
         float node_offset;
         float edge_offset;
         float prof_offset;
+        float gap_score;
     };
 
     static const string usage_message = "infer <mrf_file> <seq_file> [options]";
@@ -140,6 +141,7 @@ namespace Infer {
         "\n"
         "Profile inference options:\n"
         " --prof-offset <float>     profile score offset (default: -2.9957)\n"
+        " --gap-score <float>       score for gap (default: 0.0)\n"
         "\n"
         " -h, --help                show this help message\n";
 }

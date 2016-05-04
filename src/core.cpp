@@ -359,7 +359,7 @@ double MRFInferProcessor::calc_prof_ll(const MRF& model, const string& aseq) {
     const Alphabet& abc = model.get_alphabet();
     MatrixXf mat = model.get_psfm().unaryExpr(&log);
     mat = (mat.array() - opt->prof_offset).matrix();
-    mat.col(20) = VectorXf::Zero(mat.rows());       // ignore gaps
+    mat.col(20) = VectorXf::Constant(mat.rows(), opt->gap_score);
     for (size_t i = 0; i < n; ++i) {
         float w;
         string s = abc.get_degeneracy(aseq[i], &w);

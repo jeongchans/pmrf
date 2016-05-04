@@ -235,7 +235,9 @@ TEST_F(MRFInferCommandLine_Test, test_parse_param) {
 
     EXPECT_FLOAT_EQ(0., cmd_line.opt.node_offset);
     EXPECT_FLOAT_EQ(0., cmd_line.opt.edge_offset);
+
     EXPECT_FLOAT_EQ(log(0.05), cmd_line.opt.prof_offset);
+    EXPECT_FLOAT_EQ(0., cmd_line.opt.gap_score);
 }
 
 TEST_F(MRFInferCommandLine_Test, test_parse_mrf_param) {
@@ -250,12 +252,14 @@ TEST_F(MRFInferCommandLine_Test, test_parse_mrf_param) {
 }
 
 TEST_F(MRFInferCommandLine_Test, test_parse_prof_param) {
-    int argc = 5;
-    char* argv[5] = {"infer", "example.mrf", "example.fa",
-                     "--prof-offset", "0.0"};
+    int argc = 7;
+    char* argv[7] = {"infer", "example.mrf", "example.fa",
+                     "--prof-offset", "0.0",
+                     "--gap-score", "-10.0"};
     MRFInferCommandLine cmd_line(argc, argv);
     ASSERT_TRUE(cmd_line.is_valid());
     EXPECT_FLOAT_EQ(0., cmd_line.opt.prof_offset);
+    EXPECT_FLOAT_EQ(-10., cmd_line.opt.gap_score);
 }
 
 class MRFShowCommandLine_Test : public testing::Test {
