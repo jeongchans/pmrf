@@ -232,6 +232,30 @@ TEST_F(MRFInferCommandLine_Test, test_parse_param) {
     ASSERT_TRUE(cmd_line.is_valid());
     EXPECT_EQ("example.mrf", cmd_line.opt.mrf_filename);
     EXPECT_EQ("example.fa", cmd_line.opt.seq_filename);
+
+    EXPECT_FLOAT_EQ(0., cmd_line.opt.node_offset);
+    EXPECT_FLOAT_EQ(0., cmd_line.opt.edge_offset);
+    EXPECT_FLOAT_EQ(log(0.05), cmd_line.opt.prof_offset);
+}
+
+TEST_F(MRFInferCommandLine_Test, test_parse_mrf_param) {
+    int argc = 7;
+    char* argv[7] = {"infer", "example.mrf", "example.fa",
+                     "--node-offset", "4.0",
+                     "--edge-offset", "2.0"};
+    MRFInferCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
+    EXPECT_FLOAT_EQ(4., cmd_line.opt.node_offset);
+    EXPECT_FLOAT_EQ(2., cmd_line.opt.edge_offset);
+}
+
+TEST_F(MRFInferCommandLine_Test, test_parse_prof_param) {
+    int argc = 5;
+    char* argv[5] = {"infer", "example.mrf", "example.fa",
+                     "--prof-offset", "0.0"};
+    MRFInferCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
+    EXPECT_FLOAT_EQ(0., cmd_line.opt.prof_offset);
 }
 
 class MRFShowCommandLine_Test : public testing::Test {

@@ -118,16 +118,28 @@ namespace Stat {
 }
 
 namespace Infer {
-    struct Option {
+    class Option {
+      public:
+        Option() : node_offset(0.), edge_offset(0.), prof_offset(log(0.05)) {};
+
         string mrf_filename;
         string seq_filename;
+        float node_offset;
+        float edge_offset;
+        float prof_offset;
     };
 
     static const string usage_message = "infer <mrf_file> <seq_file> [options]";
     static const string option_message =
-        "Options:\n"
+//        "Options:\n"
 //        " --ref <seq_file>          calculate the score difference for <seq_file> (FASTA)\n"
-//        " --offset <float>          score offset (default: 0.0)\n"
+//        "\n"
+        "MRF inference options:\n"
+        " --node-offset <float>     node score offset (default: 0.0)\n"
+        " --edge-offset <float>     edge score offset (default: 0.0)\n"
+        "\n"
+        "Profile inference options:\n"
+        " --prof-offset <float>     profile score offset (default: -2.9957)\n"
         "\n"
         " -h, --help                show this help message\n";
 }

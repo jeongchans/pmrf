@@ -269,9 +269,13 @@ int MRFInferCommandLine::process_command(MRFCmdProcessor *processor) {
 }
 
 bool MRFInferCommandLine::parse_command_line(int argc, char** argv) {
+    float fval;
     optind = 0;     // initialize getopt_long()
     static struct option opts[] = {
         {"help",            no_argument,        0, 'h'},
+        {"node-offset",     required_argument,  0, 200},
+        {"edge-offset",     required_argument,  0, 201},
+        {"prof-offset",     required_argument,  0, 300},
         {0, 0, 0, 0}
     };
     int opt_idx = 0;
@@ -279,6 +283,9 @@ bool MRFInferCommandLine::parse_command_line(int argc, char** argv) {
     while (true) {
         c = getopt_long(argc, argv, "h", opts, &opt_idx);
         if (c == -1) break;
+        else if (c == 200) validity = parse_float(optarg, fval) && set_val<float>(opt.node_offset, fval);
+        else if (c == 201) validity = parse_float(optarg, fval) && set_val<float>(opt.edge_offset, fval);
+        else if (c == 300) validity = parse_float(optarg, fval) && set_val<float>(opt.prof_offset, fval);
         else if (c == 'h') { show_help(); exit(0); }
         else validity = false;
         if (!validity) return set_opt_err_msg("--" + string(opts[opt_idx].name), optarg);

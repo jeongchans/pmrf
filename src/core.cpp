@@ -336,16 +336,16 @@ double MRFInferProcessor::calc_mrf_pll(const MRF& model, const string& aseq) {
     const Alphabet& abc = model.get_alphabet();
     for (size_t i = 0; i < n; ++i) {
         FloatType w1;
-        string s1 = abc.get_degeneracy(aseq[i], &w1);
+        const string s1 = abc.get_degeneracy(aseq[i], &w1);
         for (auto c = s1.cbegin(); c != s1.cend(); ++c)
-            pll += w1 * model.get_node(i).get_weight()(abc.get_idx(*c));
+            pll += w1 * (model.get_node(i).get_weight().array() - opt->node_offset)(abc.get_idx(*c));
         for (size_t j = i + 1; j < n; ++j) {
             if (model.has_edge(i, j)) {
                 FloatType w2;
-                string s2 = abc.get_degeneracy(aseq[j], &w2);
-                for (string::iterator c1 = s1.begin(); c1 != s1.end(); ++c1) {
-                    for (string::iterator c2 = s2.begin(); c2 != s2.end(); ++c2)
-                        pll += w1 * w2 * model.get_edge(i, j).get_weight()(abc.get_idx(*c1), abc.get_idx(*c2));
+                const string s2 = abc.get_degeneracy(aseq[j], &w2);
+                for (auto c1 = s1.begin(); c1 != s1.end(); ++c1) {
+                    for (auto c2 = s2.begin(); c2 != s2.end(); ++c2)
+                        pll += w1 * w2 * (model.get_edge(i, j).get_weight().array() - opt->edge_offset)(abc.get_idx(*c1), abc.get_idx(*c2));
                 }
             }
         }
@@ -358,7 +358,7 @@ double MRFInferProcessor::calc_prof_ll(const MRF& model, const string& aseq) {
     size_t n = model.get_length();
     const Alphabet& abc = model.get_alphabet();
     MatrixXf mat = model.get_psfm().unaryExpr(&log);
-    mat = (mat.array() - log(0.05)).matrix();
+    mat = (mat.array() - opt->prof_offset).matrix();
     mat.col(20) = VectorXf::Zero(mat.rows());       // ignore gaps
     for (size_t i = 0; i < n; ++i) {
         float w;
