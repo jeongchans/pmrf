@@ -9,6 +9,8 @@
 #include "util/common.h"
 #include "seq/alphabet.h"
 
+#define MRF_FORMAT_NUMBER 1
+
 using std::vector;
 using std::string;
 using std::map;
@@ -53,12 +55,12 @@ class MRF {
 
         NodeElement& operator=(const NodeElement& rhs);
 
-        virtual void accept(Visitor* visitor, const size_t& idx1, const size_t& idx2=(size_t) NULL);
+        virtual void accept(Visitor* visitor, const size_t& idx1, const size_t& idx2=(size_t) NULL) { visitor->visit_node(this, idx1); }
 
         // weight getter and setter
-        const VectorXf& get_weight() const;
-        void set_weight(const VectorXf& w);
-        void set_weight(const double& w);
+        const VectorXf& get_weight() const { return weight; }
+        void set_weight(const VectorXf& w) { weight = w; }
+        void set_weight(const double& w) { set_weight(VectorXf::Constant(num_weight, w)); }
 
       protected:
         size_t num_weight;
@@ -72,12 +74,12 @@ class MRF {
 
         EdgeElement& operator=(const EdgeElement& rhs);
 
-        virtual void accept(Visitor* visitor, const size_t& idx1, const size_t& idx2);
+        virtual void accept(Visitor* visitor, const size_t& idx1, const size_t& idx2) { visitor->visit_edge(this, idx1, idx2); }
 
         // weight getter and setter
-        const MatrixXf& get_weight() const;
-        void set_weight(const MatrixXf& w);
-        void set_weight(const double& w);
+        const MatrixXf& get_weight() const { return weight; }
+        void set_weight(const MatrixXf& w) { weight = w; }
+        void set_weight(const double& w) { set_weight(MatrixXf::Constant(num_weight1, num_weight2, w)); }
 
       protected:
         size_t num_weight1, num_weight2;
@@ -116,6 +118,12 @@ class MRF {
 
     bool has_edge(const size_t& idx1, const size_t& idx2) const;
 
+    // modeling log
+    void set_neff(const float& n) { neff = n; }
+    float get_neff() const { return neff; }
+    void set_fmtnum(const size_t& n) { fmtnum = n; }
+    size_t get_fmtnum() const { return fmtnum; }
+
   private:
     const Alphabet& abc;
     string seq;
@@ -123,6 +131,8 @@ class MRF {
     vector<NodeElement> nodes;
     map<EdgeIndex, EdgeElement> edges;
     MatrixXf psfm;  // Position-specific frequency matrix
+    float neff;
+    size_t fmtnum;
 
     void init(const EdgeIndexVector* eidxs);
 };

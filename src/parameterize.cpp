@@ -408,6 +408,7 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     float neff;
     msa_analyzer.calc_sw_and_neff(traces, sw, neff);
     sw *= neff / sw.sum();
+    model.set_neff(neff);
     /* sequence profile */
     MatrixXf psfm = MatrixXf::Zero(length, num_var);
     FloatType gap_prob = 0.;

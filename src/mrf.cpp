@@ -1,35 +1,10 @@
 #include "mrf.h"
 
-inline void resize_and_fill(VectorXf& v, const size_t& size, const double& value) {
-    v = VectorXf::Constant(size, value);
-}
-
-inline void resize_and_fill(MatrixXf& m, const size_t& row_size, const size_t& col_size, const double& value) {
-    m = MatrixXf::Constant(row_size, col_size, value);
-}
-
 /* NodeElement */
 MRF::NodeElement& MRF::NodeElement::operator=(const NodeElement& rhs) {
     num_weight = rhs.num_weight;
     set_weight(rhs.weight);
     return *this;
-}
-
-void MRF::NodeElement::accept(Visitor* visitor, const size_t& idx1, const size_t&) {
-    visitor->visit_node(this, idx1);
-}
-
-const VectorXf& MRF::NodeElement::get_weight() const {
-    return weight;
-}
-
-void MRF::NodeElement::set_weight(const VectorXf& w) {
-    weight.resize(w.size());
-    weight = w;
-}
-
-void MRF::NodeElement::set_weight(const double& w) {
-    resize_and_fill(weight, num_weight, w);
 }
 
 /* EdgeElement */
@@ -40,31 +15,17 @@ MRF::EdgeElement& MRF::EdgeElement::operator=(const EdgeElement& rhs) {
     return *this;
 }
 
-void MRF::EdgeElement::accept(Visitor* visitor, const size_t& idx1, const size_t& idx2) {
-    visitor->visit_edge(this, idx1, idx2);
-}
-
-const MatrixXf& MRF::EdgeElement::get_weight() const {
-    return weight;
-}
-
-void MRF::EdgeElement::set_weight(const MatrixXf& w) {
-    weight = w;
-}
-
-void MRF::EdgeElement::set_weight(const double& w) {
-    resize_and_fill(weight, num_weight1, num_weight2, w);
-}
-
 /* MRF */
-MRF::MRF(const size_t& length, const Alphabet& abc, const EdgeIndexVector* eidxs) : abc(abc), length(length) {
+MRF::MRF(const size_t& length, const Alphabet& abc, const EdgeIndexVector* eidxs) 
+: abc(abc), length(length), fmtnum(MRF_FORMAT_NUMBER) {
     seq = "";
     char c = abc.get_unknown()[0];
     for (size_t i = 0; i < length; ++i) seq += c;
     init(eidxs);
 }
 
-MRF::MRF(const string& seq, const Alphabet& abc, const EdgeIndexVector* eidxs) : abc(abc), seq(seq) {
+MRF::MRF(const string& seq, const Alphabet& abc, const EdgeIndexVector* eidxs) 
+: abc(abc), seq(seq), fmtnum(MRF_FORMAT_NUMBER) {
     length = seq.size();
     init(eidxs);
 }
@@ -96,5 +57,5 @@ void MRF::init(const EdgeIndexVector* eidxs) {
             for (size_t j = i + 1; j < length; ++j)
                 edges[EdgeIndex(i, j)] = EdgeElement(n, n);
     }
-    resize_and_fill(psfm, length, n, 0);
+    psfm = MatrixXf::Zero(length, n);
 }

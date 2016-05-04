@@ -28,6 +28,13 @@ void MRFExporter::export_model(const MRF& model, ostream& os) {
     size_t k = model.get_num_var();
     EdgeIndexVector edge_idxs = model.get_edge_idxs();
     size_t n2 = edge_idxs.size();
+    // Writing modeling log
+    size_t fmtnum = model.get_fmtnum();
+    os.write((char*)&fmtnum, sizeof(size_t));
+    float neff = model.get_neff();
+    os.write((char*)&neff, sizeof(float));
+    //string ver = VERSION;
+    // Writing sequence
     os.write((char*)&n, sizeof(size_t));
     os.write(seq.c_str(), seq.size() + 1);
     // Writing MRF architecture
@@ -47,6 +54,12 @@ void MRFExporter::export_model(const MRF& model, ostream& os) {
 }
 
 MRF MRFImporter::import_model(istream& is, const Alphabet& abc) {
+    // Reading logging information
+    size_t fmtnum;
+    is.read((char*)&fmtnum, sizeof(size_t));
+    float neff;
+    is.read((char*)&neff, sizeof(float));
+    // Reading sequence
     size_t n, n2;
     string seq;
     is.read((char*)&n, sizeof(size_t));
@@ -61,6 +74,8 @@ MRF MRFImporter::import_model(istream& is, const Alphabet& abc) {
         edge_idxs.push_back(EdgeIndex(idx1, idx2));
     }
     MRF model(seq, abc, &edge_idxs);
+    model.set_fmtnum(fmtnum);
+    model.set_neff(neff);
     size_t k = model.get_num_var();
     // Reading profile
     MatrixXf m(n, k);
@@ -111,20 +126,22 @@ ostream& operator<<(ostream& os, const MRF& model) {
     string seq = model.get_seq();
     string symbol = model.get_var_symbol();
     EdgeIndexVector edge_idxs = model.get_edge_idxs();
-    os << "VER" << sep << VERSION << endl
-       << "LENGTH" << sep << n << endl
-       << "SEQ" << endl
-       << format_seq(seq, 100) << endl;
+    os << "# PMRF INFO" << endl
+       << "FMTNUM"  << sep << model.get_fmtnum() << endl
+       << "NEFF"    << sep << model.get_neff() << endl;
+    os << "# SEQ"   << endl
+       << "LENGTH"  << sep << n << endl
+       << "REFSEQ"  << endl << format_seq(seq, 100) << endl;
     os << "# PROFILE" << endl
-       << "RES" << sep << format_symbol(symbol, sep) << endl;
+       << "RES"     << sep << format_symbol(symbol, sep) << endl;
     for (size_t i = 0; i < n; ++i)
         os << seq[i] << " " << i + 1 << sep << model.get_psfm(i).format(fmt) << endl;
-    os << "# NODE" << endl
-       << "RES" << sep << format_symbol(symbol, sep) << endl;
+    os << "# NODE"  << endl
+       << "RES"     << sep << format_symbol(symbol, sep) << endl;
     for (size_t i = 0; i < n; ++i)
         os << seq[i] << " " << i + 1 << sep << model.get_node(i).get_weight().format(fmt) << endl;
-    os << "# EDGE" << endl
-       << "RES1" << sep << "RES2" << sep << format_paired_symbol(symbol, sep) << endl;
+    os << "# EDGE"  << endl
+       << "RES1"    << sep << "RES2" << sep << format_paired_symbol(symbol, sep) << endl;
     for (EdgeIndexVector::const_iterator pos = edge_idxs.begin(); pos != edge_idxs.end(); ++pos) {
         size_t i = pos->idx1;
         size_t j = pos->idx2;
