@@ -473,24 +473,35 @@ void MRFParameterizer::get_reg_lambda(float& regnode_lambda, float& regedge_lamb
      * Optimized parameters with SW_CLSTR and NEFF_CLSTR
      * c1 = 10
      * c2 = 1e-4
-     *
+     */
+//    float lambda = opt.reg_lambda_c1 / neff;
+//    float lambda1 = lambda;
+//    float lambda2 = lambda + opt.reg_lambda_c2 * avg_deg;
+//    regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda1;
+//    regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda2;
+//    regnode_lambda *= neff;
+//    regedge_lambda *= neff;
+
+    /* method #4
+     * the regularization w.r.t the sample size is proportional to neff, but the regularization w.r.t. the average degree is not
      * Optimized parameters with SW_PB and NEFF_JOINT_SHANNON
      * c1 = NA
      * c2 = NA
-     **/
+     */
     float lambda = opt.reg_lambda_c1 / neff;
     float lambda1 = lambda;
-    float lambda2 = lambda + opt.reg_lambda_c2 * avg_deg;
+    float lambda2 = lambda;
     regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda1;
     regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda2;
+    regnode_lambda *= neff;
+    regedge_lambda *= neff;
+    regedge_lambda += opt.reg_lambda_c2 * avg_deg;
 #ifdef _DEBUG_
     std::clog << "[Parameterizer]"
               << "  regnode_lambda = " << regnode_lambda
               << ", regedge_lambda = " << regedge_lambda
               << std::endl;
 #endif
-    regnode_lambda *= neff;
-    regedge_lambda *= neff;
     if (opt.asymmetric) regedge_lambda *= 0.5;
 }
 
