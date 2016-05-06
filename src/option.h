@@ -147,16 +147,28 @@ namespace Infer {
 }
 
 namespace Show {
-    struct Option {
+    class Option {
+      public:
+        Option() : seq_flag(false), prof_flag(false), mrf_flag(false), node_flag(false), edge_flag(false) {};
+
         string mrf_filename;
+        bool seq_flag;
+        bool prof_flag;
+        bool mrf_flag;
+        bool node_flag;
+        size_t v_pos;
+        bool edge_flag;
+        EdgeIndex w_pos;
     };
 
     static const string usage_message = "show <mrf_file> [options]";
     static const string option_message =
         "Options:\n"
-//        " --brief                   show only the brief information\n"
-//        " --list-prof               list profile parameters\n"
-//        " --list-mrf                list MRF parameters\n"
+        " --seq                     show sequence\n"
+        " --profile                 show profile parameters\n"
+        " --mrf                     show MRF node and edge parameters\n"
+        " --node <pos>              show MRF node parameters\n"
+        " --edge <pos,pos>          show MRF edge parameters\n"
         "\n"
         " -h, --help                show this help message\n";
 }

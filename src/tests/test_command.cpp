@@ -272,4 +272,37 @@ TEST_F(MRFShowCommandLine_Test, test_parse_param) {
     MRFShowCommandLine cmd_line(argc, argv);
     ASSERT_TRUE(cmd_line.is_valid());
     EXPECT_EQ("example.mrf", cmd_line.opt.mrf_filename);
+
+    EXPECT_EQ(false, cmd_line.opt.seq_flag);
+    EXPECT_EQ(false, cmd_line.opt.prof_flag);
+    EXPECT_EQ(false, cmd_line.opt.mrf_flag);
+    EXPECT_EQ(false, cmd_line.opt.node_flag);
+    EXPECT_EQ(false, cmd_line.opt.edge_flag);
+}
+
+TEST_F(MRFShowCommandLine_Test, test_parse_flag_param) {
+    int argc = 5;
+    char* argv[5] = {"show", "example.mrf",
+                     "--seq",
+                     "--profile",
+                     "--mrf"};
+    MRFShowCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
+    EXPECT_EQ(true, cmd_line.opt.seq_flag);
+    EXPECT_EQ(true, cmd_line.opt.prof_flag);
+    EXPECT_EQ(true, cmd_line.opt.mrf_flag);
+}
+
+TEST_F(MRFShowCommandLine_Test, test_parse_pos_param) {
+    int argc = 6;
+    char* argv[6] = {"show", "example.mrf",
+                     "--node", "23",
+                     "--edge", "34,57"};
+    MRFShowCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
+    EXPECT_EQ(true, cmd_line.opt.node_flag);
+    EXPECT_EQ(23, cmd_line.opt.v_pos);
+    EXPECT_EQ(true, cmd_line.opt.edge_flag);
+    EXPECT_EQ(34, cmd_line.opt.w_pos.idx1);
+    EXPECT_EQ(57, cmd_line.opt.w_pos.idx2);
 }

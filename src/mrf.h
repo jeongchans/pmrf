@@ -22,6 +22,7 @@ struct EdgeIndex {
     size_t idx1;
     size_t idx2;
 
+    EdgeIndex() {}
     EdgeIndex(const size_t& idx1, const size_t& idx2) : idx1(idx1), idx2(idx2) {}
     bool operator<(const EdgeIndex& other) const { return (idx1 < other.idx1) || (idx1 == other.idx1 && idx2 < other.idx2); }
     bool operator==(const EdgeIndex& other) const { return (idx1 == other.idx1 && idx2 == other.idx2); }
@@ -116,7 +117,8 @@ class MRF {
     const EdgeElement& get_edge(const EdgeIndex& eidx) const;
     EdgeIndexVector get_edge_idxs() const;
 
-    bool has_edge(const size_t& idx1, const size_t& idx2) const;
+    bool has_edge(const size_t& idx1, const size_t& idx2) const { return has_edge(EdgeIndex(idx1, idx2)); }
+    bool has_edge(const EdgeIndex& eidx) const;
 
     // modeling log
     void set_neff(const float& n) { neff = n; }
@@ -137,9 +139,9 @@ class MRF {
     void init(const EdgeIndexVector* eidxs);
 };
 
-inline bool MRF::has_edge(const size_t& idx1, const size_t& idx2) const {
-    if (idx1 < idx2) return edges.find(EdgeIndex(idx1, idx2)) != edges.end();
-    else return edges.find(EdgeIndex(idx2, idx1)) != edges.end();
+inline bool MRF::has_edge(const EdgeIndex& eidx) const {
+    if (eidx.idx1 < eidx.idx2) return edges.find(eidx) != edges.end();
+    else return edges.find(EdgeIndex(eidx.idx2, eidx.idx1)) != edges.end();
 }
 
 inline const MRF::EdgeElement& MRF::get_edge(const EdgeIndex& eidx) const {

@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <memory>
+#include <istream>
 
 #include "seq/alphabet.h"
 #include "seq/trace.h"
@@ -14,6 +15,7 @@
 
 using std::string;
 using std::shared_ptr;
+using std::ostream;
 
 const AminoAcid AA("-", false, true);
 //const AminoAcid AA("=-^", false, true);
@@ -134,6 +136,19 @@ class MRFShowProcessor : public MRFCmdProcessor {
   private:
     const Alphabet& abc;
     Show::Option* opt;
+
+    const string sep;
+    const int prec;
+
+    string format_symbol();
+    string format_paired_symbol();
+    void show_seq(ostream& os, const MRF& model);
+    void show_prof(ostream& os, const MRF& model);
+    void show_mrf(ostream& os, const MRF& model);
+    void show_mrf_node(ostream& os, const MRF& model, const size_t& pos);
+    void show_mrf_edge(ostream& os, const MRF& model, const EdgeIndex& i);
 };
+
+ostream& operator<<(ostream& os, const MRF& model);
 
 #endif

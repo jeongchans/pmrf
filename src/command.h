@@ -112,6 +112,7 @@ class MRFShowCommandLine : public MRFCommandLine {
 
   protected:
     virtual bool parse_command_line(int argc, char** argv);
+    bool set_edge_idx(EdgeIndex& arg, const string& val);
 };
 
 #endif

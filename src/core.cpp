@@ -372,13 +372,120 @@ double MRFInferProcessor::calc_prof_ll(const MRF& model, const string& aseq) {
    @class MRFShowProcessor
  */
 
-MRFShowProcessor::MRFShowProcessor(int argc, char** argv) : abc(AA) {
+MRFShowProcessor::MRFShowProcessor(int argc, char** argv) : abc(AA), sep("\t"), prec(4) {
     cmd_line = new MRFShowCommandLine(argc, argv);
     opt = &(((MRFShowCommandLine*)cmd_line)->opt);
 }
 
 int MRFShowProcessor::show() {
     MRF model = read_mrf(opt->mrf_filename, abc);
-    cout << model;
+    if (opt->seq_flag) show_seq(cout, model);
+    if (opt->prof_flag) show_prof(cout, model);
+    if (opt->mrf_flag) show_mrf(cout, model);
+    if (opt->node_flag) show_mrf_node(cout, model, opt->v_pos);
+    if (opt->edge_flag) show_mrf_edge(cout, model, opt->w_pos);
+    if (!opt->seq_flag && !opt->prof_flag && !opt->mrf_flag && !opt->node_flag && !opt->edge_flag) cout << model;
     return 0;
+}
+
+void MRFShowProcessor::show_seq(ostream& os, const MRF& model) {
+    size_t n = model.get_length();
+    string seq = model.get_seq();
+    string fseq;
+    const size_t block_width = 10;
+    const size_t line_width = 50;
+    for (size_t i = 0; i < n; i += block_width) {
+        fseq += seq.substr(i, block_width) + " ";
+        if ((i + block_width) % line_width == 0) {
+            string tick = std::to_string(i + block_width);
+            while (tick.size() < 4) tick = " " + tick;
+            fseq += tick + "\n";
+        }
+    }
+    os << "# SEQUENCE" << endl
+       << fseq << endl;
+}
+
+void MRFShowProcessor::show_prof(ostream& os, const MRF& model) {
+    Eigen::IOFormat fmt(prec, Eigen::DontAlignCols, sep, sep);
+    size_t n = model.get_length();
+    string seq = model.get_seq();
+    os << "# PROFILE" << endl
+       << "RES"     << sep << format_symbol() << endl;
+    for (size_t i = 0; i < n; ++i)
+        os << seq[i] << " " << i + 1 << sep << model.get_psfm(i).format(fmt) << endl;
+}
+
+void MRFShowProcessor::show_mrf(ostream& os, const MRF& model) {
+    Eigen::IOFormat fmt(prec, Eigen::DontAlignCols, sep, sep);
+    size_t n = model.get_length();
+    string seq = model.get_seq();
+    EdgeIndexVector edge_idxs = model.get_edge_idxs();
+    os << "# NODE"  << endl
+       << "RES"     << sep << format_symbol() << endl;
+    for (size_t i = 0; i < n; ++i)
+        os << seq[i] << " " << i + 1 << sep << model.get_node(i).get_weight().format(fmt) << endl;
+    os << "# EDGE"  << endl
+       << "RES1"    << sep << "RES2" << sep << format_paired_symbol() << endl;
+    for (EdgeIndexVector::const_iterator pos = edge_idxs.begin(); pos != edge_idxs.end(); ++pos) {
+        size_t i = pos->idx1;
+        size_t j = pos->idx2;
+        os << seq[i] << " " << i + 1 << sep
+           << seq[j] << " " << j + 1 << sep
+           << model.get_edge(i, j).get_weight().format(fmt) << endl;
+    }
+}
+
+void MRFShowProcessor::show_mrf_node(ostream& os, const MRF& model, const size_t& pos) {
+    const string symbol = abc.get_canonical();
+    VectorXf v = model.get_node(pos).get_weight();
+    os << setprecision(prec);
+    for (size_t i = 0; i < symbol.size(); ++i)
+        os << symbol[i] << sep << v(i) << endl;
+}
+
+void MRFShowProcessor::show_mrf_edge(ostream& os, const MRF& model, const EdgeIndex& pos) {
+    Eigen::IOFormat fmt(prec, 0, "\t");
+    os << setprecision(prec);
+    const string symbol = abc.get_canonical();
+    if (model.has_edge(pos)) {
+        MatrixXf w = model.get_edge(pos).get_weight();
+        if (pos.idx1 > pos.idx2) w.transposeInPlace();
+        os << pos.idx1 << "\\" << pos.idx2;
+        for (size_t i = 0; i < symbol.size(); ++i) os << sep << symbol[i];
+        os << endl;
+        for (size_t i = 0; i < symbol.size(); ++i)
+            os << symbol[i] << sep << w.row(i).format(fmt) << endl;
+    } else {
+        os << "Edge (" << pos.idx1 << ", " << pos.idx2 << ") does not exist" << endl;
+    }
+}
+
+string MRFShowProcessor::format_symbol() {
+    const string symbol = abc.get_canonical();
+    string ret;
+    ret += symbol[0];
+    for (size_t i = 1; i < symbol.size(); ++i) ret += sep + symbol[i];
+    return ret;
+}
+
+string MRFShowProcessor::format_paired_symbol() {
+    const string symbol = abc.get_canonical();
+    string ret;
+    ret += symbol[0];
+    ret += symbol[0];
+    for (size_t i = 0; i < symbol.size(); ++i)
+        for (size_t j = 0; j < symbol.size(); ++j)
+            if (i != 0 || j != 0) ret += sep + symbol[i] + symbol[j];
+    return ret;
+}
+
+ostream& operator<<(ostream& os, const MRF& model) {
+    const string sep = "\t";
+    os << "# PMRF INFO" << endl
+       << "FMTNUM"  << sep << model.get_fmtnum() << endl
+       << "NEFF"    << sep << model.get_neff() << endl
+       << "LENGTH"  << sep << model.get_length() << endl
+       << "EDGES"   << sep << model.get_num_edge() << endl;
+   return os;
 }

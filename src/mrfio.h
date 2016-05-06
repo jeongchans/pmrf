@@ -11,7 +11,7 @@ using std::ostream;
 
 class EdgeIndexImporter {
   public:
-    EdgeIndexVector import(std::istream& is);
+    EdgeIndexVector import(istream& is);
 };
 
 class MRFExporter {
@@ -23,7 +23,5 @@ class MRFImporter {
   public:
     MRF import_model(istream& is, const Alphabet& abc);
 };
-
-ostream& operator<<(ostream& os, const MRF& model);
 
 #endif
