@@ -488,14 +488,27 @@ void MRFParameterizer::get_reg_lambda(float& regnode_lambda, float& regedge_lamb
      * c1 = NA
      * c2 = NA
      */
-    float lambda = opt.reg_lambda_c1 / neff;
-    float lambda1 = lambda;
-    float lambda2 = lambda;
+//    float lambda = opt.reg_lambda_c1 / neff;
+//    float lambda1 = lambda;
+//    float lambda2 = lambda;
+//    regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda1;
+//    regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda2;
+//    regnode_lambda *= neff;
+//    regedge_lambda *= neff;
+//    regedge_lambda += opt.reg_lambda_c2 * avg_deg;
+
+    /* method #5
+     * simply use constant weight factor
+     * c1 = NA
+     * c2 = NA
+     */
+    float lambda1 = opt.reg_lambda_c1;
+    float lambda2 = opt.reg_lambda_c2;
     regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda1;
     regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda2;
     regnode_lambda *= neff;
     regedge_lambda *= neff;
-    regedge_lambda += opt.reg_lambda_c2 * avg_deg;
+
 #ifdef _DEBUG_
     std::clog << "[Parameterizer]"
               << "  regnode_lambda = " << regnode_lambda
