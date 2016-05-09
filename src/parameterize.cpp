@@ -465,38 +465,6 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
 }
 
 void MRFParameterizer::get_reg_lambda(float& regnode_lambda, float& regedge_lambda, const float& avg_deg, const float& neff) {
-    /* method #3 
-     * Address both sample size and native protein structure 
-     * lambda : determined based on sample size 
-     * lambda2 : determined based on both sample size and native protein structure 
-     * 
-     * Optimized parameters with SW_CLSTR and NEFF_CLSTR
-     * c1 = 10
-     * c2 = 1e-4
-     */
-//    float lambda = opt.reg_lambda_c1 / neff;
-//    float lambda1 = lambda;
-//    float lambda2 = lambda + opt.reg_lambda_c2 * avg_deg;
-//    regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda1;
-//    regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda2;
-//    regnode_lambda *= neff;
-//    regedge_lambda *= neff;
-
-    /* method #4
-     * the regularization w.r.t the sample size is proportional to neff, but the regularization w.r.t. the average degree is not
-     * Optimized parameters with SW_PB and NEFF_JOINT_SHANNON
-     * c1 = NA
-     * c2 = NA
-     */
-//    float lambda = opt.reg_lambda_c1 / neff;
-//    float lambda1 = lambda;
-//    float lambda2 = lambda;
-//    regnode_lambda = opt.regnode_lambda != UNDETERMINED_F ? opt.regnode_lambda : lambda1;
-//    regedge_lambda = opt.regedge_lambda != UNDETERMINED_F ? opt.regedge_lambda : lambda2;
-//    regnode_lambda *= neff;
-//    regedge_lambda *= neff;
-//    regedge_lambda += opt.reg_lambda_c2 * avg_deg;
-
     /* method #5
      * simply use constant weight factor
      * c1 = NA

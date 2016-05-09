@@ -32,6 +32,8 @@ void MSAAnalyzer::calc_sw_and_neff(const TraceVector& traces, VectorXf& sw, floa
     vector<string> msa = traces.get_matched_aseq_vec();
     msa = termi_gap_remover->filter(msa);
     sw = seq_weight_estimator->estimate(msa);
-    if (opt.seq_wt == MSAProcOption::SW_CLSTR && opt.eff_num == MSAProcOption::NEFF_CLSTR) neff = sw.sum();
-    else neff = eff_seq_num_estimator->estimate(msa, sw / sw.sum());
+    neff = 1.;  // neff ignored
+    //TODO
+    //if (opt.seq_wt == MSAProcOption::SW_CLSTR && opt.eff_num == MSAProcOption::NEFF_CLSTR) neff = sw.sum();
+    //else neff = eff_seq_num_estimator->estimate(msa, sw / sw.sum());
 }
