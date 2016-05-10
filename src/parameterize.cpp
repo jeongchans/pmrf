@@ -291,17 +291,17 @@ MRFParameterizer::AsymPseudolikelihood::AsymPseudolikelihood(const TraceVector& 
   neff(neff),
   lp(NULL) {
     data = trace_to_var(traces, param.abc);
+    aseq = traces.get_matched_aseq_vec();
 }
 
 lbfgsfloatval_t MRFParameterizer::AsymPseudolikelihood::evaluate(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const int n, const lbfgsfloatval_t step) {
     lbfgsfloatval_t fx = 0.;
     for (size_t i = 0; i < traces.size(); ++i) {
-        string seq = traces[i].get_matched_aseq();
         const float sw = seq_weight(i);
-        const VectorXl logpot = calc_logpot(x, i, seq);
+        const VectorXl logpot = calc_logpot(x, i, aseq[i]);
         const lbfgsfloatval_t logz = calc_logz(logpot);
-        update_obj_score(fx, logpot, logz, i, seq, sw);
-        update_gradient(x, g, logpot, logz, i, seq, sw);
+        update_obj_score(fx, logpot, logz, i, aseq[i], sw);
+        update_gradient(x, g, logpot, logz, i, aseq[i], sw);
     }
     return fx;
 }

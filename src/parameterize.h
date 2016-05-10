@@ -176,6 +176,7 @@ class MRFParameterizer {
         const LocalParameter* lp;
 
         MatrixXi data;
+        vector<string> aseq;
         const VectorXf& seq_weight;
         const float& neff;
 
