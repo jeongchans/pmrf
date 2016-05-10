@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <unordered_map>
 
 #include "util/numeric.h"
 
@@ -21,7 +22,7 @@ class Alphabet {
         size_t uniq_size;
     };
 
-    typedef std::map<char, size_t> SymbolIdxMap;
+    typedef std::unordered_map<char, size_t> SymbolIdxMap;
     typedef std::multimap<char, char> DegeneracyMap;
 
   public:

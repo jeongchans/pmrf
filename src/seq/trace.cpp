@@ -1,6 +1,7 @@
 #include "trace.h"
 
 #include <stdexcept>
+#include <algorithm>
 
 #include "seq/seqio.h"
 
@@ -73,9 +74,8 @@ bool Trace::is_matched(const size_t& ref_idx) const {
 }
 
 string Trace::get_matched_aseq() const {
-    string seq;
-    for (vector<size_t>::const_iterator pos = aidx.begin(); pos != aidx.end(); ++pos)
-        seq += st[*pos].aa;
+    string seq(aidx.size(), '-');
+    std::transform(aidx.begin(), aidx.end(), seq.begin(), [&](size_t i){ return st[i].aa; });
     return seq;
 }
 
@@ -103,9 +103,8 @@ TraceVector TraceVector::subset_matched(const size_t& ref_idx) const {
 }
 
 vector<string> TraceVector::get_matched_aseq_vec() const {
-    vector<string> r;
-    for (const_iterator pos = begin(); pos != end(); ++pos)
-        r.push_back(pos->get_matched_aseq());
+    vector<string> r(size());
+    std::transform(begin(), end(), r.begin(), [&](Trace tr){ return tr.get_matched_aseq(); });
     return r;
 }
 

@@ -343,12 +343,13 @@ void MRFParameterizer::AsymPseudolikelihood::update_obj_score(lbfgsfloatval_t& f
 }
 
 void MRFParameterizer::AsymPseudolikelihood::update_gradient(const lbfgsfloatval_t *x, lbfgsfloatval_t *g, const VectorXl& logpot, const lbfgsfloatval_t& logz, const size_t m, const string& seq, const float& sw) {
+    int i, j, xi, xj;
     VectorXl nodebel(lp->num_var);
     nodebel = (logpot - VectorXl::Constant(lp->num_var, logz)).unaryExpr(&exp);
     nodebel *= sw;
     MapVectorXl dv(g + lp->v_beg_pos(), lp->num_var);
-    const size_t i = lp->get_obs_node();
-    int xi = data(m, i);
+    i = lp->get_obs_node();
+    xi = data(m, i);
     if (xi < lp->num_var) dv(xi) -= sw;
     else {
         float wi;
@@ -357,11 +358,11 @@ void MRFParameterizer::AsymPseudolikelihood::update_gradient(const lbfgsfloatval
     }
     dv += nodebel;
     for (auto it = lp->w_offset.cbegin(); it != lp->w_offset.cend(); ++it) {
-        const int i = it->first.idx1;
-        const int j = it->first.idx2;
+        i = it->first.idx1;
+        j = it->first.idx2;
         MapMatrixXl dw(g + it->second, lp->num_var, lp->num_var);
-        int xi = data(m, i);
-        int xj = data(m, j);
+        xi = data(m, i);
+        xj = data(m, j);
         if (xi < lp->num_var && xj < lp->num_var) {
             dw(xi, xj) -= sw;
             dw.col(xj) += nodebel;
