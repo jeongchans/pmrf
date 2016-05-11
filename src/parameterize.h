@@ -47,7 +47,7 @@ class MRFParameterizer {
             Option()
             : corr(100),
               epsilon(1e-5),
-              past(2), 
+              past(1), 
               delta(1e-7), 
               max_iter(500),
               linesearch(LBFGS_LINESEARCH_BACKTRACKING_STRONG_WOLFE),
