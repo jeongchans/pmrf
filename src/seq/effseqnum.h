@@ -80,8 +80,6 @@ class ClstrEffSeqNumEstimator : public EffSeqNumEstimator {
   private:
     const Alphabet& abc;
     float maxidt;       // maximum sequence identity
-
-    float calc_identity(const string& seq1, const string& seq2) const;
 };
 
 #endif
