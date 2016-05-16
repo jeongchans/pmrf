@@ -24,18 +24,23 @@ size_t RTEffSeqNumEstimator::calc_num_res_type(const string& column) const {
 
 double ExpEntropyEffSeqNumEstimator::estimate(const vector<string>& msa, const VectorXf& wt) const {
     int rows = msa.size();
-    if (rows == 0) return 0.0;
+    if (rows == 0) return 0.;
     int cols = msa[0].size();
     double s = 0;
+    int m = 0;
     int n = abc.get_canonical_size(false);
     for (int i = 0; i < cols; ++i) {
         VectorXf p = VectorXf::Zero(n);
         for (int j = 0; j < rows; ++j)
             p += wt(j) * abc.get_count(msa[j][i]);
-        p /= p.sum();
-        s += -(p.array() > 0).select(p.cwiseProduct(p.unaryExpr(&log)), 0.).sum();
+        if (p.sum() > 0) {
+            p /= p.sum();
+            s += -(p.array() > 0).select(p.cwiseProduct(p.unaryExpr(&log)), 0.).sum();
+            ++m;
+        }
     }
-    return exp(s / (double) cols);
+    if (m > 0) return exp(s / (double) m);
+    else return 0.;
 }
 
 double ExpJointEntropyEffSeqNumEstimator::estimate(const vector<string>& msa, const VectorXf& wt) const {
