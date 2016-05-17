@@ -74,7 +74,7 @@ namespace Build {
         " --regul-wl <float>        weighting factor for edge regularization (default: 0.01)\n"
         "\n"
         "Optimization options:\n"
-        " --lbfgs-corr <int>        number of correction (default: 6)\n"
+        " --lbfgs-corr <int>        number of correction (default: 50)\n"
         " --lbfgs-epsilon <float>   convergence criterion (default: 1e-5)\n"
         " --lbfgs-delta <float>     stopping criterion (default: 1e-5)\n"
         " --lbfgs-maxiter <int>     maximum iteration (default: 500)\n"
