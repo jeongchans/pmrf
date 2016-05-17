@@ -45,7 +45,7 @@ class MRFParameterizer {
         class Option {
           public:
             Option()
-            : corr(6),
+            : corr(50),
               epsilon(1e-5),
               past(1), 
               delta(1e-5), 

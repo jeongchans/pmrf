@@ -81,7 +81,7 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_param_default) {
     EXPECT_FLOAT_EQ(0.01, cmd_line.opt.parameterizer_opt.regnode_lambda);
     EXPECT_FLOAT_EQ(0.01, cmd_line.opt.parameterizer_opt.regedge_lambda);
 
-    EXPECT_EQ(6, cmd_line.opt.optim_opt.corr);
+    EXPECT_EQ(50, cmd_line.opt.optim_opt.corr);
     EXPECT_FLOAT_EQ(1e-5, cmd_line.opt.optim_opt.epsilon);
     EXPECT_FLOAT_EQ(1e-5, cmd_line.opt.optim_opt.delta);
     EXPECT_EQ(500, cmd_line.opt.optim_opt.max_iter);
@@ -172,13 +172,13 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_regul_param) {
 TEST_F(MRFBuildCommandLine_Test, test_parse_lbfgs_param) {
     int argc = 10;
     char* argv[10] = {"build", "example.afa",
-                     "--lbfgs-corr", "50",
+                     "--lbfgs-corr", "10",
                      "--lbfgs-epsilon", "1e-3",
                      "--lbfgs-delta", "1e-2",
                      "--lbfgs-maxiter", "100"};
     MRFBuildCommandLine cmd_line(argc, argv);
     ASSERT_TRUE(cmd_line.is_valid());
-    EXPECT_EQ(50, cmd_line.opt.optim_opt.corr);
+    EXPECT_EQ(10, cmd_line.opt.optim_opt.corr);
     EXPECT_FLOAT_EQ(1e-3, cmd_line.opt.optim_opt.epsilon);
     EXPECT_FLOAT_EQ(1e-2, cmd_line.opt.optim_opt.delta);
     EXPECT_EQ(100, cmd_line.opt.optim_opt.max_iter);
