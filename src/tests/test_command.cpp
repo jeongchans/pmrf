@@ -88,17 +88,24 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_param_default) {
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_input_param) {
-    int argc = 8;
-    char* argv[8] = {"build", "example.a3m",
-                     "-o", "example.mrf",
+    int argc = 6;
+    char* argv[6] = {"build", "example.a3m",
                      "--msa", "a3m",
                      "--edge", "edges.txt"};
     MRFBuildCommandLine cmd_line(argc, argv);
     ASSERT_TRUE(cmd_line.is_valid());
     EXPECT_EQ("example.a3m", cmd_line.opt.msa_filename);
-    EXPECT_EQ("example.mrf", cmd_line.opt.out_filename);
     EXPECT_EQ(A3M, cmd_line.opt.msa_fmt);
     EXPECT_EQ("edges.txt", cmd_line.opt.eidx_filename);
+}
+
+TEST_F(MRFBuildCommandLine_Test, test_parse_output_param) {
+    int argc = 4;
+    char* argv[4] = {"build", "example.afa",
+                     "-o", "example.mrf"};
+    MRFBuildCommandLine cmd_line(argc, argv);
+    ASSERT_TRUE(cmd_line.is_valid());
+    EXPECT_EQ("example.mrf", cmd_line.opt.out_filename);
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_preproc_param) {
@@ -126,15 +133,22 @@ TEST_F(MRFBuildCommandLine_Test, test_parse_preproc_param) {
     ASSERT_TRUE(cmd_line3.is_valid());
     EXPECT_EQ(MSAProcOption::SW_PB, cmd_line3.opt.msa_analyzer_opt.seq_wt);
     EXPECT_EQ(MSAProcOption::NEFF_JOINT_SHANNON, cmd_line3.opt.msa_analyzer_opt.eff_num);
+
+    int argc4 = 3;
+    char* argv4[3] = {"build", "example.afa",
+                      "--no-profile"};
+    MRFBuildCommandLine cmd_line4(argc4, argv4);
+    ASSERT_TRUE(cmd_line4.is_valid());
+    EXPECT_EQ(false, cmd_line4.opt.msa_analyzer_opt.profile);
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_learning_param) {
-    int argc = 3;
-    char* argv[3] = {"build", "example.afa",
+    int argc1 = 3;
+    char* argv1[3] = {"build", "example.afa",
                       "--symmetric"};
-    MRFBuildCommandLine cmd_line(argc, argv);
-    ASSERT_TRUE(cmd_line.is_valid());
-    EXPECT_EQ(false, cmd_line.opt.parameterizer_opt.asymmetric);
+    MRFBuildCommandLine cmd_line1(argc1, argv1);
+    ASSERT_TRUE(cmd_line1.is_valid());
+    EXPECT_EQ(false, cmd_line1.opt.parameterizer_opt.asymmetric);
 }
 
 TEST_F(MRFBuildCommandLine_Test, test_parse_regul_param) {

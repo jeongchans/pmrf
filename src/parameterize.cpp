@@ -7,9 +7,6 @@
 #include <limits>
 
 #include "util/common.h"
-#include "seq/profile.h"
-#include "seq/bgfreq.h"
-#include "seq/subsmat.h"
 
 #include "core.h"
 
@@ -413,7 +410,7 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
     /* sequence profile */
     MatrixXf psfm = MatrixXf::Zero(length, num_var);
     FloatType gap_prob = 0.;
-    psfm.leftCols<20>() = calc_profile(traces) * (1. - gap_prob);
+    psfm.leftCols<20>() = msa_analyzer.calc_profile(traces, length) * (1. - gap_prob);
     psfm.rightCols<1>().setConstant(gap_prob);
     model.set_psfm(psfm);
     /* MRF */
@@ -477,23 +474,6 @@ void MRFParameterizer::get_reg_lambda(float& regnode_lambda, float& regedge_lamb
               << std::endl;
 #endif
     if (opt.asymmetric) regedge_lambda *= 0.5;
-}
-
-MatrixXf MRFParameterizer::calc_profile(const TraceVector& traces) {
-    AminoAcid aa;
-    SMMEmitProbEstimator emit_prob_estimator(ROBINSON_BGFREQ.get_array(aa), 
-                                             BLOSUM62_MATRIX.get_array(aa), 
-                                             3.2);
-    PBSeqWeightEstimator seq_weight_estimator;
-    ExpEntropyEffSeqNumEstimator eff_seq_num_estimator(aa, &seq_weight_estimator);
-    TerminalGapRemover termi_gap_remover(aa, 0.1);
-    ProfileBuilder profile_builder(aa);
-    profile_builder.set_emit_prob_estimator(&emit_prob_estimator);
-    profile_builder.set_seq_weight_estimator(&seq_weight_estimator);
-    profile_builder.set_eff_seq_num_estimator(&eff_seq_num_estimator);
-    profile_builder.set_msa_filter(&termi_gap_remover);
-    Profile profile = profile_builder.build(traces);
-    return profile.get_prob();
 }
 
 void MRFParameterizer::update_model(MRF& model, const SymmParameter& param) {

@@ -63,6 +63,7 @@ namespace Build {
 //        "                           clstr: number of sequences clustered by sequence identity (default)\n"
 //        "                           shan: exponential of average shannon entropy of amino acid pair\n"
         " --clstr-maxidt <float>    maximum identity between sequence clusters (default: 0.8)\n"
+        " --no-profile              disable sequence profile estimation\n"
         "\n"
         "Parameterization options:\n"
         " --symmetric               use symmetry constraint on edge weights\n"

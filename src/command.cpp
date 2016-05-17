@@ -119,6 +119,7 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         {"output",          required_argument,  0, 'o'},
         {"seqwt",           required_argument,  0, 300},
         {"neff",            required_argument,  0, 301},
+        {"no-profile",      no_argument,        0, 302},
         {"clstr-maxidt",    required_argument,  0, 310},
         {"symmetric",       no_argument,        0, 400},
         {"regul",           required_argument,  0, 401},
@@ -144,8 +145,9 @@ bool MRFBuildCommandLine::parse_command_line(int argc, char** argv) {
         else if (c == 'o') validity = parse_str(optarg, opt.out_filename);
         else if (c == 300) validity = parse_str(optarg, sval) && set_seq_wt(opt.msa_analyzer_opt.seq_wt, sval);
         else if (c == 301) validity = parse_str(optarg, sval) && set_eff_num(opt.msa_analyzer_opt.eff_num, sval);
+        else if (c == 302) validity = set_val<bool>(opt.msa_analyzer_opt.profile, false);
         else if (c == 310) validity = parse_float(optarg, fval) && fval >= 0. && fval <= 1. && set_val<float>(opt.msa_analyzer_opt.clstr_maxidt, fval);
-        else if (c == 400) validity = set_val<bool>(opt.parameterizer_opt.asymmetric, !opt.parameterizer_opt.asymmetric);
+        else if (c == 400) validity = set_val<bool>(opt.parameterizer_opt.asymmetric, false);
         else if (c == 401) validity = parse_str(optarg, sval) && set_regul(opt.parameterizer_opt.regul, sval);
         else if (c == 410) validity = parse_float(optarg, fval) && fval >= 0. && set_val<float>(opt.parameterizer_opt.regnode_lambda, fval);
         else if (c == 411) validity = parse_float(optarg, fval) && fval >= 0. && set_val<float>(opt.parameterizer_opt.regedge_lambda, fval);

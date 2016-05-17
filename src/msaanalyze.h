@@ -25,10 +25,12 @@ class MSAAnalyzer {
         : seq_wt(MSAProcOption::SW_CLSTR),
           eff_num(MSAProcOption::NEFF_CLSTR),
           clstr_maxidt(0.8),
-          termi_maxgapperc(0.1) {};
+          termi_maxgapperc(0.1),
+          profile(true) {};
 
         MSAProcOption::SeqWeight seq_wt;
         MSAProcOption::EffSeqNum eff_num;
+        bool profile;
 
         float clstr_maxidt;
         float termi_maxgapperc;
@@ -37,6 +39,7 @@ class MSAAnalyzer {
     MSAAnalyzer(const Option& opt, const Alphabet& abc);
 
     void calc_sw_and_neff(const TraceVector& traces, VectorXf& sw, float& neff) const;
+    MatrixXf calc_profile(const TraceVector& traces, const size_t& n) const;
 
     shared_ptr<SeqWeightEstimator> seq_weight_estimator;
     shared_ptr<EffSeqNumEstimator> eff_seq_num_estimator;
