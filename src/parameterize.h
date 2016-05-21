@@ -24,7 +24,7 @@ namespace RegulMethod {
 typedef LBFGS::ObjectiveFunction* PtrObjFunc;
 
 typedef Eigen::Matrix<lbfgsfloatval_t, Eigen::Dynamic, 1> VectorXl;
-typedef Eigen::Matrix<lbfgsfloatval_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> MatrixXl;
+typedef Eigen::Matrix<lbfgsfloatval_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> MatrixXl;
 typedef Eigen::Map<VectorXl> MapVectorXl;
 typedef Eigen::Map<const VectorXl> MapKVectorXl;
 typedef Eigen::Map<MatrixXl> MapMatrixXl;

@@ -1,5 +1,5 @@
 export CXX          = g++
-export CXXFLAGS     = -std=c++11 -DNDEBUG
+export CXXFLAGS     = -std=c++11 -march=native -DNDEBUG
 
 LBFGS_MODULE 	    = thirdparty/lbfgs
 LBFGS_SRC_DIR 	    = $(LBFGS_MODULE)
