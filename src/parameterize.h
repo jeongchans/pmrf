@@ -50,7 +50,7 @@ class MRFParameterizer {
               past(1), 
               delta(1e-5), 
               max_iter(500),
-              linesearch(LBFGS_LINESEARCH_BACKTRACKING_STRONG_WOLFE),
+              linesearch(LBFGS_LINESEARCH_DEFAULT),
               max_linesearch(30) {};
 
             int corr;

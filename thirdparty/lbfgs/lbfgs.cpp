@@ -516,12 +516,7 @@ int lbfgs(
             /* We don't test the stopping criterion while k < past. */
             if (param.past <= k) {
                 /* Compute the relative improvement from the past. */
-                //rate = (pf[k % param.past] - fx) / fx;
-
-                /* Modified by Chan-Seok Jeong */
-                if (fx < 1.) rate = pf[k % param.past] - fx;
-                else rate = (pf[k % param.past] - fx) / fx;
-                /* End of Modification by Chan-Seok Jeong */
+                rate = (pf[k % param.past] - fx) / fx;
 
                 /* The stopping criterion. */
                 if (rate < param.delta) {
