@@ -2,7 +2,7 @@
 All notable changes to this project will be documented in this file.
 
 
-## Unreleased
+## 0.4.0 - 2016-06-03
 
 ### Added
 - Calculate pseudolikelihood value for an aligned sequence. Use `pmrf-infer` command.
