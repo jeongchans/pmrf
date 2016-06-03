@@ -8,9 +8,8 @@ string seq1  = "PPDQEFLRGARVQLGDA";
 string seq2  = "DQHGNRIVHLQ";
 string aseq1 = "PPDQEFLRGARVQLGDA";
 string aseq2 = "--DQ---HGNRIVHLQ----";
-//string st1   = "MMMMMMMMMMMMMMMMM";
-//string st2   = "UUMMOEEMMIIIMMMMUUUU";
 string st1   = "MMMMMMMMMMMMMMMMM";
+//string st2   = "UUMMOEEMMIIIMMMMUUUU";
 string st2   = "DDMMDDDMMIIIMMMMDDDD";
 
 class TraceTest : public testing::Test {
@@ -28,13 +27,17 @@ TEST_F(TraceTest, test_get_seq) {
     EXPECT_EQ(seq2, trace2.get_seq());
 }
 
-//TEST_F(TraceTest, test_get_matched_seq) {
-//    EXPECT_EQ(string("PPDQEFLRGARVQLGDA"), trace1.get_matched_aseq());
-//    EXPECT_EQ(string("^^DQ=--HGVHLQ^^^^"), trace2.get_matched_aseq());
-//}
+TEST_F(TraceTest, test_is_matched) {
+    EXPECT_TRUE(trace1.is_matched(3));
+    EXPECT_TRUE(trace2.is_matched(3));
+    EXPECT_FALSE(trace2.is_matched(4));
+    EXPECT_FALSE(trace2.is_matched(6));
+    EXPECT_TRUE(trace2.is_matched(7));
+}
 
 TEST_F(TraceTest, test_get_matched_seq) {
     EXPECT_EQ(string("PPDQEFLRGARVQLGDA"), trace1.get_matched_aseq());
+    //EXPECT_EQ(string("^^DQ=--HGVHLQ^^^^"), trace2.get_matched_aseq());
     EXPECT_EQ(string("--DQ---HGVHLQ----"), trace2.get_matched_aseq());
 }
 
@@ -42,6 +45,13 @@ TEST_F(TraceTest, test_operator_eq) {
     Trace trace(st1, seq1);
     EXPECT_TRUE(trace1 == trace);
     EXPECT_FALSE(trace2 == trace);
+}
+
+TEST_F(TraceTest, test_get_symbol_at) {
+    EXPECT_EQ('P', trace1.get_symbol_at(0));
+    //EXPECT_EQ('^', trace2.get_symbol_at(0));
+    EXPECT_EQ('-', trace2.get_symbol_at(0));
+    EXPECT_EQ('H', trace2.get_symbol_at(7));
 }
 
 class TraceVectorTest : public testing::Test {
@@ -55,6 +65,15 @@ class TraceVectorTest : public testing::Test {
     AminoAcid abc;
     TraceVector traces;
 };
+
+TEST_F(TraceVectorTest, test_subset_matched) {
+    TraceVector trs = traces.subset_matched(0);
+    ASSERT_EQ((size_t) 1, trs.size());
+    EXPECT_TRUE(traces[0] == trs[0]);
+
+    trs = traces.subset_matched(2);
+    ASSERT_EQ((size_t) 2, trs.size());
+}
 
 TEST_F(TraceVectorTest, test_get_matched_aseq_vec) {
     vector<string> vec = traces.get_matched_aseq_vec();

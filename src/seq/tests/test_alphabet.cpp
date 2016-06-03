@@ -39,6 +39,8 @@ class AlphabetTest : public testing::Test {
 
 TEST_F(AlphabetTest, test_get_canonical) {
     EXPECT_EQ(canonical_sym, abc.get_canonical());
+    EXPECT_EQ(canonical_sym, abc.get_canonical(false));
+    EXPECT_EQ(canonical_sym + gap_sym, abc.get_canonical(true));
 }
 
 TEST_F(AlphabetTest, test_get_gap) {
@@ -53,10 +55,19 @@ TEST_F(AlphabetTest, test_is_canonical) {
     std::string::iterator pos;
     for (pos = canonical_sym.begin(); pos != canonical_sym.end(); ++pos) {
         EXPECT_TRUE(abc.is_canonical(*pos));
+        EXPECT_TRUE(abc.is_canonical(*pos, false));
+        EXPECT_TRUE(abc.is_canonical(*pos, true));
     }
-    std::string s = gap_sym + degenerate_sym + unknown_sym + none_sym + missing_sym + undefined_sym;
+    for (pos = gap_sym.begin(); pos != gap_sym.end(); ++pos) {
+        EXPECT_FALSE(abc.is_canonical(*pos));
+        EXPECT_FALSE(abc.is_canonical(*pos, false));
+        EXPECT_TRUE(abc.is_canonical(*pos, true));
+    }
+    std::string s = degenerate_sym + unknown_sym + none_sym + missing_sym + undefined_sym;
     for (pos = s.begin(); pos != s.end(); ++pos) {
         EXPECT_FALSE(abc.is_canonical(*pos));
+        EXPECT_FALSE(abc.is_canonical(*pos, false));
+        EXPECT_FALSE(abc.is_canonical(*pos, true));
     }
 }
 
@@ -157,6 +168,8 @@ TEST_F(AlphabetTest, test_is_valid) {
 
 TEST_F(AlphabetTest, test_get_canonical_size) {
     EXPECT_EQ(canonical_sym.size(), abc.get_canonical_size());
+    EXPECT_EQ(canonical_sym.size(), abc.get_canonical_size(false));
+    EXPECT_EQ(canonical_sym.size() + gap_sym.size(), abc.get_canonical_size(true));
 }
 
 TEST_F(AlphabetTest, test_get_degeneracy) {
@@ -174,18 +187,18 @@ TEST_F(AlphabetTest, test_get_degeneracy) {
 
 TEST_F(AlphabetTest, test_get_count) {
     ASSERT_EQ(canonical_sym.size(), (size_t)abc.get_count('A').size());
-    blitz::Array<double, 1> cnt(3);
-    cnt = 1, 0, 0;
-    EXPECT_TRUE(all(cnt == abc.get_count('A')));
-    cnt = 0.5, 0.5, 0;
-    EXPECT_TRUE(all(cnt == abc.get_count('P')));
-    cnt = 0, 0, 1;
-    EXPECT_TRUE(all(cnt == abc.get_count('R')));
-    cnt = 0, 0, 0;
-    EXPECT_TRUE(all(cnt == abc.get_count('X')));
-    EXPECT_TRUE(all(cnt == abc.get_count('-')));
-    EXPECT_TRUE(all(cnt == abc.get_count('*')));
-    EXPECT_TRUE(all(cnt == abc.get_count('~')));
+    VectorXf cnt(3);
+    cnt << 1, 0, 0;
+    EXPECT_TRUE(cnt.matrix() == abc.get_count('A').matrix());
+    cnt << 0.5, 0.5, 0;
+    EXPECT_TRUE(cnt.matrix() == abc.get_count('P').matrix());
+    cnt << 0, 0, 1;
+    EXPECT_TRUE(cnt.matrix() == abc.get_count('R').matrix());
+    cnt << 0, 0, 0;
+    EXPECT_TRUE(cnt.matrix() == abc.get_count('X').matrix());
+    EXPECT_TRUE(cnt.matrix() == abc.get_count('-').matrix());
+    EXPECT_TRUE(cnt.matrix() == abc.get_count('*').matrix());
+    EXPECT_TRUE(cnt.matrix() == abc.get_count('~').matrix());
 }
 
 class AminoAcidTest : public testing::Test {
@@ -247,9 +260,9 @@ TEST_F(AminoAcidTest, test_get_idx) {
 
 TEST_F(AminoAcidTest, test_get_count) {
     ASSERT_EQ(20, amino.get_count('C').size());
-    EXPECT_EQ(1, sum(amino.get_count('C')));
+    EXPECT_EQ(1, amino.get_count('C').sum());
     EXPECT_EQ(1, amino.get_count('C')(1));
-    EXPECT_EQ(1, sum(amino.get_count('B')));
-    EXPECT_EQ(0.5, amino.get_count('B')(2));
-    EXPECT_EQ(0.5, amino.get_count('B')(11));
+    EXPECT_FLOAT_EQ(1, amino.get_count('B').sum());
+    EXPECT_FLOAT_EQ(0.5, amino.get_count('B')(2));
+    EXPECT_FLOAT_EQ(0.5, amino.get_count('B')(11));
 }

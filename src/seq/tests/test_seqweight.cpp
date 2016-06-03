@@ -22,14 +22,14 @@ class SeqWeightEstimatorTest : public testing::Test {
 };
 
 TEST_F(SeqWeightEstimatorTest, test_pb_seq_weight_estimator) {
-    PBSeqWeightEstimator estimator(abc);
-    Float1dArray wt(4);
-    wt = 0.267, 0.267, 0.200, 0.267;
-    Float1dArray v = estimator.estimate(msa1);
+    PBSeqWeightEstimator estimator;
+    VectorXf wt(4);
+    wt << 0.267, 0.267, 0.200, 0.267;
+    VectorXf v = estimator.estimate(msa1);
     ASSERT_EQ(wt.size(), v.size());
-    EXPECT_TRUE(allclose(wt, v)) << v;
+    EXPECT_TRUE(allclose(wt, v, 0.01)) << v;
 
-    wt = 0.284, 0.230, 0.223, 0.263;
+    wt << 0.284, 0.230, 0.223, 0.263;
     v = estimator.estimate(msa2);
-    EXPECT_TRUE(allclose(wt, v)) << v;
+    EXPECT_TRUE(allclose(wt, v, 0.01)) << v;
 }

@@ -24,8 +24,8 @@ class Trace {
         DELETE = 2,
         UNDEFINED = 99
     };
-    static const char STATE_SYMBOL[3];
     static const size_t NUM_STATE_TYPE = 3;
+    static const char STATE_SYMBOL[3];
 
     class State {
       public:
@@ -43,10 +43,13 @@ class Trace {
     Trace(const string& ststr, const string& seq, const string& id, const string& desc);
 
     std::string get_seq() const;
+    std::string get_desc() const { return desc; }
     size_t get_length() const { return get_seq().size(); }
 
     bool operator==(const Trace& rhs) const;
+    bool is_matched(const size_t& ref_idx) const;
     std::string get_matched_aseq() const;
+    char get_symbol_at(const size_t& ref_idx) const;
 
   private:
     std::string id, desc;
@@ -69,6 +72,7 @@ class TraceVector {
     void push_back(const Trace& x) { data.push_back(x); }
     bool empty() const { return data.empty(); }
 
+    TraceVector subset_matched(const size_t& ref_idx) const;
     vector<string> get_matched_aseq_vec() const;
 
   private:

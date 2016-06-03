@@ -12,8 +12,8 @@ class LBFGS {
     class Parameter {
       public:
         Parameter() : n(0), x(NULL) {};
-        Parameter(const int& n) : n(n), x(NULL), fx(0.) { init(); };
-        ~Parameter() { lbfgs_free(x); }
+        Parameter(const int& n) : n(n), x(NULL), fx(0.) { malloc_x(); init_param(); };
+        virtual ~Parameter() { if (x != NULL) lbfgs_free(x); }
 
         int n;
         lbfgsfloatval_t *x;
@@ -21,7 +21,8 @@ class LBFGS {
         lbfgs_parameter_t opt_param;
 
       protected:
-        void init();
+        void malloc_x() { if (x != NULL) lbfgs_free(x); x = lbfgs_malloc(n); }
+        void init_param() { lbfgs_parameter_init(&opt_param); }
     };
 
     class ObjectiveFunction {

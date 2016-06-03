@@ -1,7 +1,7 @@
 export CXX          = g++
-export CXXFLAGS     = -Wno-write-strings -W -Wall -std=c++0x -O3
+export CXXFLAGS     = -std=c++11 -march=native -DNDEBUG
 
-LBFGS_MODULE 	    = lbfgs
+LBFGS_MODULE 	    = thirdparty/lbfgs
 LBFGS_SRC_DIR 	    = $(LBFGS_MODULE)
 
 SRC_DIR 			= src $(addprefix src/, seq util)
@@ -15,6 +15,7 @@ PROG_OBJECTS		= $(PROG_MRFMAIN_OBJECT)
 SRCS   				= $(foreach dir,. $(DIRS), $(wildcard $(dir)/*.cpp))
 OBJECTS				= $(filter-out $(PROG_OBJECTS), $(SRCS:.cpp=.o))
 
+all : CXXFLAGS += -w -O3 -ffast-math
 all : prog
 
 prog : objs
@@ -22,16 +23,25 @@ prog : objs
 
 objs :
 	@for dir in $(DIRS); do\
-		make -C $$dir || exit $?;\
+		$(MAKE) -C $$dir || exit $?;\
 	done
 
 clean : test_clean prog_clean
 	@for dir in $(DIRS); do\
-		make -C $$dir clean;\
+		$(MAKE) -C $$dir clean;\
 	done
 
 prog_clean:
-	rm -rf $(PROG_MRFMAIN)
+	rm -f $(PROG_MRFMAIN)
+
+
+####################################
+# Increase verbosity for debugging #
+####################################
+
+debug : CXXFLAGS += -D_DEBUG_
+debug : all
+
 
 ###############
 # Test runner #
@@ -47,17 +57,32 @@ TEST_DIRS 			= $(addsuffix /tests, $(SRC_DIR)) $(TESTRUNNER_DIR)
 TEST_SRCS			= $(foreach dir,. $(TEST_DIRS), $(wildcard $(dir)/*.cpp))
 TEST_OBJECTS		= $(filter-out $(TESTRUNNER_OBJECT), $(TEST_SRCS:.cpp=.o))
 
+test : CXXFLAGS += -D_TEST_ -Wall -Wextra -O3 -ffast-math
 test : objs test_objs
 	$(CXX) $(CXXFLAGS) -o $(TESTRUNNER) $(TESTRUNNER_OBJECT) $(TEST_OBJECTS) $(OBJECTS) $(TESTFLAGS)
 	./$(TESTRUNNER) --gtest_throw_on_failure
 
 test_objs :
 	@for dir in $(TEST_DIRS); do\
-		make -C $$dir || exit $?;\
+		$(MAKE) -C $$dir || exit $?;\
 	done
 
 test_clean :
 	@for dir in $(TEST_DIRS); do\
-		make -C $$dir clean;\
+		$(MAKE) -C $$dir clean;\
 	done
-	rm -rf $(TESTRUNNER)
+	rm -f $(TESTRUNNER)
+
+
+############
+# Profiler #
+############
+
+prof : CXXFLAGS += -pg -Wall -Wextra
+prof : prof_objs
+	$(CXX) $(CXXFLAGS) -o $(PROG_MRFMAIN) $(PROG_MRFMAIN_OBJECT) $(OBJECTS)
+
+prof_objs : clean
+	@for dir in $(DIRS); do\
+		$(MAKE) -C $$dir || exit $?;\
+	done

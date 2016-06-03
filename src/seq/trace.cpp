@@ -1,6 +1,7 @@
 #include "trace.h"
 
 #include <stdexcept>
+#include <algorithm>
 
 #include "seq/seqio.h"
 
@@ -9,7 +10,6 @@
  */
 
 //const char Trace::STATE_SYMBOL[5] = {'M', 'I', 'O', 'E', 'U'};
-
 const char Trace::STATE_SYMBOL[3] = {'M', 'I', 'D'};
 
 inline Trace::StateType Trace::char_to_state(const char& x) {
@@ -22,26 +22,28 @@ Trace::Trace(const string& ststr, const string& seq) {
     init(ststr, seq, "", "");
 }
 
-//Trace::Trace(const string& ststr, const string& seq, const string& id, const string& desc) : id(id), desc(desc) {
+Trace::Trace(const string& ststr, const string& seq, const string& id, const string& desc) {
+    init(ststr, seq, id, desc);
+}
+
+//void Trace::init(const string& ststr, const string& seq, const string& id, const string& desc) {
+//    this->id = id;
+//    this->desc = desc;
 //    size_t i = 0;
 //    size_t j = 0;
 //    for (string::const_iterator pos = ststr.begin(); pos != ststr.end(); ++pos) {
 //        char aa;
 //        StateType st = char_to_state(*pos);
 //        if (st == MATCH || st == INSERT) aa = seq[i++];
-////        else if (st == GAPOPEN) aa = '=';
-////        else if (st == GAPEXT) aa = '-';
-////        else if (st == UNALIGNED) aa = '^';
+//        else if (st == GAPOPEN) aa = '=';
+//        else if (st == GAPEXT) aa = '-';
+//        else if (st == UNALIGNED) aa = '^';
 //        else throw std::range_error(ststr);
 //        this->st.push_back(State(st, aa));
 //        if (st != INSERT) this->aidx.push_back(j);
 //        ++j;
 //    }
 //}
-
-Trace::Trace(const string& ststr, const string& seq, const string& id, const string& desc) {
-    init(ststr, seq, id, desc);
-}
 
 void Trace::init(const string& ststr, const string& seq, const string& id, const string& desc) {
     this->id = id;
@@ -67,11 +69,18 @@ string Trace::get_seq() const {
     return seq;
 }
 
+bool Trace::is_matched(const size_t& ref_idx) const {
+    return st[aidx[ref_idx]].st == MATCH;
+}
+
 string Trace::get_matched_aseq() const {
-    string seq;
-    for (vector<size_t>::const_iterator pos = aidx.begin(); pos != aidx.end(); ++pos)
-        seq += st[*pos].aa;
+    string seq(aidx.size(), '-');
+    std::transform(aidx.begin(), aidx.end(), seq.begin(), [&](size_t i){ return st[i].aa; });
     return seq;
+}
+
+char Trace::get_symbol_at(const size_t& ref_idx) const {
+    return st[aidx[ref_idx]].aa;
 }
 
 bool Trace::operator==(const Trace& rhs) const {
@@ -86,10 +95,16 @@ bool Trace::operator==(const Trace& rhs) const {
    @class TraceVector
  */
 
-vector<string> TraceVector::get_matched_aseq_vec() const {
-    vector<string> r;
+TraceVector TraceVector::subset_matched(const size_t& ref_idx) const {
+    TraceVector trs;
     for (const_iterator pos = begin(); pos != end(); ++pos)
-        r.push_back(pos->get_matched_aseq());
+        if (pos->is_matched(ref_idx)) trs.push_back(*pos);
+    return trs;
+}
+
+vector<string> TraceVector::get_matched_aseq_vec() const {
+    vector<string> r(size());
+    std::transform(begin(), end(), r.begin(), [&](Trace tr){ return tr.get_matched_aseq(); });
     return r;
 }
 

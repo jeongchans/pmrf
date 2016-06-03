@@ -17,4 +17,11 @@ using std::string;
 using std::make_pair;
 using std::endl;
 
+class ConvergeException : public std::exception {
+  public:
+    virtual const char* what() const throw() {
+        return "Failed to converge";
+    }
+};
+
 #endif

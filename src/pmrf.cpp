@@ -1,4 +1,4 @@
-#include "mrfmaincore.h"
+#include "core.h"
 
 int main(int argc, char** argv) {
     MRFMainProcessor processor(argc, argv);

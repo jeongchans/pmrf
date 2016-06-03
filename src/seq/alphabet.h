@@ -1,10 +1,9 @@
-#ifndef _ALPHABET_H_
-#define _ALPHABET_H_
-
-#include <blitz/array.h>
+#ifndef _SEQ_ALPHABET_H_
+#define _SEQ_ALPHABET_H_
 
 #include <string>
 #include <map>
+#include <unordered_map>
 
 #include "util/numeric.h"
 
@@ -23,7 +22,7 @@ class Alphabet {
         size_t uniq_size;
     };
 
-    typedef std::map<char, size_t> SymbolIdxMap;
+    typedef std::unordered_map<char, size_t> SymbolIdxMap;
     typedef std::multimap<char, char> DegeneracyMap;
 
   public:
@@ -32,22 +31,25 @@ class Alphabet {
              const char* unknown, const char* none, const char* missing,
              const bool& nocase = false, const bool& gapres = false);
 
-    std::string get_canonical() const;
+    std::string get_canonical() const { return get_canonical(gapres); }
+    std::string get_canonical(const bool& gapres) const;
     std::string get_gap() const { return sym_grp[GAP].get_member(); }
     std::string get_unknown() const { return sym_grp[UNKNOWN].get_member(); }
-    bool is_canonical(const char& x) const;
+    bool is_canonical(const char& x) const { return is_canonical(x, gapres); }
+    bool is_canonical(const char& x, const bool& gapres) const;
     bool is_gap(const char& x) const;
     bool is_degenerate(const char& x) const;
     bool is_unknown(const char& x) const;
     bool is_none(const char& x) const;
     bool is_missing(const char& x) const;
     bool is_valid(const char& x) const;
-    int get_idx(const char& x) const;
-    size_t get_canonical_size() const;
+    int get_idx(const char& x) const { return sym_idx.at(x); }
+    size_t get_canonical_size() const { return get_canonical_size(gapres); }
+    size_t get_canonical_size(const bool& gapres) const;
     size_t get_gap_size() const { return sym_grp[GAP].get_uniq_size(); }
     size_t get_valid_size() const { return get_valid_symbol().size(); }
-    Float1dArray get_count(const char& x) const;
-    std::string get_degeneracy(const char& x, FloatType* w=NULL) const;
+    VectorXf get_count(const char& x) const;
+    std::string get_degeneracy(const char& x, float* w=NULL) const;
     void set_degeneracy(const char& degen_ch, const char& canoni_ch);
 
   private:
