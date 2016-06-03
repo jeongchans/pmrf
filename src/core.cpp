@@ -407,13 +407,23 @@ void MRFShowProcessor::show_seq(ostream& os, const MRF& model) {
 }
 
 void MRFShowProcessor::show_prof(ostream& os, const MRF& model) {
-    Eigen::IOFormat fmt(prec, Eigen::DontAlignCols, sep, sep);
+    string delim = " ";
     size_t n = model.get_length();
     string seq = model.get_seq();
+    const string symbol = abc.get_canonical();
+    const size_t m = symbol.size();
     os << "# PROFILE" << endl
-       << "RES"     << sep << format_symbol() << endl;
-    for (size_t i = 0; i < n; ++i)
-        os << seq[i] << " " << i + 1 << sep << model.get_psfm(i).format(fmt) << endl;
+       << setw(6) << left << "RES" << delim;
+    for (size_t k = 0; k < m; ++k) os << setw(6) << right << symbol[k] << delim;
+    os << endl;
+    const MatrixXf f = model.get_psfm();
+    for (size_t i = 0; i < n; ++i) {
+        os << setw(1) << seq[i] << delim
+           << setw(4) << fixed << right << i + 1 << delim;
+        os << setprecision(prec) << right << fixed;
+        for (size_t k = 0; k < f.cols(); ++k) os << setw(6) << f(i, k) << delim;
+        os << endl;
+    }
 }
 
 void MRFShowProcessor::show_mrf(ostream& os, const MRF& model) {
@@ -437,25 +447,35 @@ void MRFShowProcessor::show_mrf(ostream& os, const MRF& model) {
 }
 
 void MRFShowProcessor::show_mrf_node(ostream& os, const MRF& model, const size_t& pos) {
+    string delim = " ";
     const string symbol = abc.get_canonical();
+    const size_t m = symbol.size();
     VectorXf v = model.get_node(pos).get_weight();
-    os << setprecision(prec);
-    for (size_t i = 0; i < symbol.size(); ++i)
-        os << symbol[i] << sep << v(i) << endl;
+    os << setprecision(prec) << fixed;
+    for (size_t i = 0; i < symbol.size(); ++i) {
+        os << setw(7) << left << symbol[i] << delim 
+           << setw(7) << right << v(i) << endl;
+    }
 }
 
 void MRFShowProcessor::show_mrf_edge(ostream& os, const MRF& model, const EdgeIndex& pos) {
-    Eigen::IOFormat fmt(prec, 0, "\t");
-    os << setprecision(prec);
+    string delim = " ";
     const string symbol = abc.get_canonical();
+    const size_t m = symbol.size();
     if (model.has_edge(pos)) {
         MatrixXf w = model.get_edge(pos).get_weight();
         if (pos.idx1 > pos.idx2) w.transposeInPlace();
-        os << pos.idx1 << "\\" << pos.idx2;
-        for (size_t i = 0; i < symbol.size(); ++i) os << sep << symbol[i];
+        std::stringstream ss;
+        ss << pos.idx1 << "\\" << pos.idx2;
+        os << setw(7) << left << ss.str() << delim;
+        for (size_t k = 0; k < m; ++k) os << setw(7) << right << symbol[k] << delim;
         os << endl;
-        for (size_t i = 0; i < symbol.size(); ++i)
-            os << symbol[i] << sep << w.row(i).format(fmt) << endl;
+        os << setprecision(prec) << fixed;
+        for (size_t i = 0; i < m; ++i) {
+            os << setw(7) << left << symbol[i] << delim;
+            for (size_t j = 0; j < m; ++j) os << setw(7) << right << w(i, j) << delim;
+            os << endl;
+        }
     } else {
         os << "Edge (" << pos.idx1 << ", " << pos.idx2 << ") does not exist" << endl;
     }
