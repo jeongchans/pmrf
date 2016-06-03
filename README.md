@@ -14,9 +14,9 @@ Download the latest release from the [PMRF repository].
 1. Uncompress the downloaded file in the directory where the PMRF software will be installed.
 
 2. Compile the source code.
-  ``
+  ```
   $ make
-  ``
+  ```
 
 3. The executable named as `pmrf` will be placed in the directory.
 
@@ -59,7 +59,7 @@ The columns of output table represent the edge (Pos1-Pos2), the pairwise coevolu
 
 The positional coevolution score is an alternative coevolution estimate determined for each node, while the pairwise coevolution score is detemined for each edge. As many biological informations are annotated per positions, this positional score would be useful. The positional coevolution scores are calculated by using `--mode pos` option.
   ```
-  $ pmrf stat MYG_PHYCD.mrf --mode pos |head
+  $ pmrf stat MYG_PHYCD.mrf --mode pos
    Pos      Score    Z-score
   ---- ---------- ----------
      1   0.205870   0.150840
@@ -78,18 +78,16 @@ The columns of output table represent the node (Pos), the positional coevolution
 ### Estimating the statistical potential
 Given a sequence, its statistical potential can be estimated with the likelihood from MRF model. PMRF suite provides the `infer` command to estimate the pseudo-likelihood values.
 
-To estimate the statistical potential, a MRF model file and a sequence file formatted with FASTA are required. Please, note that the sequences should be aligned to the reference sequence of the MRF model, which implies that each of aligned sequences has the same length with the reference sequence length. Here, we use the sequence file, `MYG_PHYCD.afa`, because it is already formatted properly.
+To estimate the statistical potential, a MRF model file and a sequence file formatted with FASTA are required. Please, note that the sequences should be aligned to the reference sequence of the MRF model, which implies that each of aligned sequences has the same length with the reference sequence length. Here, we prepared an [example file](example/MYG_SEQ.afa).
   ```
-  $ pmrf infer MYG_PHYCD.mrf MYG_PHYCD.afa |head
+  $ pmrf infer MYG_PHYCD.mrf example/MYG_SEQ.afa
        -------- MRF -------- ------ Profile ------
      #      Score       Diff      Score       Diff Description
   ---- ---------- ---------- ---------- ---------- --------------------
-     1     315.56      83.44      -5.32    -130.13 sp|P02185|MYG_PHYCD Myoglobin
-     2     317.50      85.38      -8.28    -133.08 tr|H3AFT2|H3AFT2_LATCH Unchara
-     3     337.40     105.28      -6.28    -131.08 sp|P14399|MYG_MUSAN Myoglobin
-     4     338.46     106.34      -4.52    -129.33 sp|P02206|MYG_HETPO Myoglobin
-     5     337.84     105.73      -4.18    -128.98 tr|H2RIW6|H2RIW6_TAKRU Unchara
-	                                 :
+     1     232.12       0.00     124.81       0.00 sp|P02185|MYG_PHYCD Myoglobin
+     2     218.42     -13.69     103.16     -21.64 sp|P14399|MYG_MUSAN Myoglobin
+     3     222.06     -10.05     105.93     -18.87 sp|P02206|MYG_HETPO Myoglobin
+     4     235.05       2.94     112.74     -12.07 sp|P86874|MYG_DRONO Myoglobin
   ```
 
 The columns of output table represent the sequence number (#), the pseudo-likelihood value (Score), its difference from the reference sequence (Diff), the profile-based likelihood value (Score), its difference from the reference sequence (Diff), and the description in the input FASTA file (Description), respectively.
