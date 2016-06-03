@@ -96,12 +96,12 @@ The columns of output table represent the sequence number (#), the pseudo-likeli
 Although the MRF model is writtein in a binary file, all the model paramters are easily accessible by using `show` command. To retrieve a node or edge parameter, use the `show` command with `--node <pos>` or `--edge <pos,pos>` option. For example, the node parameter corresponding to the sequence position `7` can be retrieved as below.
   ```
   $ pmrf show MYG_PHYCD.mrf --node 7
-  A	0.2537
-  C	-0.2907
-  D	-0.3643
-  E	-0.0548
-  F	-0.1063
-      :
+  A        0.2537
+  C       -0.2907
+  D       -0.3643
+  E       -0.0548
+  F       -0.1063
+           :
   ```
 
 The values represent the parameter values for the corresponding amino acids, respectively.
@@ -109,12 +109,12 @@ The values represent the parameter values for the corresponding amino acids, res
 Similarly, the edge parameter interconnecting the sequence positions `7` and `134` can be retrieved as below.
   ```
   $ pmrf show MYG_PHYCD.mrf --edge 7,134
-  7\134   A       C       D       E       ...
-  A         0.04409         -0.0588       -0.006881          -0.015         ...
-  C        -0.09258       0.0001412         0.01398         0.01254         ...
-  D         -0.1031        0.006237         0.01638         0.01523         ...
-  E         0.09969         0.06398        0.005755        0.003179		   ...
-                                          :
+  7\134         A       C       D       E ...
+  A        0.0441 -0.0588 -0.0069 -0.0150 ...
+  C       -0.0926  0.0001  0.0140  0.0125 ...
+  D       -0.1031  0.0062  0.0164  0.0152 ...
+  E        0.0997  0.0640  0.0058  0.0032 ...
+                        :
   ```
 
 The values represent the parameter values for the corresponding amino acid pairs, respectively, and the row and column headers indicate the amino acids of the position `7` and `134`, respectively.
