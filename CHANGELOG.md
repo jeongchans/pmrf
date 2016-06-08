@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ## 0.4.0 - 2016-06-03
 
 ### Added
-- Calculate pseudolikelihood value for an aligned sequence. Use `pmrf-infer` command.
+- Calculate fitness potential for a sequence. Use `pmrf-infer` command.
 - Calculate coevolution scores for an MRF model. Use `pmrf-stat` command.
 - Show the MRF model parameters. Use `pmrf-show` command.
 - Asymmetric parameterization is added and used as a default.
