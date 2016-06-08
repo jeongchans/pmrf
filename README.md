@@ -75,10 +75,10 @@ The positional coevolution score is an alternative coevolution estimate determin
 
 The columns of output table represent the node (Pos), the positional coevolution score (Score), and the Z-score transformation (Z-score), respectively.
 
-### Estimating the statistical potential
-Given a sequence, its statistical potential can be estimated with the likelihood from MRF model. PMRF suite provides the `infer` command to estimate the pseudo-likelihood values.
+### Estimating the fitness potential
+Given a sequence, its fitness potential can be estimated with the log-likelihood from MRF model. PMRF suite provides the `infer` command to estimate the fitness potential value, represented by the log-likelihood excluding global partition function.
 
-To estimate the statistical potential, a MRF model file and a sequence file formatted with FASTA are required. Please, note that the sequences should be aligned to the reference sequence of the MRF model, which implies that each of aligned sequences has the same length with the reference sequence length. Here, we prepared an [example file](example/MYG_SEQ.afa).
+To estimate the fitness potential, a MRF model file and a sequence file formatted with FASTA are required. Please, note that the sequences should be aligned to the reference sequence of the MRF model, which implies that each of aligned sequences has the same length with the reference sequence length. Here, we prepared an [example file](example/MYG_SEQ.afa).
   ```
   $ pmrf infer MYG_PHYCD.mrf example/MYG_SEQ.afa
        -------- MRF -------- ------ Profile ------
@@ -90,7 +90,7 @@ To estimate the statistical potential, a MRF model file and a sequence file form
      4     235.05       2.94     112.74     -12.07 sp|P86874|MYG_DRONO Myoglobin
   ```
 
-The columns of output table represent the sequence number (#), the pseudo-likelihood value (Score), its difference from the reference sequence (Diff), the profile-based likelihood value (Score), its difference from the reference sequence (Diff), and the description in the input FASTA file (Description), respectively.
+The columns of output table represent the sequence number (#), the log-likelihood value (Score), its difference from the reference sequence (Diff), the profile-based likelihood value (Score), its difference from the reference sequence (Diff), and the description in the input FASTA file (Description), respectively.
 
 ### Retrieving the MRF parameters for further applications
 Although the MRF model is writtein in a binary file, all the model paramters are easily accessible by using `show` command. To retrieve a node or edge parameter, use the `show` command with `--node <pos>` or `--edge <pos,pos>` option. For example, the node parameter corresponding to the sequence position `7` can be retrieved as below.
