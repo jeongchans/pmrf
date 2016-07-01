@@ -456,6 +456,11 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
         if (opt.regul == RegulMethod::REGUL_L2) funcs.push_back(&l2);
         ObjectiveFunction obj_func(funcs, param);
         ret = optimizer.optimize(&param, &obj_func);
+#ifdef _DEBUG_
+        std::clog << "[Parameterizer]"
+                  << ", lbfgs_ret = " << ret
+                  << std::endl;
+#endif
         adjust_gauge(param);
         update_model(model, param);
     }
