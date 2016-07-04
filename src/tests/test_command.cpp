@@ -315,8 +315,8 @@ TEST_F(MRFShowCommandLine_Test, test_parse_pos_param) {
     MRFShowCommandLine cmd_line(argc, argv);
     ASSERT_TRUE(cmd_line.is_valid());
     EXPECT_EQ(true, cmd_line.opt.node_flag);
-    EXPECT_EQ(23, cmd_line.opt.v_pos);
+    EXPECT_EQ(22, cmd_line.opt.v_pos);
     EXPECT_EQ(true, cmd_line.opt.edge_flag);
-    EXPECT_EQ(34, cmd_line.opt.w_pos.idx1);
-    EXPECT_EQ(57, cmd_line.opt.w_pos.idx2);
+    EXPECT_EQ(33, cmd_line.opt.w_pos.idx1);
+    EXPECT_EQ(56, cmd_line.opt.w_pos.idx2);
 }
