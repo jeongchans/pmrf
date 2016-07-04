@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## Unreleased
+
+### Fixed
+- Fix incorrect arrangement of node weights in symmetric parameterization.
+
+
 ## 0.4.0 - 2016-06-03
 
 ### Added
@@ -16,6 +22,9 @@ All notable changes to this project will be documented in this file.
 - MRF model file is written to a binary file.
 - Use Eigen3 library replacing Blitz++ library. This significantly reduces the computation time.
 - The option names and argument values for `pmrf-build` are changed.
+
+### Compatibility Warning
+- Not support PMRF v0.2.x MRF file format.
 
 
 ## 0.2.0 - 2016-02-04
