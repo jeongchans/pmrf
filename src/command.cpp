@@ -330,7 +330,7 @@ bool MRFShowCommandLine::parse_command_line(int argc, char** argv) {
         else if (c == 100) validity = set_val<bool>(opt.seq_flag, true);
         else if (c == 101) validity = set_val<bool>(opt.prof_flag, true);
         else if (c == 102) validity = set_val<bool>(opt.mrf_flag, true);
-        else if (c == 200) validity = parse_int(optarg, ival) && ival > 0 && set_val<size_t>(opt.v_pos, (size_t) ival) && set_val<bool>(opt.node_flag, true);
+        else if (c == 200) validity = parse_int(optarg, ival) && ival > 0 && set_val<size_t>(opt.v_pos, (size_t) ival - 1) && set_val<bool>(opt.node_flag, true);
         else if (c == 201) validity = parse_str(optarg, sval) && set_edge_idx(opt.w_pos, sval) && set_val<bool>(opt.edge_flag, true);
         else if (c == 'h') { show_help(); exit(0); }
         else validity = false;
@@ -344,7 +344,7 @@ bool MRFShowCommandLine::parse_command_line(int argc, char** argv) {
 bool MRFShowCommandLine::set_edge_idx(EdgeIndex& arg, const string& val) {
     size_t pos = val.find(",");
     if (pos == string::npos) return false;
-    arg.idx1 = std::stoi(val.substr(0, pos));
-    arg.idx2 = std::stoi(val.substr(pos + 1));
+    arg.idx1 = std::stoi(val.substr(0, pos)) - 1;
+    arg.idx2 = std::stoi(val.substr(pos + 1)) - 1;
     return true;
 }

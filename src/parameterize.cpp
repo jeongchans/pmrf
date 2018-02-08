@@ -456,6 +456,11 @@ int MRFParameterizer::parameterize(MRF& model, const TraceVector& traces) {
         if (opt.regul == RegulMethod::REGUL_L2) funcs.push_back(&l2);
         ObjectiveFunction obj_func(funcs, param);
         ret = optimizer.optimize(&param, &obj_func);
+#ifdef _DEBUG_
+        std::clog << "[Parameterizer]"
+                  << ", lbfgs_ret = " << ret
+                  << std::endl;
+#endif
         adjust_gauge(param);
         update_model(model, param);
     }
@@ -477,8 +482,9 @@ void MRFParameterizer::get_reg_lambda(float& regnode_lambda, float& regedge_lamb
 }
 
 void MRFParameterizer::update_model(MRF& model, const SymmParameter& param) {
+    MapKMatrixXl v(param.x + param.v_beg_pos(), param.num_node, param.num_var);
     for (size_t i = 0; i < model.get_length(); ++i)
-        model.get_node(i).set_weight(MapKVectorXl(param.x + param.v_offset.at(i), param.num_var).cast<float>());
+        model.get_node(i).set_weight(v.row(i).cast<float>());
     const EdgeIndexVector eidxs = model.get_edge_idxs();
     for (auto it = eidxs.cbegin(); it != eidxs.cend(); ++it)
         model.get_edge(*it).set_weight(MapKMatrixXl(param.x + param.w_offset.at(*it), param.num_var, param.num_var).cast<float>());

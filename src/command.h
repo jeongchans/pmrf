@@ -9,7 +9,7 @@
 
 #define QUOTE(name)     #name
 #define PROGNAME        QUOTE(pmrf)
-#define VERSION         QUOTE(0.4.0)
+#define VERSION         QUOTE(0.4.1)
 
 using std::string;
 
