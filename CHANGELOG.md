@@ -2,10 +2,11 @@
 All notable changes to this project will be documented in this file.
 
 
-## Unreleased
+## 0.4.1 - 2018-02-08
 
 ### Fixed
 - Fix incorrect arrangement of node weights in symmetric parameterization.
+- Fix the position numbering to use one-based index
 
 
 ## 0.4.0 - 2016-06-03
